@@ -1,0 +1,11 @@
+{
+  "name": "clima16",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Clima16 - Plataforma local de orçamentos de ar-condicionado em Ribeirão Preto (site estático, ES Modules + hash router)",
+  "scripts": {
+    "build": "node scripts/build-check.mjs",
+    "start": "npx --yes serve . -l 3000"
+  },
+  "engines": { "node": ">=18" }
+}

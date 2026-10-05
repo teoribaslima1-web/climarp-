@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Application Bootstrap
+ * Clima16 - Application Bootstrap
  */
 import { renderHeader, initHeaderEvents } from './components/header.js';
 import { renderFooter } from './components/footer.js';
@@ -8,7 +8,7 @@ import { Router } from './router.js';
 import { analytics } from './analytics.js';
 
 // Expose analytics globally for inline onclick handlers
-window.climarpAnalytics = analytics;
+window.clima16Analytics = analytics;
 
 document.addEventListener('DOMContentLoaded', () => {
   const headerMount = document.getElementById('header-mount');
@@ -35,5 +35,4 @@ document.addEventListener('DOMContentLoaded', () => {
     router.init();
   }
 
-  console.log('%c🚀 ClimaRP Inicializado com Sucesso!', 'color: #087DE1; font-weight: bold; font-size: 14px;');
 });

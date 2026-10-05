@@ -1,6 +1,6 @@
-# ClimaRP - Plataforma Local de Orçamentos de Ar-Condicionado (Ribeirão Preto – SP)
+# Clima16 - Plataforma Local de Orçamentos de Ar-Condicionado (Ribeirão Preto – SP)
 
-O **ClimaRP** é uma plataforma moderna, rápida, responsiva e de alta conversão para cotação de serviços de climatização (instalação, manutenção, limpeza/higienização, reparos de vazamento e recarga de gás) em Ribeirão Preto – SP.
+O **Clima16** é uma plataforma moderna, rápida, responsiva e de alta conversão para cotação de serviços de climatização (instalação, manutenção, limpeza/higienização, reparos de vazamento e recarga de gás) em Ribeirão Preto – SP.
 
 ---
 
@@ -23,12 +23,12 @@ Todos os placeholders e parâmetros centrais estão centralizados em `js/config.
 ```javascript
 export const CONFIG = {
   brand: {
-    name: 'ClimaRP',
+    name: 'Clima16',
     city: 'Ribeirão Preto',
     state: 'SP',
     // Altere para o seu número de WhatsApp comercial real (DDI + DDD + Número)
     whatsappNumber: '5516999999999', 
-    emailContact: 'contato@climarp.com.br'
+    emailContact: 'contato@clima16.com.br'
   },
   analytics: {
     gtmId: 'GTM-XXXXXXX',

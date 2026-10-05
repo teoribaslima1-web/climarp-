@@ -1,5 +1,5 @@
 /**
- * ClimaRP - 404 Not Found View
+ * Clima16 - 404 Not Found View
  */
 export function renderNotFoundView() {
   return `

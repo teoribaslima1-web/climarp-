@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Blog & Content Marketing View
+ * Clima16 - Blog & Content Marketing View
  * Displays technical guides, buying tips, and practical articles with high conversion CTAs.
  */
 import { BLOG_POSTS } from '../blog-data.js';
@@ -103,7 +103,7 @@ function renderSingleArticle(article) {
             <span>•</span>
             <span>${article.readTime} de leitura</span>
             <span>•</span>
-            <span class="text-brand-blue font-semibold">ClimaRP Ribeirão Preto</span>
+            <span class="text-brand-blue font-semibold">Clima16 Ribeirão Preto</span>
           </div>
         </header>
 

@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Dedicated Service Landing Page View (Local SEO Optimized)
+ * Clima16 - Dedicated Service Landing Page View (Local SEO Optimized)
  * Generates tailored pages for each core service in Ribeirão Preto.
  */
 import { CONFIG } from '../config.js';

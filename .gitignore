@@ -1,15 +1,29 @@
-# Dependencies & Temp
+# Dependências
 node_modules/
+
+# Variáveis de ambiente e segredos (nunca versionar)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials*.json
+
+# Vercel
+.vercel/
+
+# Sistema / logs
 .DS_Store
 Thumbs.db
 *.log
-.env
-.env.local
+npm-debug.log*
 
 # Python
 __pycache__/
 *.pyc
 
-# Local IDE & Brain
+# IDEs e ferramentas locais
 .vscode/
 .idea/
+.gemini/

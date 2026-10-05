@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Admin Lead Management Dashboard View (/admin)
+ * Clima16 - Admin Lead Management Dashboard View (/admin)
  * Clean, reactive dashboard for monitoring, filtering, assigning, and exporting leads to CSV.
  */
 import { db, STATUS_OPTIONS } from '../storage.js';
@@ -19,7 +19,7 @@ export function renderAdminView() {
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <div>
             <div class="flex items-center gap-2">
-              <h1 class="text-2xl font-black text-navy">Painel de Gestão ClimaRP</h1>
+              <h1 class="text-2xl font-black text-navy">Painel de Gestão Clima16</h1>
               <span class="text-xs bg-blue-100 text-brand-blue font-bold px-2.5 py-0.5 rounded-full">Admin MVP</span>
             </div>
             <p class="text-xs sm:text-sm text-slate-500 mt-1">

@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Interactive Multi-Step Quote Engine
+ * Clima16 - Interactive Multi-Step Quote Engine
  * High-conversion 5-step form with step animations, data validation, and event tracking.
  */
 import { CONFIG } from '../config.js';

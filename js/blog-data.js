@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Blog Articles Data
+ * Clima16 - Blog Articles Data
  * Realistic, helpful articles tailored to Ribeirão Preto climate and air conditioning choices.
  */
 export const BLOG_POSTS = [

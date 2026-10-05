@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Analytics & Conversion Tracking Module
+ * Clima16 - Analytics & Conversion Tracking Module
  * Captures UTM parameters, device info, referrer, and handles standard conversion events.
  */
 import { CONFIG } from './config.js';
@@ -18,7 +18,7 @@ class AnalyticsTracker {
       : new URLSearchParams();
 
     // Prioritize URL query, then hash query, then fallback to stored session
-    const existing = JSON.parse(sessionStorage.getItem('climarp_utm_session') || '{}');
+    const existing = JSON.parse(sessionStorage.getItem('clima16_utm_session') || '{}');
 
     const sessionData = {
       utm_source: params.get('utm_source') || hashParams.get('utm_source') || existing.utm_source || 'direct',
@@ -35,7 +35,7 @@ class AnalyticsTracker {
     };
 
     try {
-      sessionStorage.setItem('climarp_utm_session', JSON.stringify(sessionData));
+      sessionStorage.setItem('clima16_utm_session', JSON.stringify(sessionData));
     } catch (e) {
       console.warn('SessionStorage unavailable', e);
     }
@@ -57,14 +57,14 @@ class AnalyticsTracker {
   initializeDataLayer() {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
-      event: 'climarp_initialized',
+      event: 'clima16_initialized',
       utm: this.sessionData
     });
   }
 
   loadEventLog() {
     try {
-      return JSON.parse(localStorage.getItem('climarp_analytics_events') || '[]');
+      return JSON.parse(localStorage.getItem('clima16_analytics_events') || '[]');
     } catch {
       return [];
     }
@@ -92,12 +92,11 @@ class AnalyticsTracker {
       this.eventLog.pop();
     }
     try {
-      localStorage.setItem('climarp_analytics_events', JSON.stringify(this.eventLog));
+      localStorage.setItem('clima16_analytics_events', JSON.stringify(this.eventLog));
     } catch (e) {
       console.warn('Local storage error', e);
     }
 
-    console.log(`%c[Analytics Event] ${eventName}`, 'color: #087DE1; font-weight: bold;', eventObject);
     return eventObject;
   }
 

@@ -1,16 +1,16 @@
 /**
- * ClimaRP - FAQ Component (Accordion)
+ * Clima16 - FAQ Component (Accordion)
  * Clear, transparent answers for consumer confidence.
  */
 export function renderFAQ() {
   const faqs = [
     {
-      q: 'Solicitar orçamento pelo ClimaRP tem custo?',
+      q: 'Solicitar orçamento pelo Clima16 tem custo?',
       a: 'A solicitação feita pelo consumidor através da plataforma é totalmente gratuita e sem compromisso.'
     },
     {
-      q: 'O ClimaRP realiza o serviço?',
-      a: 'O ClimaRP atua como uma plataforma digital que facilita a conexão entre clientes e profissionais ou empresas de climatização da região. O serviço é prestado diretamente pelo profissional ou empresa parceira escolhida por você.'
+      q: 'O Clima16 realiza o serviço?',
+      a: 'O Clima16 atua como uma plataforma digital que facilita a conexão entre clientes e profissionais ou empresas de climatização da região. O serviço é prestado diretamente pelo profissional ou empresa parceira escolhida por você.'
     },
     {
       q: 'Sou obrigado a contratar?',
@@ -22,7 +22,7 @@ export function renderFAQ() {
     },
     {
       q: 'Vocês atendem quais cidades?',
-      a: 'Na primeira fase, o foco operacional do ClimaRP é a cidade de Ribeirão Preto – SP (todos os bairros e distritos, como Bonfim Paulista). Outras cidades da região metropolitana poderão ser adicionadas futuramente.'
+      a: 'Na primeira fase, o foco operacional do Clima16 é a cidade de Ribeirão Preto – SP (todos os bairros e distritos, como Bonfim Paulista). Outras cidades da região metropolitana poderão ser adicionadas futuramente.'
     },
     {
       q: 'Como os meus dados serão usados?',
@@ -39,7 +39,7 @@ export function renderFAQ() {
             Dúvidas Frequentes
           </span>
           <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy mt-3">
-            Tudo o que você precisa saber sobre o ClimaRP
+            Tudo o que você precisa saber sobre o Clima16
           </h2>
           <p class="text-sm sm:text-base text-muted-rp mt-2">
             Transparência e clareza para você solicitar seu orçamento com total segurança.

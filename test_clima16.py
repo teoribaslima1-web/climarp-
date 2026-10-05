@@ -1,5 +1,5 @@
 """
-ClimaRP - Automated Comprehensive Test Suite
+Clima16 - Automated Comprehensive Test Suite
 Tests:
 1. Multi-step form validation & error states
 2. Lead persistence and retrieval logic
@@ -127,7 +127,7 @@ has_lgpd = "Lei nº 13.709/2018" in legal_code and "Artigo 18" in legal_code
 has_intermediary_disclaimer = "não executa diretamente os serviços físicos" in legal_code or "marketplace intermediador" in legal_code
 
 record_test("LGPD compliance text", has_lgpd, "Cites Brazilian Data Protection Law and titular rights")
-record_test("Intermediary role transparency", has_intermediary_disclaimer, "Explicitly states ClimaRP connects clients to independent partners")
+record_test("Intermediary role transparency", has_intermediary_disclaimer, "Explicitly states Clima16 connects clients to independent partners")
 
 # Check for banned fake claims
 forbidden_phrases = [

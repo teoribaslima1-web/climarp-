@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Legal & LGPD Compliance Views
+ * Clima16 - Legal & LGPD Compliance Views
  * Full transparency documents for Privacy Policy and Terms of Use.
  */
 import { CONFIG } from '../config.js';
@@ -20,7 +20,7 @@ export function renderPrivacyPolicyView() {
           
           <section>
             <h2 class="text-xl font-bold text-navy mb-2">1. Informações Gerais</h2>
-            <p>A presente Política de Privacidade regula o tratamento de dados pessoais coletados pela plataforma <strong>ClimaRP</strong>, desenvolvida para conectar consumidores interessados em serviços de climatização a profissionais e empresas parceiras que atendem a região de Ribeirão Preto – SP.</p>
+            <p>A presente Política de Privacidade regula o tratamento de dados pessoais coletados pela plataforma <strong>Clima16</strong>, desenvolvida para conectar consumidores interessados em serviços de climatização a profissionais e empresas parceiras que atendem a região de Ribeirão Preto – SP.</p>
           </section>
 
           <section>
@@ -40,14 +40,14 @@ export function renderPrivacyPolicyView() {
             <ul class="list-disc pl-6 space-y-1.5 text-slate-600">
               <li>Viabilizar o encaminhamento da solicitação de orçamento a profissionais e empresas de climatização credenciados e atuantes no bairro do solicitante;</li>
               <li>Permitir que os parceiros entrem em contato direto com o usuário para apresentar propostas, sanar dúvidas técnicas e agendar vistorias;</li>
-              <li>Aprimorar o funcionamento, a usabilidade e a segurança da plataforma ClimaRP;</li>
+              <li>Aprimorar o funcionamento, a usabilidade e a segurança da plataforma Clima16;</li>
               <li>Cumprir obrigações legais e regulatórias vigentes no ordenamento jurídico brasileiro.</li>
             </ul>
           </section>
 
           <section>
             <h2 class="text-xl font-bold text-navy mb-2">4. Compartilhamento de Dados com Parceiros</h2>
-            <p>O usuário declara ciência de que o ClimaRP é um marketplace intermediador. Para que a cotação aconteça, as informações da solicitação (nome, telefone/WhatsApp, bairro e detalhes do serviço) poderão ser compartilhadas com prestadores de serviços parceiros aptos a prestar o atendimento.</p>
+            <p>O usuário declara ciência de que o Clima16 é um marketplace intermediador. Para que a cotação aconteça, as informações da solicitação (nome, telefone/WhatsApp, bairro e detalhes do serviço) poderão ser compartilhadas com prestadores de serviços parceiros aptos a prestar o atendimento.</p>
             <p class="mt-2 text-slate-600">Não comercializamos nem transferimos seus dados pessoais para terceiros não relacionados com a finalidade do orçamento solicitado.</p>
           </section>
 
@@ -91,7 +91,7 @@ export function renderTermsView() {
           
           <section>
             <h2 class="text-xl font-bold text-navy mb-2">1. Natureza da Plataforma</h2>
-            <p>O <strong>ClimaRP</strong> é uma plataforma digital de conexão e geração de orçamentos para serviços de ar-condicionado e climatização em Ribeirão Preto – SP. O ClimaRP <strong>não executa diretamente os serviços físicos</strong> de instalação, manutenção ou reparos nas dependências do cliente, atuando como facilitador de contato entre clientes e profissionais autônomos ou empresas parceiras.</p>
+            <p>O <strong>Clima16</strong> é uma plataforma digital de conexão e geração de orçamentos para serviços de ar-condicionado e climatização em Ribeirão Preto – SP. O Clima16 <strong>não executa diretamente os serviços físicos</strong> de instalação, manutenção ou reparos nas dependências do cliente, atuando como facilitador de contato entre clientes e profissionais autônomos ou empresas parceiras.</p>
           </section>
 
           <section>

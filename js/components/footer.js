@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Footer Component
+ * Clima16 - Footer Component
  * Clean, institutional, LGPD compliant footer with regional scope.
  */
 import { CONFIG } from '../config.js';
@@ -16,10 +16,10 @@ export function renderFooter() {
           <!-- Column 1: Brand Info -->
           <div class="lg:col-span-2 space-y-4">
             <a href="#/" class="inline-block">
-              <img src="assets/logo.png" alt="ClimaRP" class="h-12 w-auto object-contain brightness-110" />
+              <img src="assets/logo-wordmark.png" alt="Clima16" class="h-12 w-auto object-contain bg-white rounded-xl px-3 py-2" />
             </a>
             <p class="text-slate-300 text-sm leading-relaxed max-w-sm">
-              O ClimaRP facilita a conexão entre pessoas procurando serviços de climatização e profissionais da região de Ribeirão Preto.
+              O Clima16 facilita a conexão entre pessoas procurando serviços de climatização e profissionais da região de Ribeirão Preto.
             </p>
             <div class="flex flex-col gap-2 pt-1">
               <a href="https://wa.me/${CONFIG.brand.whatsappNumber}?text=${encodeURIComponent(CONFIG.brand.whatsappDefaultMessage)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
@@ -71,7 +71,7 @@ export function renderFooter() {
 
         <!-- Sub-footer -->
         <div class="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© ${currentYear} ClimaRP. Todos os direitos reservados. Ribeirão Preto – SP.</p>
+          <p>© ${currentYear} Clima16. Todos os direitos reservados. Ribeirão Preto – SP.</p>
           <div class="flex items-center gap-6">
             <span>Marketplace local de climatização</span>
             <a href="#/politica-de-privacidade" class="hover:text-slate-400">Privacidade LGPD</a>

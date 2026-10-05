@@ -1,13 +1,13 @@
 /**
- * ClimaRP - Storage & Lead Database Engine
+ * Clima16 - Storage & Lead Database Engine
  * Manages Leads, Partners, and CSV exports with local persistence.
  */
 import { analytics } from './analytics.js';
 
 const STORAGE_KEYS = {
-  LEADS: 'climarp_leads_db_v1',
-  PARTNERS: 'climarp_partners_db_v1',
-  LAST_LEAD: 'climarp_last_submitted_lead'
+  LEADS: 'clima16_leads_db_v1',
+  PARTNERS: 'clima16_partners_db_v1',
+  LAST_LEAD: 'clima16_last_submitted_lead'
 };
 
 export const STATUS_OPTIONS = [
@@ -258,7 +258,7 @@ class StorageEngine {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `leads_climarp_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `leads_clima16_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

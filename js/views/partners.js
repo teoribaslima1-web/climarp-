@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Partners Landing Page View (/para-profissionais)
+ * Clima16 - Partners Landing Page View (/para-profissionais)
  * Dedicated portal for HVAC pros, technicians, and local service providers in Ribeirão Preto.
  */
 import { db } from '../storage.js';
@@ -14,7 +14,7 @@ export function renderPartnersView() {
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           
           <span class="inline-block text-xs font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/70 border border-cyan-800 px-3.5 py-1.5 rounded-full mb-4">
-            Parceria Regional ClimaRP
+            Parceria Regional Clima16
           </span>
 
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight max-w-3xl mx-auto leading-tight">
@@ -22,7 +22,7 @@ export function renderPartnersView() {
           </h1>
 
           <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mt-4 leading-relaxed font-light">
-            O ClimaRP conecta pessoas procurando serviços de climatização a profissionais e empresas da região. Cadastre seu interesse em receber oportunidades de atendimento.
+            O Clima16 conecta pessoas procurando serviços de climatização a profissionais e empresas da região. Cadastre seu interesse em receber oportunidades de atendimento.
           </p>
 
           <div class="mt-8 flex justify-center">
@@ -37,7 +37,7 @@ export function renderPartnersView() {
       <!-- Benefits for Partners -->
       <section class="py-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-2xl mx-auto mb-12">
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-navy">Como funciona a parceria com o ClimaRP</h2>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-navy">Como funciona a parceria com o Clima16</h2>
           <p class="text-sm text-slate-600 mt-2">Um canal transparente para expandir seus atendimentos na cidade.</p>
         </div>
 

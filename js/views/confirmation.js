@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Confirmation Page View (/solicitacao-recebida)
+ * Clima16 - Confirmation Page View (/solicitacao-recebida)
  * Conversion landing page displaying submitted lead summary and tracking scripts.
  */
 import { db } from '../storage.js';
@@ -58,7 +58,7 @@ export function renderConfirmationView() {
         </div>
 
         <div class="mt-8 pt-6 border-t border-slate-100 text-xs text-slate-400">
-          ClimaRP • Marketplace de Climatização em Ribeirão Preto – SP
+          Clima16 • Marketplace de Climatização em Ribeirão Preto – SP
         </div>
 
       </div>

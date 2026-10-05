@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Client-side Hash Router
+ * Clima16 - Client-side Hash Router
  * Handles dynamic route rendering, SEO meta titles/descriptions, and history navigation.
  */
 import { renderHomeView, initHomeEvents } from './views/home.js';
@@ -15,52 +15,60 @@ import { analytics } from './analytics.js';
 
 const ROUTE_META = {
   '/': {
-    title: 'Ar-Condicionado em Ribeirão Preto | Instalação e Manutenção | ClimaRP',
-    description: 'Solicite orçamento para instalação, manutenção, limpeza e serviços de ar-condicionado em Ribeirão Preto. Encontre profissionais da região pelo ClimaRP.'
+    title: 'Ar-Condicionado em Ribeirão Preto | Instalação e Manutenção | Clima16',
+    description: 'Solicite orçamento para instalação, manutenção, limpeza e serviços de ar-condicionado em Ribeirão Preto. Encontre profissionais da região pelo Clima16.'
   },
   '/instalacao-ar-condicionado-ribeirao-preto': {
-    title: 'Instalação de Ar-Condicionado em Ribeirão Preto | Orçamento Grátis | ClimaRP',
+    title: 'Instalação de Ar-Condicionado em Ribeirão Preto | Orçamento Grátis | Clima16',
     description: 'Encontre profissionais para instalação de ar-condicionado split em Ribeirão Preto. Compare orçamentos sem compromisso para casas, apartamentos e comércios.'
   },
   '/manutencao-ar-condicionado-ribeirao-preto': {
-    title: 'Manutenção e Conserto de Ar-Condicionado em Ribeirão Preto | ClimaRP',
+    title: 'Manutenção e Conserto de Ar-Condicionado em Ribeirão Preto | Clima16',
     description: 'Serviços de manutenção preventiva e corretiva para ar-condicionado em Ribeirão Preto. Diagnóstico de ruídos, placas e falhas.'
   },
   '/limpeza-ar-condicionado-ribeirao-preto': {
-    title: 'Limpeza e Higienização de Ar-Condicionado em Ribeirão Preto | ClimaRP',
+    title: 'Limpeza e Higienização de Ar-Condicionado em Ribeirão Preto | Clima16',
     description: 'Higienização profunda, remoção de fungos, ácaros e bactérias do seu ar-condicionado em Ribeirão Preto. Melhore a qualidade do ar.'
   },
   '/ar-condicionado-nao-gela-ribeirao-preto': {
-    title: 'Ar-Condicionado Não Gela em Ribeirão Preto? | Orçamento de Reparo | ClimaRP',
+    title: 'Ar-Condicionado Não Gela em Ribeirão Preto? | Orçamento de Reparo | Clima16',
     description: 'Seu ar-condicionado liga mas sopra ar morno? Encontre especialistas em teste de capacitor, sensores e recarga de gás em Ribeirão Preto.'
   },
+  '/vazamento-gotejamento-ar-condicionado-ribeirao-preto': {
+    title: 'Vazamento e Gotejamento de Ar-Condicionado em Ribeirão Preto | Clima16',
+    description: 'Ar-condicionado pingando ou com dreno entupido? Solicite orçamento para conserto de vazamentos e gotejamento em Ribeirão Preto.'
+  },
+  '/recarga-avaliacao-gas-ar-condicionado-ribeirao-preto': {
+    title: 'Recarga e Avaliação de Gás de Ar-Condicionado em Ribeirão Preto | Clima16',
+    description: 'Avaliação técnica e recarga de gás de ar-condicionado em Ribeirão Preto, com teste de vazamento e medição adequada.'
+  },
   '/para-profissionais': {
-    title: 'Seja Parceiro ClimaRP | Oportunidades em Ar-Condicionado em Ribeirão Preto',
-    description: 'Cadastre-se como técnico ou empresa de climatização parceira do ClimaRP e receba solicitações de clientes em Ribeirão Preto e região.'
+    title: 'Seja Parceiro Clima16 | Oportunidades em Ar-Condicionado em Ribeirão Preto',
+    description: 'Cadastre-se como técnico ou empresa de climatização parceira do Clima16 e receba solicitações de clientes em Ribeirão Preto e região.'
   },
   '/como-funciona': {
-    title: 'Como Funciona o ClimaRP | Cotação de Climatização em Ribeirão Preto',
+    title: 'Como Funciona o Clima16 | Cotação de Climatização em Ribeirão Preto',
     description: 'Entenda o passo a passo simples para solicitar orçamentos gratuitos para seu ar-condicionado em Ribeirão Preto.'
   },
   '/blog': {
-    title: 'Blog ClimaRP | Dicas de Ar-Condicionado, BTUs e Climatização em Ribeirão Preto',
+    title: 'Blog Clima16 | Dicas de Ar-Condicionado, BTUs e Climatização em Ribeirão Preto',
     description: 'Guias práticos sobre dimensionamento de BTUs, economia de energia, split inverter e manutenção periódica em Ribeirão Preto.'
   },
   '/solicitacao-recebida': {
-    title: 'Solicitação Recebida com Sucesso | ClimaRP Ribeirão Preto',
-    description: 'Sua solicitação de orçamento foi recebida pelo ClimaRP e será encaminhada a profissionais da região.'
+    title: 'Solicitação Recebida com Sucesso | Clima16 Ribeirão Preto',
+    description: 'Sua solicitação de orçamento foi recebida pelo Clima16 e será encaminhada a profissionais da região.'
   },
   '/politica-de-privacidade': {
-    title: 'Política de Privacidade | ClimaRP Ribeirão Preto',
-    description: 'Informações sobre coleta, tratamento de dados e conformidade com a LGPD no ClimaRP.'
+    title: 'Política de Privacidade | Clima16 Ribeirão Preto',
+    description: 'Informações sobre coleta, tratamento de dados e conformidade com a LGPD no Clima16.'
   },
   '/termos-de-uso': {
-    title: 'Termos de Uso | ClimaRP Ribeirão Preto',
-    description: 'Termos e condições de uso da plataforma local de orçamentos ClimaRP.'
+    title: 'Termos de Uso | Clima16 Ribeirão Preto',
+    description: 'Termos e condições de uso da plataforma local de orçamentos Clima16.'
   },
   '/admin': {
-    title: 'Painel Administrativo | Gestão de Leads ClimaRP',
-    description: 'Painel interno de controle de leads e parceiros do ClimaRP.'
+    title: 'Painel Administrativo | Gestão de Leads Clima16',
+    description: 'Painel interno de controle de leads e parceiros do Clima16.'
   }
 };
 
@@ -78,12 +86,18 @@ export class Router {
     const rawHash = window.location.hash || '#/';
     const cleanHash = rawHash.split('?')[0].replace(/^#/, '') || '/';
     
-    // Handle anchor jump if on home
-    if (cleanHash === 'formulario' || cleanHash === 'servicos' || cleanHash === 'como-funciona' || cleanHash === 'faq') {
-      this.renderView('/', () => {
-        const el = document.getElementById(cleanHash === 'formulario' ? 'orcamento-form' : `${cleanHash}-section`) || document.getElementById(cleanHash);
-        el?.scrollIntoView({ behavior: 'smooth' });
-      });
+    // Handle anchor jump if on home (aceita #/como-funciona e #como-funciona)
+    const anchorKey = cleanHash.replace(/^\//, '');
+    if (['formulario', 'servicos', 'como-funciona', 'faq'].includes(anchorKey)) {
+      this.updateMeta('/');
+      this.appContainer.innerHTML = renderHomeView();
+      initHomeEvents();
+      const target = document.getElementById(anchorKey === 'formulario' ? 'orcamento-form' : `${anchorKey}-section`) || document.getElementById(anchorKey);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
       return;
     }
 

@@ -1,9 +1,9 @@
 /**
- * ClimaRP - LGPD Cookie Banner Component
+ * Clima16 - LGPD Cookie Banner Component
  * Transparent, non-intrusive cookie consent.
  */
 export function renderCookieBanner() {
-  const hasConsented = localStorage.getItem('climarp_lgpd_consent');
+  const hasConsented = localStorage.getItem('clima16_lgpd_consent');
   if (hasConsented) return '';
 
   return `
@@ -32,7 +32,7 @@ export function initCookieBannerEvents() {
   const banner = document.getElementById('lgpd-cookie-banner');
 
   acceptBtn?.addEventListener('click', () => {
-    localStorage.setItem('climarp_lgpd_consent', 'true');
+    localStorage.setItem('clima16_lgpd_consent', 'true');
     banner?.classList.add('opacity-0', 'pointer-events-none');
     setTimeout(() => {
       banner?.remove();

@@ -1,19 +1,19 @@
 /**
- * ClimaRP - Global Configuration
+ * Clima16 - Global Configuration
  * Centralized settings for easy customization without touching application logic.
  */
 export const CONFIG = {
   brand: {
-    name: 'ClimaRP',
+    name: 'Clima16',
     tagline: 'Ar-condicionado em Ribeirão Preto sem complicação',
     description: 'Encontre profissionais para instalação, manutenção, limpeza e serviços de ar-condicionado em Ribeirão Preto de forma simples e rápida.',
     city: 'Ribeirão Preto',
     state: 'SP',
     fullLocation: 'Ribeirão Preto – SP',
-    emailContact: 'contato@climarp.com.br',
+    emailContact: 'contato@clima16.com.br',
     whatsappNumber: '5516981570034',
     whatsappFormatted: '(16) 98157-0034',
-    whatsappDefaultMessage: 'Olá! Encontrei o ClimaRP e gostaria de solicitar um orçamento para ar-condicionado.'
+    whatsappDefaultMessage: 'Olá! Encontrei o Clima16 e gostaria de solicitar um orçamento para ar-condicionado.'
   },
 
   analytics: {
@@ -81,7 +81,7 @@ export const CONFIG = {
         },
         {
           q: 'O que fazer se meu ar-condicionado apresentar código de erro?',
-          a: 'Desligue o aparelho na tomada ou disjuntor e solicite um orçamento pelo ClimaRP para que um técnico realize a leitura técnica correta da placa.'
+          a: 'Desligue o aparelho na tomada ou disjuntor e solicite um orçamento pelo Clima16 para que um técnico realize a leitura técnica correta da placa.'
         }
       ]
     },

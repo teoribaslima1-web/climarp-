@@ -1,5 +1,5 @@
 /**
- * ClimaRP - Partner Registration Modal & Form Component
+ * Clima16 - Partner Registration Modal & Form Component
  * Dedicated flow for air conditioning technicians and HVAC companies in Ribeirão Preto.
  */
 import { CONFIG } from '../config.js';
