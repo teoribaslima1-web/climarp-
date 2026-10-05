@@ -1,0 +1,15 @@
+# Dependencies & Temp
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+
+# Local IDE & Brain
+.vscode/
+.idea/
