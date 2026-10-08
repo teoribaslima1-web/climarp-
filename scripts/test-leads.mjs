@@ -154,6 +154,33 @@ await test('envia e-mail para contato@clima16.com.br com assunto do serviço', a
   assert.ok(mail.text.includes('Jardim Paulistano'));
 });
 
+await test('cliente com e-mail recebe confirmação (2º e-mail, com reply_to)', async () => {
+  setEnv(); const calls = installFetch();
+  await handler(req(validBody()), mockRes());
+  const mails = calls.filter((c) => c.url.includes('api.resend.com'));
+  assert.equal(mails.length, 2);
+  const cust = JSON.parse(mails[1].init.body);
+  assert.deepEqual(cust.to, ['joao@example.com']);
+  assert.equal(cust.reply_to, 'contato@clima16.com.br');
+  assert.ok(cust.subject.startsWith('Recebemos seu pedido'));
+  assert.ok(cust.text.includes('Jardim Paulistano'));
+});
+
+await test('sem e-mail do cliente: só o aviso interno é enviado', async () => {
+  setEnv(); const calls = installFetch();
+  await handler(req({ ...validBody(), email: '' }), mockRes());
+  assert.equal(calls.filter((c) => c.url.includes('api.resend.com')).length, 1);
+});
+
+await test('confirmação ao cliente escapa HTML e não tem quebra de linha no assunto', async () => {
+  setEnv(); const calls = installFetch();
+  await handler(req({ ...validBody(), name: '<img src=x> Zé\r\nBcc: x@y.com' }), mockRes());
+  const mails = calls.filter((c) => c.url.includes('api.resend.com'));
+  const cust = JSON.parse(mails[1].init.body);
+  assert.ok(!cust.html.includes('<img'));
+  assert.ok(!/[\r\n]/.test(cust.subject));
+});
+
 await test('HTML do e-mail escapa conteúdo malicioso', async () => {
   setEnv(); const calls = installFetch();
   await handler(req({ ...validBody(), name: '<script>alert(1)</script> Zé' }), mockRes());

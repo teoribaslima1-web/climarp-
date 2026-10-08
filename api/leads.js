@@ -148,20 +148,20 @@ function buildEmail(lead, createdAt, leadId) {
   return { subject: `🔵 Novo orçamento Clima16 — ${lead.service_type}`.slice(0, 200), text, html };
 }
 
-async function sendNotification(lead, createdAt, leadId) {
+async function postEmail({ to, subject, html, text, replyTo }) {
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.LEAD_NOTIFY_TO;
   const from = process.env.LEAD_FROM;
-  if (!apiKey || !to || !from) return false;
+  if (!apiKey || !from || !to || !to.length) return false;
 
-  const { subject, text, html } = buildEmail(lead, createdAt, leadId);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5000);
   try {
+    const payload = { from, to, subject, html, text };
+    if (replyTo) payload.reply_to = replyTo;
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: to.split(',').map((s) => s.trim()).filter(Boolean), subject, html, text }),
+      body: JSON.stringify(payload),
       signal: controller.signal
     });
     if (!res.ok) console.error('[leads] resend_failed', res.status);
@@ -172,6 +172,72 @@ async function sendNotification(lead, createdAt, leadId) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function sendNotification(lead, createdAt, leadId) {
+  const to = (process.env.LEAD_NOTIFY_TO || '').split(',').map((s) => s.trim()).filter(Boolean);
+  if (!to.length) return false;
+  const { subject, text, html } = buildEmail(lead, createdAt, leadId);
+  return postEmail({ to, subject, html, text });
+}
+
+function protocolFor(leadId) {
+  return leadId ? 'C16-' + String(leadId).replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase() : null;
+}
+
+function buildCustomerEmail(lead, leadId) {
+  const protocol = protocolFor(leadId);
+  const firstName = (lead.name || '').split(' ')[0] || 'Olá';
+  const contactEmail = process.env.LEAD_NOTIFY_TO ? process.env.LEAD_NOTIFY_TO.split(',')[0].trim() : 'contato@clima16.com.br';
+  const waText = `Olá! Fiz um pedido no Clima16${protocol ? ` (protocolo ${protocol})` : ''}. Serviço: ${lead.service_type}.`;
+  const wa = `https://wa.me/5516981570034?text=${encodeURIComponent(waText)}`;
+  const resumo = [
+    ['Serviço', lead.service_type],
+    ['Bairro', lead.neighborhood ? `${lead.neighborhood}, Ribeirão Preto – SP` : 'Ribeirão Preto – SP'],
+    ...(protocol ? [['Protocolo', protocol]] : [])
+  ];
+
+  const text = [
+    `Olá, ${firstName}!`,
+    '',
+    'Recebemos o seu pedido de orçamento no Clima16.',
+    '',
+    ...resumo.map(([k, v]) => `${k}: ${v}`),
+    '',
+    'O que acontece agora:',
+    '1. Vamos entrar em contato, normalmente pelo WhatsApp, para confirmar os detalhes.',
+    '2. Seu pedido pode ser encaminhado a profissionais da região para você comparar propostas.',
+    '3. Você escolhe livremente, sem compromisso.',
+    '',
+    `Quer agilizar? Fale com a gente: ${wa}`,
+    '',
+    `Você recebeu este e-mail porque preencheu o formulário em clima16.com.br. Dúvidas: ${contactEmail}`
+  ].join('\n');
+
+  const html = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#0f172a">
+  <h2 style="color:#092B55;margin:0 0 8px">Olá, ${escapeHtml(firstName)}!</h2>
+  <p style="margin:0 0 16px;color:#334155">Recebemos o seu pedido de orçamento no <strong>Clima16</strong>.</p>
+  <table style="width:100%;border-collapse:collapse;font-size:14px;background:#f8fafc;border-radius:8px">
+    ${resumo.map(([k, v]) => `<tr><td style="padding:8px 12px;color:#64748b;width:110px">${escapeHtml(k)}</td><td style="padding:8px 12px"><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}
+  </table>
+  <h3 style="color:#092B55;margin:22px 0 8px;font-size:15px">O que acontece agora</h3>
+  <ol style="padding-left:18px;margin:0;color:#334155;font-size:14px;line-height:1.6">
+    <li>Vamos entrar em contato, normalmente pelo WhatsApp, para confirmar os detalhes.</li>
+    <li>Seu pedido pode ser encaminhado a profissionais da região para você comparar propostas.</li>
+    <li>Você escolhe livremente, sem compromisso.</li>
+  </ol>
+  <p style="margin:20px 0"><a href="${escapeHtml(wa)}" style="background:#10b981;color:#fff;text-decoration:none;padding:11px 20px;border-radius:8px;font-weight:bold;display:inline-block">Falar no WhatsApp agora</a></p>
+  <p style="color:#94a3b8;font-size:12px;line-height:1.5">Você recebeu este e-mail porque preencheu o formulário em clima16.com.br. Dúvidas: ${escapeHtml(contactEmail)}</p>
+</div>`;
+
+  return { subject: `Recebemos seu pedido — Clima16${protocol ? ` (${protocol})` : ''}`.slice(0, 200), text, html };
+}
+
+async function sendCustomerConfirmation(lead, leadId) {
+  if (!lead.email) return false;
+  const { subject, text, html } = buildCustomerEmail(lead, leadId);
+  const replyTo = (process.env.LEAD_NOTIFY_TO || '').split(',')[0].trim() || undefined;
+  return postEmail({ to: [lead.email], subject, html, text, replyTo });
 }
 
 module.exports = async function handler(req, res) {
@@ -251,9 +317,11 @@ module.exports = async function handler(req, res) {
   // Lead já está salvo. O aviso por e-mail não pode mudar o resultado.
   if (status === 'novo') {
     await sendNotification(lead, (saved && saved.created_at) || new Date().toISOString(), saved && saved.id);
+    // Confirmação ao cliente (só se informou e-mail). Falha aqui nunca derruba o pedido.
+    await sendCustomerConfirmation(lead, saved && saved.id);
   }
 
   return res.status(200).json({ ok: true, id: saved && saved.id });
 };
 
-module.exports._internals = { validate, clean, escapeHtml, buildEmail };
+module.exports._internals = { validate, clean, escapeHtml, buildEmail, buildCustomerEmail };
