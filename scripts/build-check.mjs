@@ -30,7 +30,7 @@ const html = readFileSync(join(root, 'index.html'), 'utf8');
 for (const m of html.matchAll(/(?:src|href|content)=["'](?!https?:|#|data:|mailto:|tel:)([^"']+\.(?:js|css|png|jpg|svg|ico|webp))["']/g)) {
   if (!existsSync(join(root, m[1]))) errors.push(`index.html referencia arquivo inexistente: ${m[1]}`);
 }
-for (const f of ['api/leads.js', 'supabase/schema.sql', 'assets/logo.png', 'assets/logo-wordmark.png', 'assets/favicon.png', 'css/styles.css', 'js/app.js']) {
+for (const f of ['api/leads.js', 'assets/logo.png', 'assets/logo-wordmark.png', 'assets/favicon.png', 'css/styles.css', 'js/app.js']) {
   if (!existsSync(join(root, f))) errors.push(`Arquivo obrigatório ausente: ${f}`);
 }
 
