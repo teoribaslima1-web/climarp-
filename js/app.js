@@ -6,6 +6,7 @@ import { renderFooter } from './components/footer.js';
 import { renderCookieBanner, initCookieBannerEvents } from './components/cookie-banner.js';
 import { Router } from './router.js';
 import { analytics } from './analytics.js';
+import { initWeatherStrip } from './components/weather-strip.js';
 
 // Expose analytics globally for inline onclick handlers
 window.clima16Analytics = analytics;
@@ -15,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const appMount = document.getElementById('app-mount');
   const footerMount = document.getElementById('footer-mount');
   const bannerMount = document.getElementById('cookie-banner-mount');
+
+  initWeatherStrip(document.getElementById('weather-mount'));
 
   if (headerMount) {
     headerMount.innerHTML = renderHeader();

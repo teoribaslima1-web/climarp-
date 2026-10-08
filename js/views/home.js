@@ -7,13 +7,40 @@ import { renderQuoteForm, initQuoteFormEvents } from '../components/quote-form.j
 import { renderFAQ, initFAQEvents } from '../components/faq.js';
 import { renderPartnerModal, initPartnerModalEvents } from '../components/partner-modal.js';
 import { analytics } from '../analytics.js';
+import { renderBtuCalculator, initBtuCalculator } from '../components/btu-calculator.js';
+import { initHeroThermometer } from '../components/hero-thermometer.js';
+import { initQuoteTriggers } from '../prefill.js';
+import { initReveal } from '../reveal.js';
+
+const CHIP_LABELS = {
+  instalacao: 'Instalação',
+  manutencao: 'Manutenção',
+  limpeza: 'Limpeza',
+  nao_gela: 'Não gela',
+  vazamento: 'Vazamento',
+  gas: 'Gás'
+};
+
+const WAVE_PATH = 'M0 50 Q150 0 300 50 T600 50 T900 50 T1200 50 T1500 50 T1800 50 T2100 50 T2400 50 V100 H0 Z';
+const waveLayer = (cls, fill, top) => `
+  <div class="wave-layer ${cls}" style="top:${top}%">
+    <svg viewBox="0 0 2400 100" preserveAspectRatio="none" aria-hidden="true"><path d="${WAVE_PATH}" fill="${fill}"/></svg>
+  </div>`;
+
+const TIMELINE_STEPS = [
+  { n: 1, title: 'Pedido', text: 'Você conta o que precisa: serviço, imóvel e bairro, em menos de 1 minuto.' },
+  { n: 2, title: 'Contato', text: 'A gente entra em contato, normalmente pelo WhatsApp, para confirmar os detalhes.' },
+  { n: 3, title: 'Orçamentos comparados', text: 'Seu pedido pode ser encaminhado a profissionais da região para você comparar propostas.' },
+  { n: 4, title: 'Serviço feito', text: 'Você escolhe livremente quem contratar e agenda. Sem compromisso até decidir.' }
+];
+
 
 export function renderHomeView() {
   const whatsappUrl = `https://wa.me/${CONFIG.brand.whatsappNumber}?text=${encodeURIComponent(CONFIG.brand.whatsappDefaultMessage)}`;
 
   return `
     <!-- ================= HERO SECTION ================= -->
-    <section class="relative overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 pt-8 pb-16 lg:pt-16 lg:pb-24 border-b border-slate-200/60">
+    <section class="relative overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 pt-6 pb-24 sm:pb-28 lg:pt-14 lg:pb-32 border-b border-slate-200/60">
       
       <!-- Ambient Background Glows -->
       <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-cyan-200/40 rounded-full blur-3xl pointer-events-none"></div>
@@ -44,6 +71,15 @@ export function renderHomeView() {
             <p class="text-base sm:text-lg text-muted-rp leading-relaxed max-w-2xl font-normal">
               Solicite seu orçamento e encontre profissionais da região para instalação, manutenção, limpeza e outros serviços de climatização.
             </p>
+
+            <!-- Service Chips: começar o orçamento sem rolar a página -->
+            <div>
+              <div class="text-xs font-semibold text-slate-500 mb-2">Escolha o serviço e comece agora:</div>
+              <div class="flex flex-wrap gap-2" id="hero-service-chips">
+                ${CONFIG.services.map(srv => `<button type="button" data-quote="${srv.id}" data-origin="hero_chip" class="service-chip">${CHIP_LABELS[srv.id] || srv.shortTitle}</button>`).join('')}
+                <a href="#/calculadora-de-btus" class="service-chip border-dashed text-brand-blue">Calcular BTUs →</a>
+              </div>
+            </div>
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
@@ -79,15 +115,12 @@ export function renderHomeView() {
 
           </div>
 
-          <!-- Right Column (45%) - Minimalist Modern Visual Illustration -->
+          <!-- Right Column (45%) - Termômetro animado 32° → 16° -->
           <div class="lg:col-span-5 flex justify-center">
             <div class="relative w-full max-w-md">
-              
-              <!-- Tech Card with Air Conditioning Flow Illustration -->
               <div class="relative bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 overflow-hidden">
-                
-                <!-- Ambient Top Pill -->
-                <div class="flex items-center justify-between pb-6 border-b border-slate-100">
+
+                <div class="flex items-center justify-between pb-5 border-b border-slate-100">
                   <div class="flex items-center gap-3">
                     <img src="assets/logo-wordmark.png" alt="Clima16" class="h-8 w-auto object-contain" />
                     <div>
@@ -101,49 +134,51 @@ export function renderHomeView() {
                   </span>
                 </div>
 
-                <!-- Minimalist Vector Split AC Unit -->
-                <div class="my-6 relative py-4 flex flex-col items-center">
-                  <!-- Modern Split AC Appliance Body -->
-                  <div class="w-full bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-slate-200/80 rounded-2xl p-4 shadow-md relative z-20">
-                    <div class="flex items-center justify-between mb-2">
-                      <div class="h-1.5 w-12 bg-slate-300 rounded-full"></div>
-                      <!-- Digital Display -->
-                      <div class="px-2 py-0.5 bg-navy rounded-md text-[11px] font-mono font-bold text-cyan-300 tracking-wider">
-                        22°C • ECO
+                <div class="flex items-stretch gap-5 pt-6">
+                  <!-- Termômetro -->
+                  <div class="flex flex-col items-center shrink-0" aria-hidden="true">
+                    <div class="flex gap-2 h-44">
+                      <div class="flex flex-col justify-between text-[10px] font-semibold text-slate-400 py-0.5 text-right leading-none">
+                        <span>32°</span><span>28°</span><span>24°</span><span>20°</span><span class="text-brand-blue font-extrabold text-xs">16°</span>
+                      </div>
+                      <div class="thermo-tube"><div class="thermo-fill" id="thermo-fill" style="height:100%;background-color:hsl(15,90%,50%)"></div></div>
+                    </div>
+                    <div class="thermo-bulb" id="thermo-bulb" style="background-color:hsl(15,90%,50%)"></div>
+                  </div>
+
+                  <!-- Split + ar -->
+                  <div class="flex-1 min-w-0 flex flex-col justify-center">
+                    <div class="bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-slate-200/80 rounded-2xl p-4 shadow-md">
+                      <div class="flex items-center justify-between mb-2">
+                        <div class="h-1.5 w-10 bg-slate-300 rounded-full"></div>
+                        <div class="px-2 py-0.5 bg-navy rounded-md text-sm font-mono font-bold text-cyan-300 tracking-wider" id="thermo-display" aria-live="off">32°C</div>
+                      </div>
+                      <div class="h-2 w-full bg-slate-200 rounded-full mt-3 overflow-hidden">
+                        <div class="h-full w-2/3 gradient-brand rounded-full mx-auto"></div>
                       </div>
                     </div>
-                    <!-- Air Output Vent with glow line -->
-                    <div class="h-2 w-full bg-slate-200 rounded-full mt-3 overflow-hidden relative">
-                      <div class="h-full w-2/3 gradient-brand rounded-full mx-auto"></div>
+                    <div class="mt-4 space-y-2" aria-hidden="true">
+                      <div class="h-2 bg-gradient-to-r from-cyan-400 via-sky-300 to-transparent rounded-full w-full animate-airwave opacity-80"></div>
+                      <div class="h-2 bg-gradient-to-r from-brand-blue via-cyan-300 to-transparent rounded-full w-5/6 animate-airwave opacity-60" style="animation-delay:0.5s"></div>
+                      <div class="h-2 bg-gradient-to-r from-teal-400 via-sky-200 to-transparent rounded-full w-4/6 animate-airwave opacity-40" style="animation-delay:1s"></div>
                     </div>
-                  </div>
-
-                  <!-- Dynamic Clean Air Wave Graphics -->
-                  <div class="w-full mt-4 space-y-2 relative z-10">
-                    <div class="h-2 bg-gradient-to-r from-cyan-400 via-sky-300 to-transparent rounded-full w-full animate-airwave opacity-80 blur-[0.5px]"></div>
-                    <div class="h-2 bg-gradient-to-r from-brand-blue via-cyan-300 to-transparent rounded-full w-5/6 mx-auto animate-airwave opacity-60" style="animation-delay: 0.5s;"></div>
-                    <div class="h-2 bg-gradient-to-r from-teal-400 via-sky-200 to-transparent rounded-full w-4/6 mx-auto animate-airwave opacity-40" style="animation-delay: 1s;"></div>
+                    <div id="thermo-status" class="mt-4 text-xs font-semibold text-slate-600">Resfriando…</div>
                   </div>
                 </div>
 
-                <!-- Fast Features Pills in visual -->
-                <div class="grid grid-cols-2 gap-2 pt-2 text-xs">
-                  <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2">
-                    <div class="w-6 h-6 rounded-lg bg-blue-100 text-brand-blue flex items-center justify-center text-xs font-bold">1</div>
-                    <span class="font-medium text-slate-700">Faça o pedido</span>
-                  </div>
-                  <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2">
-                    <div class="w-6 h-6 rounded-lg bg-cyan-100 text-brand-cyan flex items-center justify-center text-xs font-bold">2</div>
-                    <span class="font-medium text-slate-700">Receba contatos</span>
-                  </div>
-                </div>
-
+                <p class="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-500 text-center">Do calorão de Ribeirão ao conforto dos <strong class="text-brand-blue">16°</strong>.</p>
               </div>
-
             </div>
           </div>
 
         </div>
+      </div>
+
+      <!-- Ondas da logo em movimento suave -->
+      <div class="absolute inset-x-0 bottom-0 h-20 sm:h-28 overflow-hidden pointer-events-none" aria-hidden="true">
+        ${waveLayer('wave-drift-slow', 'rgba(22,198,234,0.16)', 25)}
+        ${waveLayer('wave-drift-mid', 'rgba(8,125,225,0.12)', 45)}
+        ${waveLayer('wave-drift-fast', 'rgba(24,212,195,0.12)', 65)}
       </div>
     </section>
 
@@ -156,59 +191,49 @@ export function renderHomeView() {
     </section>
 
 
-    <!-- ================= COMO FUNCIONA ================= -->
+    <!-- ================= COMO FUNCIONA (linha do tempo) ================= -->
     <section id="como-funciona" class="py-16 sm:py-24 bg-white border-y border-slate-100">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="text-center max-w-2xl mx-auto mb-14" data-reveal>
+          <span class="text-xs font-bold tracking-wider text-brand-blue uppercase bg-blue-50 px-3 py-1 rounded-full">Processo Simples</span>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy mt-3">Resolver seu ar-condicionado ficou mais fácil</h2>
+          <p class="text-sm sm:text-base text-muted-rp mt-2">Elimine o trabalho de procurar e ligar para dezenas de técnicos individualmente.</p>
+        </div>
+
+        <div class="relative" data-reveal data-timeline>
+          <div class="md:hidden absolute left-[22px] top-6 bottom-6 w-1 bg-slate-200 rounded-full overflow-hidden" aria-hidden="true"><div class="tl-line-fill-v h-full w-full"></div></div>
+          <div class="hidden md:block absolute top-[22px] left-[12.5%] right-[12.5%] h-1 bg-slate-200 rounded-full overflow-hidden" aria-hidden="true"><div class="tl-line-fill-h h-full w-full"></div></div>
+
+          <ol class="relative grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-6">
+            ${TIMELINE_STEPS.map((st, i) => `
+              <li class="tl-step flex md:flex-col items-start md:items-center gap-4 md:gap-5 md:text-center" data-reveal style="--reveal-delay:${i * 280}ms">
+                <div class="tl-dot shrink-0 w-12 h-12 rounded-full gradient-brand text-white flex items-center justify-center text-lg font-extrabold shadow-glow-blue ring-4 ring-white">${st.n}</div>
+                <div>
+                  <h3 class="text-base sm:text-lg font-bold text-navy mb-1">${st.title}</h3>
+                  <p class="text-sm text-slate-600 leading-relaxed">${st.text}</p>
+                </div>
+              </li>`).join('')}
+          </ol>
+        </div>
+
+        <div class="text-center mt-12" data-reveal>
+          <button type="button" data-quote="" data-origin="timeline_cta" class="gradient-brand text-white text-sm sm:text-base font-bold px-7 py-3.5 rounded-xl shadow-lg hover:brightness-105 active:scale-95 transition-all">Começar meu pedido</button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= CALCULADORA DE BTUs ================= -->
+    <section id="calculadora-section" class="py-16 sm:py-24 bg-slate-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="text-center max-w-2xl mx-auto mb-16">
-          <span class="text-xs font-bold tracking-wider text-brand-blue uppercase bg-blue-50 px-3 py-1 rounded-full">
-            Processo Simples
-          </span>
-          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy mt-3">
-            Resolver seu ar-condicionado ficou mais fácil
-          </h2>
-          <p class="text-sm sm:text-base text-muted-rp mt-2">
-            Elimine o trabalho de procurar e ligar para dezenas de técnicos individualmente.
-          </p>
+        <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
+          <span class="text-xs font-bold tracking-wider text-brand-blue uppercase bg-blue-50 px-3 py-1 rounded-full">Calculadora de BTUs</span>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy mt-3">Qual a potência ideal para o seu ambiente?</h2>
+          <p class="text-sm sm:text-base text-muted-rp mt-2">Responda em 10 segundos e peça o orçamento já com o aparelho certo.</p>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-          
-          <!-- Step 1 -->
-          <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-8 text-center relative group hover:bg-white hover:shadow-card-hover transition-all">
-            <div class="w-14 h-14 rounded-2xl bg-blue-100 text-brand-blue flex items-center justify-center mx-auto mb-6 text-xl font-extrabold group-hover:scale-110 transition-transform">
-              1
-            </div>
-            <h3 class="text-lg font-bold text-navy mb-2">Conte o que precisa</h3>
-            <p class="text-sm text-slate-600 leading-relaxed">
-              Selecione o serviço e informe alguns detalhes do seu aparelho e imóvel em menos de 1 minuto.
-            </p>
-          </div>
-
-          <!-- Step 2 -->
-          <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-8 text-center relative group hover:bg-white hover:shadow-card-hover transition-all">
-            <div class="w-14 h-14 rounded-2xl bg-cyan-100 text-brand-blue flex items-center justify-center mx-auto mb-6 text-xl font-extrabold group-hover:scale-110 transition-transform">
-              2
-            </div>
-            <h3 class="text-lg font-bold text-navy mb-2">Conectamos sua solicitação</h3>
-            <p class="text-sm text-slate-600 leading-relaxed">
-              Seu pedido pode ser encaminhado para profissionais da região capazes de realizar o serviço no seu bairro.
-            </p>
-          </div>
-
-          <!-- Step 3 -->
-          <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-8 text-center relative group hover:bg-white hover:shadow-card-hover transition-all">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-6 text-xl font-extrabold group-hover:scale-110 transition-transform">
-              3
-            </div>
-            <h3 class="text-lg font-bold text-navy mb-2">Compare e escolha</h3>
-            <p class="text-sm text-slate-600 leading-relaxed">
-              Converse com o profissional, esclareça suas dúvidas e decida livremente se deseja contratar.
-            </p>
-          </div>
-
-        </div>
-
+        <div data-reveal>${renderBtuCalculator()}</div>
+        <p class="text-center text-xs text-slate-500 mt-4"><a href="#/calculadora-de-btus" class="font-semibold text-brand-blue hover:underline">Ver guia completo e tabela de referência →</a></p>
       </div>
     </section>
 
@@ -234,7 +259,7 @@ export function renderHomeView() {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
           ${CONFIG.services.map(srv => `
-            <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-subtle hover:shadow-card-hover transition-all flex flex-col justify-between group">
+            <div data-reveal class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-subtle hover:shadow-card-hover transition-all flex flex-col justify-between group">
               <div>
                 <div class="w-12 h-12 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center mb-4 group-hover:bg-brand-blue group-hover:text-white transition-colors">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -247,7 +272,7 @@ export function renderHomeView() {
                 <a href="#/${srv.slug}" class="text-xs font-semibold text-slate-500 hover:text-navy flex items-center gap-1">
                   Saiba mais →
                 </a>
-                <button onclick="document.getElementById('orcamento-form')?.scrollIntoView({behavior:'smooth'});" class="gradient-brand text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm hover:shadow transition-all">
+                <button type="button" data-quote="${srv.id}" data-origin="service_card" class="gradient-brand text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm hover:shadow transition-all">
                   Pedir orçamento
                 </button>
               </div>
@@ -260,10 +285,48 @@ export function renderHomeView() {
     </section>
 
 
+    <!-- ================= COBERTURA POR BAIRROS ================= -->
+    <section id="cobertura-section" class="py-16 sm:py-24 bg-white border-t border-slate-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+
+          <div class="lg:col-span-4 lg:sticky lg:top-24" data-reveal>
+            <span class="text-xs font-bold tracking-wider text-brand-blue uppercase bg-blue-50 px-3 py-1 rounded-full">Cobertura local</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-3">Ar-condicionado em todos os bairros de Ribeirão Preto</h2>
+            <p class="text-sm sm:text-base text-muted-rp mt-3">Toque no seu bairro e comece o pedido já com a localização preenchida.</p>
+            <div class="mt-6 rounded-2xl gradient-navy-dark text-white p-6 relative overflow-hidden">
+              <div class="absolute -right-6 -top-6 w-32 h-32 rounded-full border border-cyan-400/30"></div>
+              <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full border border-cyan-400/20"></div>
+              <svg class="w-8 h-8 text-cyan-300 relative" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <div class="mt-3 text-lg font-extrabold relative">Ribeirão Preto – SP</div>
+              <div class="text-xs text-slate-300 relative">DDD 16 · Atendimento local</div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-8" data-reveal>
+            <label for="bairro-filter" class="sr-only">Buscar bairro</label>
+            <input id="bairro-filter" type="search" placeholder="Buscar seu bairro..." autocomplete="off" class="w-full mb-4 px-4 py-3 border-2 border-slate-200 focus:border-brand-blue focus:ring-0 rounded-xl text-sm font-medium text-slate-800" />
+            <div id="bairro-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              ${CONFIG.neighborhoodsRP.filter(n => !n.startsWith('Outro')).map(n => `
+                <button type="button" data-quote-neighborhood="${n}" data-name="${n}" class="bairro-btn flex items-center gap-2 px-3.5 py-3 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-brand-blue hover:shadow-card-hover text-left text-sm font-semibold text-slate-700 transition-all">
+                  <svg class="w-4 h-4 text-brand-blue shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                  <span class="truncate">${n}</span>
+                </button>`).join('')}
+            </div>
+            <p id="bairro-empty" class="hidden text-sm text-slate-500 mt-3">Nenhum bairro encontrado com esse nome.</p>
+            <button type="button" data-quote-neighborhood="Outro bairro de Ribeirão Preto" class="mt-4 text-sm font-semibold text-brand-blue hover:underline">Meu bairro não está na lista →</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
     <!-- ================= BLOCO DE CONVERSÃO ================= -->
     <section class="py-16 sm:py-20 gradient-navy-dark text-white relative overflow-hidden">
       <!-- Background Ambient Glow -->
-      <div class="absolute inset-0 bg-[radial-gradient(#087DE1_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
+      <img src="assets/fotos/split.webp" alt="" aria-hidden="true" width="1600" height="1067" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-luminosity" />
+      <div class="absolute inset-0 bg-gradient-to-r from-navy/95 via-navy/85 to-navy/70"></div>
 
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight mb-4">
@@ -292,8 +355,22 @@ export function renderHomeView() {
           </h2>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+
+          <!-- Foto: conforto em casa -->
+          <div class="lg:col-span-5" data-reveal>
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] max-h-[560px] mx-auto bg-slate-100">
+              <img src="assets/fotos/sala.webp" alt="Sala iluminada com ar-condicionado instalado na parede" width="960" height="1200" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-navy/70 to-transparent"></div>
+              <div class="absolute left-4 bottom-4 right-4 flex items-center gap-3 text-white">
+                <div class="w-12 h-12 rounded-2xl gradient-brand flex items-center justify-center text-lg font-extrabold shadow-glow-blue shrink-0">16°</div>
+                <div class="text-sm font-semibold leading-snug">O conforto que a sua casa merece, sem dor de cabeça.</div>
+              </div>
+            </div>
+          </div>
+
+        <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-5">
+
           <!-- Benefit 1 -->
           <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-left hover:border-blue-200 transition-all">
             <div class="w-10 h-10 rounded-xl bg-blue-100 text-brand-blue flex items-center justify-center mb-4">
@@ -330,6 +407,7 @@ export function renderHomeView() {
             <p class="text-sm text-slate-600">Solicitar contato através da plataforma não obriga a contratação do serviço.</p>
           </div>
 
+        </div>
         </div>
 
       </div>
@@ -398,7 +476,31 @@ export function renderHomeView() {
 }
 
 export function initHomeEvents() {
+  initReveal();
   initQuoteFormEvents();
   initFAQEvents();
   initPartnerModalEvents();
+  initBtuCalculator();
+  initHeroThermometer();
+  initQuoteTriggers();
+  initNeighborhoodFilter();
+}
+
+const norm = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+function initNeighborhoodFilter() {
+  const input = document.getElementById('bairro-filter');
+  const buttons = document.querySelectorAll('#bairro-grid .bairro-btn');
+  const empty = document.getElementById('bairro-empty');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    const q = norm(input.value.trim());
+    let visible = 0;
+    buttons.forEach((b) => {
+      const show = !q || norm(b.getAttribute('data-name')).includes(q);
+      b.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    empty?.classList.toggle('hidden', visible > 0);
+  });
 }

@@ -10,8 +10,9 @@ node_modules/
 secrets/
 credentials*.json
 
-# Vercel
+# Vercel e build
 .vercel/
+dist/
 
 # Sistema / logs
 .DS_Store

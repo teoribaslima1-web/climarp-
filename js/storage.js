@@ -62,10 +62,11 @@ class StorageEngine {
     }
   }
 
-  createLead(formData) {
+  createLead(formData, serverId = null) {
     const session = analytics.getSession();
+    const protocol = serverId ? 'C16-' + String(serverId).replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase() : null;
     const newLead = {
-      id: 'LEAD-' + Math.floor(100000 + Math.random() * 900000),
+      id: protocol || 'LEAD-' + Math.floor(100000 + Math.random() * 900000),
       created_at: new Date().toISOString(),
       name: formData.name || '',
       phone: formData.phone || '',

@@ -6,7 +6,8 @@ import { renderHomeView, initHomeEvents } from './views/home.js';
 import { renderServicePageView, initServicePageEvents } from './views/service-page.js';
 import { renderBlogView } from './views/blog.js';
 import { renderPartnersView, initPartnersEvents } from './views/partners.js';
-import { renderConfirmationView } from './views/confirmation.js';
+import { renderConfirmationView, initConfirmationEvents } from './views/confirmation.js';
+import { renderBtuCalculatorView, initBtuCalculatorView } from './views/btu-calculator.js';
 import { renderPrivacyPolicyView, renderTermsView } from './views/legal.js';
 import { renderAdminView, initAdminEvents } from './views/admin.js';
 import { renderNotFoundView } from './views/not-found.js';
@@ -45,6 +46,10 @@ const ROUTE_META = {
   '/para-profissionais': {
     title: 'Seja Parceiro Clima16 | Oportunidades em Ar-Condicionado em Ribeirão Preto',
     description: 'Cadastre-se como técnico ou empresa de climatização parceira do Clima16 e receba solicitações de clientes em Ribeirão Preto e região.'
+  },
+  '/calculadora-de-btus': {
+    title: 'Calculadora de BTUs para Ar-Condicionado | Ribeirão Preto | Clima16',
+    description: 'Calcule a potência ideal em BTUs para o seu ambiente considerando m², sol, pessoas e aparelhos. Peça orçamento em Ribeirão Preto já com o aparelho certo.'
   },
   '/como-funciona': {
     title: 'Como Funciona o Clima16 | Cotação de Climatização em Ribeirão Preto',
@@ -88,7 +93,7 @@ export class Router {
     
     // Handle anchor jump if on home (aceita #/como-funciona e #como-funciona)
     const anchorKey = cleanHash.replace(/^\//, '');
-    if (['formulario', 'servicos', 'como-funciona', 'faq'].includes(anchorKey)) {
+    if (['formulario', 'servicos', 'como-funciona', 'faq', 'cobertura', 'calculadora'].includes(anchorKey)) {
       this.updateMeta('/');
       this.appContainer.innerHTML = renderHomeView();
       initHomeEvents();
@@ -149,6 +154,15 @@ export class Router {
       case 'solicitacao-recebida':
         this.renderView('/solicitacao-recebida', () => {
           this.appContainer.innerHTML = renderConfirmationView();
+          initConfirmationEvents();
+        });
+        break;
+
+      case '/calculadora-de-btus':
+      case 'calculadora-de-btus':
+        this.renderView('/calculadora-de-btus', () => {
+          this.appContainer.innerHTML = renderBtuCalculatorView();
+          initBtuCalculatorView();
         });
         break;
 

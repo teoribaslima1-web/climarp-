@@ -5,6 +5,7 @@
 import { CONFIG } from '../config.js';
 import { db } from '../storage.js';
 import { analytics } from '../analytics.js';
+import { takePrefill } from '../prefill.js';
 
 export function renderQuoteForm(preselectedServiceId = null) {
   return `
@@ -25,6 +26,12 @@ export function renderQuoteForm(preselectedServiceId = null) {
           </div>
           <span id="step-indicator" class="text-xs font-semibold text-slate-500 whitespace-nowrap">Etapa 1 de 5</span>
         </div>
+      </div>
+
+      <!-- Aviso de pré-preenchimento (calculadora de BTUs) -->
+      <div id="form-prefill-note" class="hidden mb-5 p-3 rounded-xl bg-blue-50 border border-blue-100 text-sm text-navy flex items-start justify-between gap-3">
+        <span id="form-prefill-text" class="font-semibold"></span>
+        <button type="button" id="form-prefill-clear" class="text-xs font-semibold text-slate-500 hover:text-slate-800 underline shrink-0">Remover</button>
       </div>
 
       <!-- Multi-step Container -->
@@ -258,6 +265,13 @@ export function renderQuoteForm(preselectedServiceId = null) {
             </div>
           </div>
 
+          <!-- Antispam (honeypot): invisível para pessoas, robôs costumam preencher -->
+          <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden">
+            <label>Não preencha este campo <input type="text" id="lead-website" name="website" tabindex="-1" autocomplete="off" /></label>
+          </div>
+
+          <div id="submit-error" role="alert" class="hidden mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm"></div>
+
           <!-- Actions -->
           <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
             <button type="button" class="btn-prev text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 py-2 px-3 order-2 sm:order-1">
@@ -288,6 +302,8 @@ export function initQuoteFormEvents(initialService = null) {
     email: '',
     description: ''
   };
+  let prefillBtu = '';   // capacidade sugerida pela calculadora
+  let prefillCalc = '';  // resumo do cálculo, vai na descrição do pedido
 
   const steps = [
     document.getElementById('step-1'),
@@ -328,6 +344,65 @@ export function initQuoteFormEvents(initialService = null) {
       matchedBtn.classList.add('option-card-selected');
     }
   }
+
+  // ---- Pré-preenchimento (chips do hero, calculadora, bairros) ----
+  function markBtuButton(label) {
+    document.querySelectorAll('.btn-btu-option').forEach(b => {
+      const on = b.getAttribute('data-val') === label;
+      b.classList.toggle('bg-brand-blue', on);
+      b.classList.toggle('text-white', on);
+      b.classList.toggle('border-brand-blue', on);
+      b.classList.toggle('border-slate-200', !on);
+      b.classList.toggle('text-slate-700', !on);
+    });
+  }
+
+  function showPrefillNote(text) {
+    const note = document.getElementById('form-prefill-note');
+    const label = document.getElementById('form-prefill-text');
+    if (!note || !label) return;
+    if (text) { label.textContent = text; note.classList.remove('hidden'); } else { note.classList.add('hidden'); }
+  }
+
+  function applyPrefill(p) {
+    if (!p) return;
+    if (p.service) {
+      const btn = document.querySelector(`.step-option-card[data-service-id="${p.service}"]`);
+      if (btn) {
+        formData.service_type = btn.getAttribute('data-val');
+        document.querySelectorAll('.step-option-card').forEach(b => b.classList.remove('option-card-selected'));
+        btn.classList.add('option-card-selected');
+        analytics.track('form_step_1', { service: formData.service_type, prefilled: true });
+        currentStep = 2;
+      }
+    }
+    if (p.btu) {
+      prefillBtu = p.btu;
+      prefillCalc = p.calc || '';
+      formData.btu = p.btu;
+      formData.has_equipment = formData.has_equipment || '';
+      markBtuButton(p.btu);
+      showPrefillNote(`Orçamento para ${p.btuText || p.btu}${p.calc ? ' · calculado pela Calculadora Clima16' : ''}`);
+    }
+    if (p.neighborhood && neighborhoodInput) {
+      neighborhoodInput.value = p.neighborhood;
+      formData.neighborhood = p.neighborhood;
+      neighborhoodError?.classList.add('hidden');
+      if (!p.service && !formData.service_type) {
+        // Bairro escolhido primeiro: segue o fluxo normal a partir do serviço
+        currentStep = 1;
+      }
+    }
+    updateStepUI();
+  }
+
+  document.getElementById('form-prefill-clear')?.addEventListener('click', () => {
+    prefillBtu = '';
+    prefillCalc = '';
+    formData.btu = '';
+    markBtuButton('');
+    showPrefillNote('');
+  });
 
   // Step 1: Service selection
   document.querySelectorAll('.step-option-card').forEach(btn => {
@@ -374,7 +449,7 @@ export function initQuoteFormEvents(initialService = null) {
         btuSection?.classList.remove('hidden');
       } else {
         btuSection?.classList.add('hidden');
-        formData.btu = 'Não informado';
+        formData.btu = prefillBtu || 'Não informado';
       }
     });
   });
@@ -501,9 +576,13 @@ export function initQuoteFormEvents(initialService = null) {
     formData.name = nameInput?.value.trim();
     formData.phone = phoneInput?.value.trim();
     formData.email = emailInput?.value.trim() || '';
-    formData.description = descInput?.value.trim() || '';
+    const userDesc = descInput?.value.trim() || '';
+    formData.description = [prefillCalc, userDesc].filter(Boolean).join('\n');
 
     // Show loading state on button
+    const originalBtnHtml = submitBtn.innerHTML;
+    const errorBox = document.getElementById('submit-error');
+    errorBox?.classList.add('hidden');
     submitBtn.disabled = true;
     submitBtn.innerHTML = `
       <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -513,9 +592,88 @@ export function initQuoteFormEvents(initialService = null) {
       Processando solicitação...
     `;
 
-    setTimeout(() => {
-      const createdLead = db.createLead(formData);
-      window.location.hash = '#/solicitacao-recebida';
-    }, 600);
+    const session = analytics.getSession();
+    const payload = {
+      ...formData,
+      consent: true,
+      website: document.getElementById('lead-website')?.value || '',
+      utm_source: session.utm_source,
+      utm_medium: session.utm_medium,
+      utm_campaign: session.utm_campaign,
+      utm_content: session.utm_content,
+      utm_term: session.utm_term,
+      gclid: session.gclid,
+      fbclid: session.fbclid,
+      referrer: session.referrer,
+      landing_page: session.entry_page,
+      device: session.device
+    };
+
+    sendLead(payload)
+      .then((res) => {
+        // Guarda só o resumo local para a tela de confirmação; o registro oficial está no banco.
+        db.createLead(formData, res && res.id);
+        window.location.hash = '#/solicitacao-recebida';
+      })
+      .catch((err) => {
+        analytics.track('form_submit_error', { error: err.code || 'network' });
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+        showSubmitError(errorBox, err.code);
+      });
   });
+
+  // Aplica pré-preenchimento pendente e escuta novos pedidos (chips, calculadora, bairros)
+  applyPrefill(takePrefill());
+  if (window.__clima16PrefillHandler) window.removeEventListener('clima16:prefill', window.__clima16PrefillHandler);
+  window.__clima16PrefillHandler = () => applyPrefill(takePrefill());
+  window.addEventListener('clima16:prefill', window.__clima16PrefillHandler);
+}
+
+const SUBMIT_ERROR_MESSAGES = {
+  invalid_name: 'Confira o nome informado e tente novamente.',
+  invalid_phone: 'Confira o telefone informado (com DDD) e tente novamente.',
+  invalid_email: 'Confira o e-mail informado e tente novamente.',
+  consent_required: 'É necessário concordar com a política de privacidade para prosseguir.',
+  too_many_requests: 'Recebemos muitas solicitações deste aparelho. Tente novamente mais tarde.'
+};
+
+async function sendLead(payload) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const res = await fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    let data = null;
+    try { data = await res.json(); } catch { /* resposta sem JSON */ }
+    if (!res.ok || !data || data.ok !== true) {
+      const error = new Error('lead_request_failed');
+      error.code = (data && data.error) || `http_${res.status}`;
+      throw error;
+    }
+    return data;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function showSubmitError(box, code) {
+  if (!box) return;
+  const message = SUBMIT_ERROR_MESSAGES[code] || 'Não foi possível enviar sua solicitação agora. Tente novamente em instantes ou fale direto com a gente pelo WhatsApp.';
+  const waUrl = `https://wa.me/${CONFIG.brand.whatsappNumber}?text=${encodeURIComponent(CONFIG.brand.whatsappDefaultMessage)}`;
+  box.innerHTML = '';
+  const text = document.createElement('span');
+  text.textContent = message + ' ';
+  const link = document.createElement('a');
+  link.href = waUrl;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.className = 'font-bold underline';
+  link.textContent = 'Chamar no WhatsApp';
+  box.append(text, link);
+  box.classList.remove('hidden');
 }

@@ -14,7 +14,7 @@ export function renderHeader() {
           <!-- Brand Logo -->
           <a href="#/" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-blue rounded-lg p-1">
             <img src="assets/logo-wordmark.png" alt="Clima16 Logo" class="h-10 sm:h-11 w-auto object-contain transform group-hover:scale-105 transition-transform duration-200" />
-            <div class="flex flex-col">
+            <div class="flex flex-col lg:hidden 2xl:flex">
               <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Ribeirão Preto</span>
             </div>
           </a>
@@ -37,13 +37,14 @@ export function renderHeader() {
                 <a href="#/manutencao-ar-condicionado-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Manutenção & Reparos</a>
                 <a href="#/limpeza-ar-condicionado-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Limpeza & Higienização</a>
                 <a href="#/ar-condicionado-nao-gela-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Ar Não Está Gelando</a>
+                <a href="#/calculadora-de-btus" class="block px-3 py-2 text-xs font-bold text-brand-blue hover:bg-blue-50 rounded-lg border-t border-slate-100 mt-1 pt-2.5">Calculadora de BTUs</a>
               </div>
             </div>
 
-            <a href="#/como-funciona" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors">Como funciona</a>
+            <a href="#/como-funciona" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors whitespace-nowrap">Como funciona</a>
             <a href="#/faq" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors">Dúvidas</a>
             <a href="#/blog" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors">Blog</a>
-            <a href="#/para-profissionais" class="px-3 py-2 text-sm font-semibold text-brand-blue bg-blue-50/70 hover:bg-blue-100/80 rounded-md transition-colors">Para profissionais</a>
+            <a href="#/para-profissionais" class="px-3 py-2 text-sm font-semibold text-brand-blue bg-blue-50/70 hover:bg-blue-100/80 rounded-md transition-colors whitespace-nowrap">Para profissionais</a>
           </nav>
 
           <!-- Action CTA & Direct WhatsApp -->
@@ -83,6 +84,7 @@ export function renderHeader() {
           <a href="#/manutencao-ar-condicionado-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Manutenção</a>
           <a href="#/limpeza-ar-condicionado-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Limpeza & Higienização</a>
           <a href="#/ar-condicionado-nao-gela-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Ar Não Gela</a>
+          <a href="#/calculadora-de-btus" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Calculadora de BTUs</a>
           <a href="#/como-funciona" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Como funciona</a>
           <a href="#/faq" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Dúvidas</a>
           <a href="#/blog" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Blog & Dicas</a>

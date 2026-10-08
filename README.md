@@ -40,6 +40,29 @@ export const CONFIG = {
 
 ---
 
+## 🗄️ Banco de Leads (Supabase) e e-mail de aviso
+
+Fluxo: formulário → `POST /api/leads` (Vercel Function) → valida → salva no **Supabase** (fonte oficial) → avisa por e-mail via **Resend**.
+O e-mail é só aviso: se falhar, o lead continua salvo.
+
+### Configuração (uma vez)
+1. **Supabase** (região *South America – São Paulo*): crie o projeto e rode `supabase/schema.sql` no *SQL Editor*.
+2. **Resend**: crie a conta e verifique o domínio (de preferência um subdomínio, ex.: `envio.clima16.com.br`, para não interferir no e-mail `contato@`).
+3. **Vercel → Settings → Environment Variables** (Production): cadastre as variáveis do arquivo `.env.example`:
+   `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFY_TO`, `LEAD_FROM`, `IP_HASH_SALT`.
+   Depois faça **Redeploy**. Nunca coloque chaves no código nem no GitHub.
+
+### Comandos
+* `npm run build` — valida o código e gera a pasta `dist/` (é o que a Vercel publica).
+* `npm test` — testa a função `/api/leads` com Supabase/Resend simulados (sem rede).
+* Para testar a API localmente use `npx vercel dev` (o `python -m http.server` não executa `/api`).
+
+### Observações
+* Telefone repetido em 24h entra com status `duplicado` (sem e-mail). Honeypot e limite de 10 envios/hora por IP (guardado só como hash).
+* O `/admin` atual ainda lê dados do navegador. O painel com login (Supabase Auth) é a próxima etapa.
+
+---
+
 ## 🎯 Estrutura de Rotas e Páginas
 
 * **`#/`** - Página Inicial de Alta Conversão (Hero 55/45, Formulário em 5 Etapas, Como Funciona, Serviços, Benefícios, FAQ, Chamada para Profissionais).
