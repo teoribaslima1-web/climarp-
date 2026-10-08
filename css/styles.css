@@ -201,3 +201,53 @@ body {
   .tl-line-fill-v, .tl-line-fill-h { transition: none; transform: none; }
   .tl-dot { transition: none; transform: none; }
 }
+
+/* ================= Vento gelado (dentro de seções específicas) ================= */
+.vento-gelado {
+  --vento-cor: 22, 198, 234;
+  --vento-intensidade: 0.7;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.vento-gelado.vento-escuro { --vento-cor: 126, 200, 224; --vento-intensidade: 0.6; }
+.vento-gelado .fio {
+  position: absolute;
+  top: var(--t);
+  left: 0;
+  width: var(--w);
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(var(--vento-cor), 1), transparent);
+  opacity: 0;
+  animation: vento-passa var(--s) linear var(--d) infinite;
+  will-change: transform, opacity;
+}
+.vento-gelado .neblina {
+  position: absolute;
+  top: var(--t);
+  left: 0;
+  width: 60%;
+  height: 40%;
+  background: radial-gradient(ellipse at center, rgba(var(--vento-cor), 0.22), transparent 70%);
+  opacity: 0;
+  animation: vento-passa var(--s) linear var(--d) infinite;
+  display: none;
+}
+@keyframes vento-passa {
+  0%   { transform: translateX(-60%); opacity: 0; }
+  15%  { opacity: var(--vento-intensidade); }
+  85%  { opacity: var(--vento-intensidade); }
+  100% { transform: translateX(220%); opacity: 0; }
+}
+/* No celular: só 3 fios e sem névoa (mais leve) */
+.vento-gelado .fio-extra { display: none; }
+@media (min-width: 768px) {
+  .vento-gelado .fio-extra { display: block; }
+  .vento-gelado .neblina { display: block; filter: blur(28px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vento-gelado { display: none; }
+}

@@ -12,6 +12,18 @@ import { initHeroThermometer } from '../components/hero-thermometer.js';
 import { initQuoteTriggers } from '../prefill.js';
 import { initReveal } from '../reveal.js';
 
+const windHtml = (dark = false) => `
+  <div class="vento-gelado${dark ? ' vento-escuro' : ''}" aria-hidden="true">
+    <span class="neblina" style="--t:10%; --s:26s; --d:-6s"></span>
+    <span class="neblina" style="--t:55%; --s:34s; --d:-20s"></span>
+    <span class="fio" style="--t:14%; --w:240px; --s:9s;  --d:-1s"></span>
+    <span class="fio fio-extra" style="--t:28%; --w:160px; --s:12s; --d:-4s"></span>
+    <span class="fio" style="--t:42%; --w:300px; --s:10s; --d:-7s"></span>
+    <span class="fio fio-extra" style="--t:56%; --w:200px; --s:13s; --d:-2s"></span>
+    <span class="fio" style="--t:70%; --w:260px; --s:11s; --d:-9s"></span>
+    <span class="fio fio-extra" style="--t:84%; --w:180px; --s:14s; --d:-5s"></span>
+  </div>`;
+
 const CHIP_LABELS = {
   instalacao: 'Instalação',
   manutencao: 'Manutenção',
@@ -45,6 +57,7 @@ export function renderHomeView() {
       <!-- Ambient Background Glows -->
       <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-cyan-200/40 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute bottom-0 left-10 -mb-20 w-80 h-80 bg-blue-200/30 rounded-full blur-3xl pointer-events-none"></div>
+      ${windHtml(false)}
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -327,6 +340,7 @@ export function renderHomeView() {
       <!-- Background Ambient Glow -->
       <img src="assets/fotos/split.webp" alt="" aria-hidden="true" width="1600" height="1067" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-luminosity" />
       <div class="absolute inset-0 bg-gradient-to-r from-navy/95 via-navy/85 to-navy/70"></div>
+      ${windHtml(true)}
 
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight mb-4">
