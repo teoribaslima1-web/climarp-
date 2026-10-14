@@ -14,7 +14,7 @@ export function renderPrivacyPolicyView() {
         </nav>
 
         <h1 class="text-3xl sm:text-4xl font-extrabold text-navy mb-4">Política de Privacidade</h1>
-        <p class="text-xs text-slate-400 mb-8 font-mono">Última atualização: Março de 2026 • Em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)</p>
+        <p class="text-xs text-slate-400 mb-8 font-mono">Última atualização: Outubro de 2026 • Em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)</p>
 
         <div class="prose max-w-none text-slate-700 text-sm sm:text-base leading-relaxed space-y-6">
           
@@ -56,6 +56,12 @@ export function renderPrivacyPolicyView() {
             <p>Empregamos medidas técnicas e organizacionais compatíveis com os padrões de mercado para proteger as informações contra acessos não autorizados, destruição, perda ou alteração ilícita.</p>
           </section>
 
+
+          <section>
+            <h2 class="text-xl font-bold text-navy mb-2">Responsável pelo tratamento dos dados</h2>
+            <p>O responsável pela plataforma Clima16 e controlador dos dados pessoais tratados é <strong>${CONFIG.brand.responsibleName}</strong>, com atuação em ${CONFIG.brand.fullLocation}. Contato: <span class="font-mono text-brand-blue">${CONFIG.brand.emailContact}</span>.</p>
+          </section>
+
           <section>
             <h2 class="text-xl font-bold text-navy mb-2">6. Direitos do Titular (LGPD)</h2>
             <p>Conforme previsto no Artigo 18 da LGPD, o titular dos dados possui o direito de solicitar a qualquer momento a confirmação da existência de tratamento, o acesso aos dados, a correção de dados incompletos ou a exclusão de seus dados da nossa base.</p>
@@ -85,7 +91,7 @@ export function renderTermsView() {
         </nav>
 
         <h1 class="text-3xl sm:text-4xl font-extrabold text-navy mb-4">Termos de Uso</h1>
-        <p class="text-xs text-slate-400 mb-8 font-mono">Última atualização: Março de 2026</p>
+        <p class="text-xs text-slate-400 mb-8 font-mono">Última atualização: Outubro de 2026</p>
 
         <div class="prose max-w-none text-slate-700 text-sm sm:text-base leading-relaxed space-y-6">
           
@@ -107,6 +113,11 @@ export function renderTermsView() {
           <section>
             <h2 class="text-xl font-bold text-navy mb-2">4. Conduta do Usuário</h2>
             <p>O usuário compromete-se a fornecer informações verdadeiras e atualizadas nos formulários de solicitação para permitir o correto contato dos prestadores.</p>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold text-navy mb-2">5. Responsável pela Plataforma</h2>
+            <p>O responsável pela plataforma Clima16 e controlador dos dados pessoais tratados é <strong>${CONFIG.brand.responsibleName}</strong>, com atuação em ${CONFIG.brand.fullLocation}. Contato: <span class="font-mono text-brand-blue">${CONFIG.brand.emailContact}</span>.</p>
           </section>
 
         </div>

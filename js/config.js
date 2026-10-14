@@ -11,6 +11,7 @@ export const CONFIG = {
     state: 'SP',
     fullLocation: 'Ribeirão Preto – SP',
     emailContact: 'contato@clima16.com.br',
+    responsibleName: 'Téo Ribas Lima',
     whatsappNumber: '5516981570034',
     whatsappFormatted: '(16) 98157-0034',
     whatsappDefaultMessage: 'Olá! Encontrei o Clima16 e gostaria de solicitar um orçamento para ar-condicionado.'

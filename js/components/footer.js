@@ -65,7 +65,6 @@ export function renderFooter() {
             <ul class="space-y-2 text-sm">
               <li><a href="/politica-de-privacidade" class="hover:text-white transition-colors">Política de Privacidade</a></li>
               <li><a href="/termos-de-uso" class="hover:text-white transition-colors">Termos de Uso</a></li>
-              <li><a href="/admin" class="hover:text-cyan-400 transition-colors flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span> Gestão de Leads</a></li>
             </ul>
           </div>
 
