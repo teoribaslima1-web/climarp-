@@ -46,7 +46,7 @@ export function renderBtuCalculatorView() {
 
         <div class="mt-10 p-6 rounded-2xl bg-blue-50/60 border border-blue-100 text-center">
           <h3 class="text-lg font-bold text-navy">Já sabe a potência? Peça seu orçamento.</h3>
-          <a href="#/formulario" class="inline-block mt-3 gradient-brand text-white font-bold text-sm px-6 py-3 rounded-xl shadow">Solicitar orçamento grátis</a>
+          <a href="/formulario" class="inline-block mt-3 gradient-brand text-white font-bold text-sm px-6 py-3 rounded-xl shadow">Solicitar orçamento grátis</a>
         </div>
       </div>
     </section>`;

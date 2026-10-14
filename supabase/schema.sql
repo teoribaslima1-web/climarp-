@@ -76,3 +76,60 @@ create trigger leads_set_updated_at
 -- As políticas do painel admin (leitura por usuário logado) entram na etapa do admin.
 alter table public.leads enable row level security;
 revoke all on public.leads from anon, authenticated;
+
+-- ============================================================
+-- Parceiros (cadastro de interesse de técnicos e empresas)
+-- Mesma regra de segurança: RLS ligado, sem política pública.
+-- Quem grava é a função /api/partners; quem lê é o painel admin.
+-- ============================================================
+create table if not exists public.partners (
+  id           uuid primary key default gen_random_uuid(),
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+
+  name         text not null check (char_length(name) between 2 and 120),
+  phone        text not null,
+  phone_digits text not null check (phone_digits ~ '^[0-9]{10,13}$'),
+  email        text,
+  city         text not null default 'Ribeirão Preto – SP',
+  services     text[] not null default '{}',
+  cnpj         text check (cnpj is null or cnpj ~ '^[0-9]{14}$'),
+  bio          text check (bio is null or char_length(bio) <= 1500),
+
+  status       text not null default 'novo'
+               check (status in ('novo','em_analise','aprovado','recusado','duplicado')),
+  notes        text,
+
+  utm_source   text,
+  device       text,
+  consent      boolean not null default false,
+  consent_at   timestamptz,
+  ip_hash      text
+);
+
+create index if not exists partners_created_at_idx   on public.partners (created_at desc);
+create index if not exists partners_phone_digits_idx on public.partners (phone_digits, created_at desc);
+create index if not exists partners_ip_hash_idx      on public.partners (ip_hash, created_at desc);
+
+drop trigger if exists partners_set_updated_at on public.partners;
+create trigger partners_set_updated_at
+  before update on public.partners
+  for each row execute function public.set_updated_at();
+
+alter table public.partners enable row level security;
+revoke all on public.partners from anon, authenticated;
+
+-- ============================================================
+-- Encaminhamento de leads a parceiros + acesso ao portal do parceiro
+-- ============================================================
+alter table public.leads
+  add column if not exists partner_id uuid references public.partners(id) on delete set null,
+  add column if not exists dispatched_at timestamptz,
+  add column if not exists partner_status text
+    check (partner_status is null or partner_status in ('recebido','em_atendimento','fechado','sem_resposta'));
+
+create index if not exists leads_partner_id_idx on public.leads (partner_id, dispatched_at desc);
+
+alter table public.partners
+  add column if not exists auth_user_id uuid,
+  add column if not exists access_created_at timestamptz;

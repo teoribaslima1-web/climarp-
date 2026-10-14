@@ -10,7 +10,7 @@ export function renderNotFoundView() {
         <p class="text-sm text-slate-600 mb-6">
           A página ou serviço que você procura não está disponível ou mudou de endereço.
         </p>
-        <a href="#/" class="gradient-brand text-white font-bold text-sm px-6 py-3 rounded-xl inline-block shadow">
+        <a href="/" class="gradient-brand text-white font-bold text-sm px-6 py-3 rounded-xl inline-block shadow">
           Voltar para o Início
         </a>
       </div>

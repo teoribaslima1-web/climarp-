@@ -68,7 +68,7 @@ export function renderFAQ() {
             <h4 class="font-bold text-navy text-base">Ainda tem alguma dúvida?</h4>
             <p class="text-sm text-slate-600">Nossa equipe de suporte está à disposição para esclarecer tudo.</p>
           </div>
-          <button onclick="window.location.hash='#formulario'; document.getElementById('orcamento-form')?.scrollIntoView({behavior:'smooth'});" class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm hover:shadow whitespace-nowrap">
+          <button onclick="window.clima16Navigate('/formulario');" class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm hover:shadow whitespace-nowrap">
             Fazer solicitação gratuita
           </button>
         </div>

@@ -9,6 +9,70 @@ class AnalyticsTracker {
     this.sessionData = this.captureSessionMetadata();
     this.eventLog = this.loadEventLog();
     this.initializeDataLayer();
+    this.mode = null; // 'gtm' | 'direct' | null (nenhum ID real configurado ou sem consentimento)
+    this.loadTrackers();
+  }
+
+  /**
+   * Carrega GTM (ou GA4 + Meta Pixel direto) SOMENTE depois do aceite do banner LGPD
+   * e SOMENTE se o ID em js/config.js for real (placeholders como GTM-XXXXXXX são ignorados).
+   * Com GTM configurado, GA4 e Meta Pixel devem ser criados dentro do GTM (evita contar em dobro).
+   */
+  loadTrackers() {
+    if (this.mode) return;
+    const cfg = CONFIG.analytics || {};
+    if (!cfg.enabled) return;
+    try {
+      if (localStorage.getItem('clima16_lgpd_consent') !== 'true') return;
+    } catch { return; }
+
+    const gtm = /^GTM-[A-Z0-9]{4,10}$/.test(cfg.gtmId || '') && !/^GTM-X+$/.test(cfg.gtmId) ? cfg.gtmId : null;
+    const ga4 = /^G-[A-Z0-9]{6,12}$/.test(cfg.ga4Id || '') && !/^G-X+$/.test(cfg.ga4Id) ? cfg.ga4Id : null;
+    const pixel = /^\d{10,20}$/.test(cfg.metaPixelId || '') ? cfg.metaPixelId : null;
+
+    const addScript = (src) => {
+      const el = document.createElement('script');
+      el.async = true;
+      el.src = src;
+      document.head.appendChild(el);
+    };
+
+    if (gtm) {
+      window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+      addScript(`https://www.googletagmanager.com/gtm.js?id=${gtm}`);
+      this.mode = 'gtm';
+      return;
+    }
+
+    if (ga4) {
+      window.gtag = function gtag() { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', ga4);
+      addScript(`https://www.googletagmanager.com/gtag/js?id=${ga4}`);
+      this.mode = 'direct';
+    }
+
+    if (pixel) {
+      /* eslint-disable */
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      /* eslint-enable */
+      window.fbq('init', pixel);
+      window.fbq('track', 'PageView');
+      this.mode = 'direct';
+    }
+  }
+
+  /** Eventos enviados direto (só quando não há GTM). */
+  sendDirect(eventName, payload) {
+    if (this.mode !== 'direct') return;
+    try {
+      if (window.gtag) window.gtag('event', eventName, payload);
+      if (window.fbq) {
+        if (eventName === 'form_complete') window.fbq('track', 'Lead');
+        else if (eventName === 'professional_signup') window.fbq('track', 'CompleteRegistration');
+        else if (eventName === 'whatsapp_click') window.fbq('track', 'Contact');
+      }
+    } catch { /* métricas nunca quebram o site */ }
   }
 
   captureSessionMetadata() {
@@ -85,6 +149,7 @@ class AnalyticsTracker {
 
     // Push to browser dataLayer for GTM / GA4 / Meta Pixel
     window.dataLayer.push(eventObject);
+    this.sendDirect(eventName, { ...payload });
 
     // Save locally for admin dashboard inspection
     this.eventLog.unshift(eventObject);

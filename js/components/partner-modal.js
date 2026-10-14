@@ -3,7 +3,7 @@
  * Dedicated flow for air conditioning technicians and HVAC companies in Ribeirão Preto.
  */
 import { CONFIG } from '../config.js';
-import { db } from '../storage.js';
+import { submitPartner, CONSENT_HTML, HONEYPOT_HTML } from '../partners-api.js';
 import { analytics } from '../analytics.js';
 
 export function renderPartnerModal() {
@@ -93,6 +93,10 @@ export function renderPartnerModal() {
             <textarea id="partner-bio" rows="2" placeholder="Experiência, marcas com as quais trabalha, ferramentas, etc..." class="w-full px-3.5 py-2 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm"></textarea>
           </div>
 
+          ${HONEYPOT_HTML('partner-website')}
+          ${CONSENT_HTML('partner-consent')}
+          <p id="partner-error-msg" class="text-xs text-rose-600 hidden" role="alert"></p>
+
           <div id="partner-success-msg" class="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-medium hidden">
             ✓ Cadastro de interesse enviado com sucesso! Entraremos em contato para validar os dados.
           </div>
@@ -135,40 +139,28 @@ export function initPartnerModalEvents() {
     });
   });
 
-  submitBtn?.addEventListener('click', () => {
-    const name = document.getElementById('partner-name')?.value.trim();
-    const phone = document.getElementById('partner-phone')?.value.trim();
-    const email = document.getElementById('partner-email')?.value.trim();
-    const city = document.getElementById('partner-city')?.value.trim();
-    const cnpj = document.getElementById('partner-cnpj')?.value.trim();
-    const bio = document.getElementById('partner-bio')?.value.trim();
-
-    const selectedServices = Array.from(document.querySelectorAll('.partner-service-check:checked')).map(cb => cb.value);
-
-    if (!name || !phone) {
-      alert('Por favor, preencha pelo menos Nome e WhatsApp para contato.');
-      return;
-    }
-
-    db.createPartner({
-      name,
-      company: name,
-      phone,
-      email,
-      city,
-      services: selectedServices,
-      cnpj,
-      bio
-    });
-
+  submitBtn?.addEventListener('click', async () => {
     const successBox = document.getElementById('partner-success-msg');
+    const errorBox = document.getElementById('partner-error-msg');
+    const result = await submitPartner({
+      name: document.getElementById('partner-name')?.value,
+      phone: document.getElementById('partner-phone')?.value,
+      email: document.getElementById('partner-email')?.value,
+      city: document.getElementById('partner-city')?.value,
+      cnpj: document.getElementById('partner-cnpj')?.value,
+      bio: document.getElementById('partner-bio')?.value,
+      services: Array.from(document.querySelectorAll('.partner-service-check:checked')).map(cb => cb.value),
+      consent: !!document.getElementById('partner-consent')?.checked,
+      website: document.getElementById('partner-website')?.value || ''
+    }, submitBtn, errorBox);
+    if (!result) return;
     if (successBox) {
       successBox.classList.remove('hidden');
       setTimeout(() => {
         closeModal();
         successBox.classList.add('hidden');
         document.getElementById('partner-form')?.reset();
-      }, 2000);
+      }, 2500);
     }
   });
 }

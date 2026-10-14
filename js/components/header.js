@@ -12,8 +12,8 @@ export function renderHeader() {
         <div class="flex items-center justify-between h-20">
           
           <!-- Brand Logo -->
-          <a href="#/" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-blue rounded-lg p-1">
-            <img src="assets/logo-wordmark.png" alt="Clima16 Logo" class="h-10 sm:h-11 w-auto object-contain transform group-hover:scale-105 transition-transform duration-200" />
+          <a href="/" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-blue rounded-lg p-1">
+            <img src="/assets/logo-wordmark.png" alt="Clima16 Logo" class="h-10 sm:h-11 w-auto object-contain transform group-hover:scale-105 transition-transform duration-200" />
             <div class="flex flex-col lg:hidden 2xl:flex">
               <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Ribeirão Preto</span>
             </div>
@@ -21,11 +21,11 @@ export function renderHeader() {
 
           <!-- Desktop Navigation -->
           <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
-            <a href="#/" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors">Início</a>
+            <a href="/" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors">Início</a>
             
             <!-- Services Dropdown / Link -->
             <div class="relative group">
-              <a href="#/servicos" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md flex items-center gap-1 transition-colors">
+              <a href="/servicos" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md flex items-center gap-1 transition-colors">
                 Serviços
                 <svg class="w-4 h-4 text-slate-400 group-hover:text-brand-blue transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -33,18 +33,18 @@ export function renderHeader() {
               </a>
               <!-- Submenu -->
               <div class="absolute left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-2 z-50">
-                <a href="#/instalacao-ar-condicionado-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Instalação de Ar-Condicionado</a>
-                <a href="#/manutencao-ar-condicionado-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Manutenção & Reparos</a>
-                <a href="#/limpeza-ar-condicionado-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Limpeza & Higienização</a>
-                <a href="#/ar-condicionado-nao-gela-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Ar Não Está Gelando</a>
-                <a href="#/calculadora-de-btus" class="block px-3 py-2 text-xs font-bold text-brand-blue hover:bg-blue-50 rounded-lg border-t border-slate-100 mt-1 pt-2.5">Calculadora de BTUs</a>
+                <a href="/instalacao-ar-condicionado-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Instalação de Ar-Condicionado</a>
+                <a href="/manutencao-ar-condicionado-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Manutenção & Reparos</a>
+                <a href="/limpeza-ar-condicionado-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Limpeza & Higienização</a>
+                <a href="/ar-condicionado-nao-gela-ribeirao-preto" class="block px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue rounded-lg">Ar Não Está Gelando</a>
+                <a href="/calculadora-de-btus" class="block px-3 py-2 text-xs font-bold text-brand-blue hover:bg-blue-50 rounded-lg border-t border-slate-100 mt-1 pt-2.5">Calculadora de BTUs</a>
               </div>
             </div>
 
-            <a href="#/como-funciona" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors whitespace-nowrap">Como funciona</a>
-            <a href="#/faq" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors">Dúvidas</a>
-            <a href="#/blog" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors">Blog</a>
-            <a href="#/para-profissionais" class="px-3 py-2 text-sm font-semibold text-brand-blue bg-blue-50/70 hover:bg-blue-100/80 rounded-md transition-colors whitespace-nowrap">Para profissionais</a>
+            <a href="/como-funciona" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors whitespace-nowrap">Como funciona</a>
+            <a href="/faq" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors">Dúvidas</a>
+            <a href="/blog" class="px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand-blue rounded-md transition-colors">Blog</a>
+            <a href="/para-profissionais" class="px-3 py-2 text-sm font-semibold text-brand-blue bg-blue-50/70 hover:bg-blue-100/80 rounded-md transition-colors whitespace-nowrap">Para profissionais</a>
           </nav>
 
           <!-- Action CTA & Direct WhatsApp -->
@@ -56,7 +56,7 @@ export function renderHeader() {
               <span>Falar no WhatsApp</span>
             </a>
             
-            <button onclick="window.location.hash='#formulario'; document.getElementById('orcamento-form')?.scrollIntoView({behavior:'smooth'});" class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:brightness-105 active:scale-95 transition-all duration-200">
+            <button onclick="window.clima16Navigate('/formulario');" class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:brightness-105 active:scale-95 transition-all duration-200">
               Solicitar orçamento
             </button>
           </div>
@@ -79,16 +79,16 @@ export function renderHeader() {
       <!-- Mobile Drawer Menu -->
       <div id="mobile-menu" class="hidden md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-6 space-y-3 shadow-lg">
         <div class="flex flex-col space-y-2">
-          <a href="#/" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Início</a>
-          <a href="#/instalacao-ar-condicionado-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Instalação de Ar</a>
-          <a href="#/manutencao-ar-condicionado-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Manutenção</a>
-          <a href="#/limpeza-ar-condicionado-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Limpeza & Higienização</a>
-          <a href="#/ar-condicionado-nao-gela-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Ar Não Gela</a>
-          <a href="#/calculadora-de-btus" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Calculadora de BTUs</a>
-          <a href="#/como-funciona" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Como funciona</a>
-          <a href="#/faq" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Dúvidas</a>
-          <a href="#/blog" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Blog & Dicas</a>
-          <a href="#/para-profissionais" class="mobile-nav-link px-3 py-2.5 text-base font-semibold text-brand-blue bg-blue-50 rounded-lg">Para Profissionais e Técnicos</a>
+          <a href="/" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Início</a>
+          <a href="/instalacao-ar-condicionado-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Instalação de Ar</a>
+          <a href="/manutencao-ar-condicionado-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Manutenção</a>
+          <a href="/limpeza-ar-condicionado-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Limpeza & Higienização</a>
+          <a href="/ar-condicionado-nao-gela-ribeirao-preto" class="mobile-nav-link px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Ar Não Gela</a>
+          <a href="/calculadora-de-btus" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Calculadora de BTUs</a>
+          <a href="/como-funciona" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Como funciona</a>
+          <a href="/faq" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Dúvidas</a>
+          <a href="/blog" class="mobile-nav-link px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50 rounded-lg">Blog & Dicas</a>
+          <a href="/para-profissionais" class="mobile-nav-link px-3 py-2.5 text-base font-semibold text-brand-blue bg-blue-50 rounded-lg">Para Profissionais e Técnicos</a>
         </div>
         
         <div class="pt-2 border-t border-slate-100 space-y-2">
@@ -98,7 +98,7 @@ export function renderHeader() {
             </svg>
             <span>Falar pelo WhatsApp</span>
           </a>
-          <button onclick="window.location.hash='#formulario'; document.getElementById('mobile-menu').classList.add('hidden'); document.getElementById('orcamento-form')?.scrollIntoView({behavior:'smooth'});" class="w-full gradient-brand text-white text-base font-semibold py-3 rounded-xl shadow-md text-center">
+          <button onclick="window.clima16Navigate('/formulario'); document.getElementById('mobile-menu').classList.add('hidden');" class="w-full gradient-brand text-white text-base font-semibold py-3 rounded-xl shadow-md text-center">
             Solicitar orçamento
           </button>
         </div>

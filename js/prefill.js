@@ -29,7 +29,7 @@ export function requestQuote(data) {
     window.dispatchEvent(new CustomEvent('clima16:prefill'));
     document.getElementById('orcamento-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else {
-    window.location.hash = '#/formulario';
+    window.clima16Navigate('/formulario');
   }
 }
 

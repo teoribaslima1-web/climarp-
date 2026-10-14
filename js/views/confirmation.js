@@ -17,7 +17,7 @@ function buildWhatsappUrl(lead) {
     `Serviço: ${lead.service_type}`,
     `Bairro: ${lead.neighborhood}`
   ];
-  if (lead.btu && !['N/A', 'Não informado'].includes(lead.btu)) lines.push(`Capacidade: ${lead.btu}`);
+  if (lead.btu && !['N/A', 'Não informado', 'Não sei informar'].includes(lead.btu)) lines.push(`Capacidade: ${lead.btu}`);
   lines.push('Podem me ajudar?');
   return `https://wa.me/${CONFIG.brand.whatsappNumber}?text=${encodeURIComponent(lines.join('\n'))}`;
 }
@@ -54,7 +54,7 @@ export function renderConfirmationView() {
           <div class="text-slate-500 text-xs uppercase tracking-wider font-semibold">Resumo do pedido</div>
           <div class="text-slate-800"><strong>Serviço:</strong> ${escapeHtml(lastLead.service_type)}</div>
           <div class="text-slate-800"><strong>Localização:</strong> ${escapeHtml(lastLead.neighborhood)}, Ribeirão Preto – SP</div>
-          ${lastLead.btu && !['N/A', 'Não informado'].includes(lastLead.btu) ? `<div class="text-slate-800"><strong>Capacidade:</strong> ${escapeHtml(lastLead.btu)}</div>` : ''}
+          ${lastLead.btu && !['N/A', 'Não informado', 'Não sei informar'].includes(lastLead.btu) ? `<div class="text-slate-800"><strong>Capacidade:</strong> ${escapeHtml(lastLead.btu)}</div>` : ''}
           ${lastLead.id ? `<div class="text-slate-400 text-xs font-mono pt-1">Protocolo: ${escapeHtml(lastLead.id)}</div>` : ''}
         </div>
 
@@ -74,8 +74,8 @@ export function renderConfirmationView() {
         </div>
 
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <a href="#/" class="w-full sm:w-auto gradient-brand text-white font-bold text-sm px-6 py-3.5 rounded-xl shadow hover:shadow-md transition-all text-center">Voltar para o início</a>
-          <a href="#/blog" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm px-6 py-3.5 rounded-xl transition-all text-center">Ver dicas no Blog</a>
+          <a href="/" class="w-full sm:w-auto gradient-brand text-white font-bold text-sm px-6 py-3.5 rounded-xl shadow hover:shadow-md transition-all text-center">Voltar para o início</a>
+          <a href="/blog" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm px-6 py-3.5 rounded-xl transition-all text-center">Ver dicas no Blog</a>
         </div>
 
         <div class="mt-8 pt-6 border-t border-slate-100 text-xs text-slate-400">Clima16 • Marketplace de Climatização em Ribeirão Preto – SP</div>

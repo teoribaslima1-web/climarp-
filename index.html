@@ -10,6 +10,7 @@
   <meta name="title" content="Ar-Condicionado em Ribeirão Preto | Instalação e Manutenção | Clima16" />
   <meta name="description" content="Solicite orçamento para instalação, manutenção, limpeza e serviços de ar-condicionado em Ribeirão Preto. Encontre profissionais da região pelo Clima16." />
   <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://clima16.com.br/" />
   <meta name="author" content="Clima16" />
   <meta name="geo.region" content="BR-SP" />
   <meta name="geo.placename" content="Ribeirão Preto" />
@@ -31,32 +32,14 @@
   <meta property="twitter:image" content="https://clima16.com.br/assets/og-image.png" />
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
 
-  <!-- Tailwind CSS CDN & Fonts -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            navy: '#092B55',
-            'brand-blue': '#087DE1',
-            'brand-cyan': '#16C6EA',
-            'brand-turquoise': '#18D4C3',
-            'bg-light': '#F7F9FC',
-            'muted-rp': '#5F6B7A'
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Fontes e CSS (Tailwind compilado: npm run css) -->
+  
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="/css/tailwind.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
 
   <!-- Schema.org JSON-LD Structured Data for Local Business / Platform -->
   <script type="application/ld+json">
@@ -122,6 +105,6 @@
   <div id="cookie-banner-mount"></div>
 
   <!-- Application Bootstrap (ES Modules) -->
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="/js/app.js"></script>
 </body>
 </html>

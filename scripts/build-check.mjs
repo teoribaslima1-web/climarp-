@@ -5,6 +5,8 @@ import { readFileSync, existsSync, readdirSync, statSync, copyFileSync, rmSync, 
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
+import { writeFileSync } from 'node:fs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -26,11 +28,17 @@ for (const f of jsFiles) {
   }
 }
 
+for (const f of jsFiles) {
+  const src = readFileSync(f, 'utf8');
+  if (/href=["']#\//.test(src)) errors.push(`Link antigo com #/ em ${f} (use href="/rota")`);
+  if (/(?:src|href)=["']assets\//.test(src)) errors.push(`Caminho relativo de asset em ${f} (use /assets/...)`);
+}
+
 const html = readFileSync(join(root, 'index.html'), 'utf8');
 for (const m of html.matchAll(/(?:src|href|content)=["'](?!https?:|#|data:|mailto:|tel:)([^"']+\.(?:js|css|png|jpg|svg|ico|webp))["']/g)) {
   if (!existsSync(join(root, m[1]))) errors.push(`index.html referencia arquivo inexistente: ${m[1]}`);
 }
-for (const f of ['api/leads.js', 'assets/logo.png', 'assets/logo-wordmark.png', 'assets/favicon.png', 'css/styles.css', 'js/app.js']) {
+for (const f of ['api/leads.js', 'api/admin.js', 'api/partners.js', 'api/portal.js', 'api/_lib.js', 'css/tailwind.css', 'robots.txt', 'assets/logo.png', 'assets/logo-wordmark.png', 'assets/favicon.png', 'css/styles.css', 'js/app.js']) {
   if (!existsSync(join(root, f))) errors.push(`Arquivo obrigatório ausente: ${f}`);
 }
 
@@ -50,8 +58,28 @@ function copyInto(src, dest) {
     copyFileSync(src, dest); // sobrescreve no lugar, sem apagar
   }
 }
-for (const item of ['index.html', 'css', 'js', 'assets']) {
+for (const item of ['index.html', 'robots.txt', 'css', 'js', 'assets']) {
   copyInto(join(root, item), join(root, 'dist', item));
 }
+
+// Sitemap gerado a partir das rotas reais (páginas de serviço, blog e páginas fixas).
+const { CONFIG } = await import(pathToFileURL(join(root, 'js', 'config.js')).href);
+const { BLOG_POSTS } = await import(pathToFileURL(join(root, 'js', 'blog-data.js')).href);
+const SITE = 'https://clima16.com.br';
+const urls = [
+  ['/', '1.0'],
+  ...CONFIG.services.map((s) => [`/${s.slug}`, '0.9']),
+  ['/calculadora-de-btus', '0.8'],
+  ['/para-profissionais', '0.7'],
+  ['/blog', '0.7'],
+  ...BLOG_POSTS.map((p) => [`/blog/${p.id}`, '0.6']),
+  ['/politica-de-privacidade', '0.3'],
+  ['/termos-de-uso', '0.3']
+];
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
+  .map(([p, prio]) => `  <url>\n    <loc>${SITE}${p}</loc>\n    <priority>${prio}</priority>\n  </url>`)
+  .join('\n')}\n</urlset>\n`;
+writeFileSync(join(root, 'sitemap.xml'), sitemap);
+writeFileSync(join(root, 'dist', 'sitemap.xml'), sitemap);
 
 console.log(`Build OK: ${jsFiles.length} módulos JS validados, index.html e assets conferidos, dist/ gerado.`);

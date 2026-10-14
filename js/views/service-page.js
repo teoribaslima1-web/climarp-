@@ -18,9 +18,9 @@ export function renderServicePageView(slug) {
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           
           <nav class="flex items-center justify-center space-x-2 text-xs text-slate-500 mb-6">
-            <a href="#/" class="hover:text-brand-blue">Início</a>
+            <a href="/" class="hover:text-brand-blue">Início</a>
             <span>/</span>
-            <a href="#/servicos" class="hover:text-brand-blue">Serviços</a>
+            <a href="/servicos" class="hover:text-brand-blue">Serviços</a>
             <span>/</span>
             <span class="text-navy font-semibold">${service.shortTitle}</span>
           </nav>

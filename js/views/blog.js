@@ -50,7 +50,7 @@ export function renderBlogView(postId = null) {
                   </div>
 
                   <h2 class="text-lg font-bold text-navy mb-3 leading-snug hover:text-brand-blue transition-colors">
-                    <a href="#/blog/${article.id}">${article.title}</a>
+                    <a href="/blog/${article.id}">${article.title}</a>
                   </h2>
 
                   <p class="text-sm text-slate-600 line-clamp-3 leading-relaxed">
@@ -60,10 +60,10 @@ export function renderBlogView(postId = null) {
               </div>
 
               <div class="px-6 pb-6 pt-2 border-t border-slate-50 flex items-center justify-between">
-                <a href="#/blog/${article.id}" class="text-xs font-bold text-brand-blue hover:text-blue-700 flex items-center gap-1">
+                <a href="/blog/${article.id}" class="text-xs font-bold text-brand-blue hover:text-blue-700 flex items-center gap-1">
                   Ler artigo completo →
                 </a>
-                <a href="#/formulario" class="text-xs font-medium text-slate-400 hover:text-slate-700">
+                <a href="/formulario" class="text-xs font-medium text-slate-400 hover:text-slate-700">
                   Pedir orçamento
                 </a>
               </div>
@@ -84,9 +84,9 @@ function renderSingleArticle(article) {
         
         <!-- Breadcrumbs -->
         <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-8">
-          <a href="#/" class="hover:text-brand-blue">Início</a>
+          <a href="/" class="hover:text-brand-blue">Início</a>
           <span>/</span>
-          <a href="#/blog" class="hover:text-brand-blue">Blog</a>
+          <a href="/blog" class="hover:text-brand-blue">Blog</a>
           <span>/</span>
           <span class="text-navy font-semibold truncate">${article.title}</span>
         </nav>
@@ -124,14 +124,14 @@ function renderSingleArticle(article) {
           <p class="text-sm text-slate-600 max-w-xl mx-auto mb-6">
             Solicite um orçamento gratuito e receba propostas de profissionais da região de forma rápida e sem compromisso.
           </p>
-          <a href="#/formulario" class="gradient-brand text-white font-bold px-7 py-3.5 rounded-xl shadow-md hover:shadow-lg inline-block text-sm sm:text-base transition-all">
+          <a href="/formulario" class="gradient-brand text-white font-bold px-7 py-3.5 rounded-xl shadow-md hover:shadow-lg inline-block text-sm sm:text-base transition-all">
             Solicitar orçamento agora
           </a>
         </div>
 
         <div class="pt-6 border-t border-slate-200 flex justify-between items-center">
-          <a href="#/blog" class="text-sm font-semibold text-brand-blue hover:underline">← Voltar para todos os artigos</a>
-          <a href="#/" class="text-sm font-medium text-slate-500 hover:text-slate-800">Ir para a página inicial</a>
+          <a href="/blog" class="text-sm font-semibold text-brand-blue hover:underline">← Voltar para todos os artigos</a>
+          <a href="/" class="text-sm font-medium text-slate-500 hover:text-slate-800">Ir para a página inicial</a>
         </div>
 
       </div>

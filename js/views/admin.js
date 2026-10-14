@@ -1,340 +1,588 @@
 /**
- * Clima16 - Admin Lead Management Dashboard View (/admin)
- * Clean, reactive dashboard for monitoring, filtering, assigning, and exporting leads to CSV.
+ * Clima16 - Painel admin (/admin)
+ * Login (Supabase Auth via /api/admin) + leads reais do banco.
+ * O token fica só em sessionStorage (some ao fechar a aba). Nada de leads no navegador além da sessão aberta.
  */
-import { db, STATUS_OPTIONS } from '../storage.js';
-import { analytics } from '../analytics.js';
 
-export function renderAdminView() {
-  const stats = db.getDashboardStats();
-  const leads = db.leads;
-  const partners = db.partners;
-  const recentEvents = analytics.getRecentEvents().slice(0, 15);
+const TOKEN_KEY = 'clima16_admin_token';
 
-  return `
-    <div class="bg-slate-100 min-h-screen py-8">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-2xl font-black text-navy">Painel de Gestão Clima16</h1>
-              <span class="text-xs bg-blue-100 text-brand-blue font-bold px-2.5 py-0.5 rounded-full">Admin MVP</span>
-            </div>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1">
-              Controle de solicitações de orçamentos e parceiros em Ribeirão Preto
-            </p>
-          </div>
+const STATUS = [
+  { id: 'novo', label: 'Novo', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  { id: 'em_contato', label: 'Em contato', color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  { id: 'encaminhado', label: 'Encaminhado', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+  { id: 'convertido', label: 'Convertido', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  { id: 'perdido', label: 'Perdido', color: 'bg-slate-100 text-slate-700 border-slate-200' },
+  { id: 'invalido', label: 'Não válido', color: 'bg-slate-100 text-slate-700 border-slate-200' },
+  { id: 'duplicado', label: 'Duplicado', color: 'bg-rose-100 text-rose-800 border-rose-200' }
+];
 
-          <div class="flex items-center gap-3 w-full sm:w-auto">
-            <button id="btn-export-csv" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-sm transition-all">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-              Exportar Leads CSV
-            </button>
-            <a href="#/" class="text-xs font-semibold text-slate-600 hover:text-navy px-3 py-2 border border-slate-200 rounded-xl hover:bg-slate-50">
-              Ver Site
-            </a>
-          </div>
-        </div>
+const PARTNER_STATUS = [
+  { id: 'novo', label: 'Novo', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  { id: 'em_analise', label: 'Em análise', color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  { id: 'aprovado', label: 'Aprovado', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  { id: 'recusado', label: 'Recusado', color: 'bg-slate-100 text-slate-700 border-slate-200' },
+  { id: 'duplicado', label: 'Duplicado', color: 'bg-rose-100 text-rose-800 border-rose-200' }
+];
 
-        <!-- Metric KPI Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Leads Hoje</span>
-              <span class="p-2 bg-blue-50 text-brand-blue rounded-xl text-xs font-bold">Hoje</span>
-            </div>
-            <div class="text-3xl font-extrabold text-navy mt-3">${stats.today}</div>
-            <p class="text-xs text-slate-400 mt-1">Solicitações nas últimas 24h</p>
-          </div>
+const PROGRESS_LABEL = { recebido: 'Recebido', em_atendimento: 'Em atendimento', fechado: 'Fechado', sem_resposta: 'Sem resposta' };
 
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Últimos 7 Dias</span>
-              <span class="p-2 bg-cyan-50 text-brand-cyan rounded-xl text-xs font-bold">7D</span>
-            </div>
-            <div class="text-3xl font-extrabold text-navy mt-3">${stats.sevenDays}</div>
-            <p class="text-xs text-slate-400 mt-1">Média de demanda recente</p>
-          </div>
+const state = { leads: [], partners: [], partnersError: false, email: '', search: '', status: '' };
 
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Últimos 30 Dias</span>
-              <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold">30D</span>
-            </div>
-            <div class="text-3xl font-extrabold text-navy mt-3">${stats.thirtyDays}</div>
-            <p class="text-xs text-slate-400 mt-1">Volume acumulado</p>
-          </div>
-
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Parceiros Cadastrados</span>
-              <span class="p-2 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-bold">Rede RP</span>
-            </div>
-            <div class="text-3xl font-extrabold text-navy mt-3">${stats.partnersCount}</div>
-            <p class="text-xs text-slate-400 mt-1">Técnicos & empresas</p>
-          </div>
-
-        </div>
-
-        <!-- Breakdown Charts / Bars -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          <!-- Services Breakdown -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 class="text-base font-bold text-navy mb-4">Leads por Tipo de Serviço</h3>
-            <div class="space-y-3">
-              ${Object.entries(stats.byService).map(([serv, count]) => {
-                const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
-                return `
-                  <div>
-                    <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
-                      <span>${serv}</span>
-                      <span>${count} (${pct}%)</span>
-                    </div>
-                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div class="h-full gradient-brand" style="width: ${pct}%"></div>
-                    </div>
-                  </div>
-                `;
-              }).join('') || '<p class="text-xs text-slate-400">Nenhum dado registrado.</p>'}
-            </div>
-          </div>
-
-          <!-- Source Breakdown -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 class="text-base font-bold text-navy mb-4">Leads por Origem de Tráfego</h3>
-            <div class="space-y-3">
-              ${Object.entries(stats.bySource).map(([src, count]) => {
-                const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
-                return `
-                  <div>
-                    <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
-                      <span class="font-mono">${src}</span>
-                      <span>${count} (${pct}%)</span>
-                    </div>
-                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div class="h-full bg-cyan-500" style="width: ${pct}%"></div>
-                    </div>
-                  </div>
-                `;
-              }).join('') || '<p class="text-xs text-slate-400">Nenhum dado registrado.</p>'}
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Leads Table Section -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          
-          <!-- Table Controls -->
-          <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-              <h2 class="text-lg font-bold text-navy">Tabela de Solicitações</h2>
-              <span class="text-xs text-slate-400 font-mono">(${leads.length} registros)</span>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-3">
-              <!-- Search -->
-              <input type="text" id="admin-search-input" placeholder="Buscar por nome, fone ou bairro..." class="px-3.5 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-brand-blue" />
-              
-              <!-- Filter by status -->
-              <select id="admin-filter-status" class="px-3 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-brand-blue text-slate-700">
-                <option value="">Todos os Status</option>
-                ${STATUS_OPTIONS.map(st => `<option value="${st.id}">${st.label}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-
-          <!-- Table -->
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs sm:text-sm" id="admin-leads-table">
-              <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-                <tr>
-                  <th class="p-4">Data / ID</th>
-                  <th class="p-4">Cliente / Contato</th>
-                  <th class="p-4">Bairro (RP)</th>
-                  <th class="p-4">Serviço / Detalhes</th>
-                  <th class="p-4">Status</th>
-                  <th class="p-4">Parceiro Atribuído</th>
-                  <th class="p-4 text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100" id="admin-leads-tbody">
-                ${renderLeadsTableRows(leads, partners)}
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-
-        <!-- Real-time Analytics Event Stream -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-bold text-navy flex items-center gap-2">
-              <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
-              Eventos de Conversão Recentes (Analytics / GTM)
-            </h3>
-            <span class="text-xs text-slate-400">Stream ao vivo</span>
-          </div>
-
-          <div class="space-y-2 max-h-60 overflow-y-auto font-mono text-xs text-slate-700">
-            ${recentEvents.map(evt => `
-              <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-brand-blue">${evt.event}</span>
-                  <span class="text-slate-400">|</span>
-                  <span class="text-slate-500">${evt.device || 'desktop'}</span>
-                  <span class="text-slate-400">|</span>
-                  <span class="text-slate-600">${evt.utm_source || 'direto'}</span>
-                </div>
-                <span class="text-slate-400">${new Date(evt.timestamp).toLocaleTimeString('pt-BR')}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-      </div>
-    </div>
-  `;
+function getToken() {
+  try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; }
+}
+function setToken(t) {
+  try { t ? sessionStorage.setItem(TOKEN_KEY, t) : sessionStorage.removeItem(TOKEN_KEY); } catch { /* sem storage */ }
 }
 
-function renderLeadsTableRows(leads, partners) {
-  if (leads.length === 0) {
-    return `<tr><td colspan="7" class="p-8 text-center text-slate-400 text-sm">Nenhum lead encontrado com os filtros selecionados.</td></tr>`;
+async function api(payload, withToken = true) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (withToken) headers.Authorization = `Bearer ${getToken()}`;
+  let res;
+  try {
+    res = await fetch('/api/admin', { method: 'POST', headers, body: JSON.stringify(payload) });
+  } catch {
+    return { ok: false, error: 'network' };
   }
-
-  return leads.map(l => {
-    const formattedDate = new Date(l.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-    const statusObj = STATUS_OPTIONS.find(s => s.id === l.status) || STATUS_OPTIONS[0];
-
-    return `
-      <tr class="hover:bg-slate-50/80 transition-colors lead-row" data-id="${l.id}" data-name="${(l.name || '').toLowerCase()}" data-phone="${(l.phone || '').toLowerCase()}" data-neighborhood="${(l.neighborhood || '').toLowerCase()}" data-status="${l.status}">
-        
-        <td class="p-4">
-          <div class="font-bold text-navy">${l.id}</div>
-          <div class="text-slate-400 text-xs">${formattedDate}</div>
-          <div class="text-[11px] text-slate-400 font-mono">${l.source || 'direct'}</div>
-        </td>
-
-        <td class="p-4">
-          <div class="font-bold text-slate-800">${escapeHtml(l.name)}</div>
-          <a href="https://wa.me/55${(l.phone || '').replace(/\D/g, '')}" target="_blank" class="text-emerald-700 font-medium hover:underline flex items-center gap-1 text-xs mt-0.5">
-            ${escapeHtml(l.phone)}
-          </a>
-          ${l.email ? `<div class="text-slate-400 text-xs truncate max-w-[150px]">${escapeHtml(l.email)}</div>` : ''}
-        </td>
-
-        <td class="p-4">
-          <span class="font-semibold text-slate-800">${escapeHtml(l.neighborhood)}</span>
-          <div class="text-xs text-slate-400">${escapeHtml(l.city || 'Ribeirão Preto')}</div>
-        </td>
-
-        <td class="p-4">
-          <div class="font-semibold text-brand-blue">${escapeHtml(l.service_type)}</div>
-          <div class="text-xs text-slate-500">${escapeHtml(l.property_type)} • ${escapeHtml(l.btu || 'BTU N/I')}</div>
-          ${l.description ? `<div class="text-xs text-slate-500 italic mt-1 max-w-xs truncate" title="${escapeHtml(l.description)}">${escapeHtml(l.description)}</div>` : ''}
-        </td>
-
-        <td class="p-4">
-          <select class="admin-lead-status-select text-xs font-bold px-2.5 py-1 rounded-lg border border-slate-200 ${statusObj.color}" data-lead-id="${l.id}">
-            ${STATUS_OPTIONS.map(st => `
-              <option value="${st.id}" ${st.id === l.status ? 'selected' : ''}>${st.label}</option>
-            `).join('')}
-          </select>
-        </td>
-
-        <td class="p-4">
-          <input type="text" class="admin-partner-input text-xs px-2.5 py-1 border border-slate-200 rounded-lg w-36" placeholder="Nome do parceiro..." value="${escapeHtml(l.partner_assigned || '')}" data-lead-id="${l.id}" />
-        </td>
-
-        <td class="p-4 text-right">
-          <button class="btn-delete-lead text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors" data-lead-id="${l.id}" title="Excluir lead">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-          </button>
-        </td>
-
-      </tr>
-    `;
-  }).join('');
-}
-
-export function initAdminEvents() {
-  // Export CSV
-  document.getElementById('btn-export-csv')?.addEventListener('click', () => {
-    db.exportLeadsCSV();
-  });
-
-  // Filter & Search
-  const searchInput = document.getElementById('admin-search-input');
-  const filterStatus = document.getElementById('admin-filter-status');
-
-  function filterTable() {
-    const q = (searchInput?.value || '').toLowerCase().trim();
-    const st = filterStatus?.value || '';
-
-    document.querySelectorAll('.lead-row').forEach(row => {
-      const name = row.getAttribute('data-name') || '';
-      const phone = row.getAttribute('data-phone') || '';
-      const neighborhood = row.getAttribute('data-neighborhood') || '';
-      const rowStatus = row.getAttribute('data-status') || '';
-
-      const matchesSearch = !q || name.includes(q) || phone.includes(q) || neighborhood.includes(q);
-      const matchesStatus = !st || rowStatus === st;
-
-      if (matchesSearch && matchesStatus) {
-        row.classList.remove('hidden');
-      } else {
-        row.classList.add('hidden');
-      }
-    });
-  }
-
-  searchInput?.addEventListener('input', filterTable);
-  filterStatus?.addEventListener('change', filterTable);
-
-  // Status Change
-  document.querySelectorAll('.admin-lead-status-select').forEach(sel => {
-    sel.addEventListener('change', (e) => {
-      const leadId = sel.getAttribute('data-lead-id');
-      const newStatus = e.target.value;
-      db.updateLeadStatus(leadId, newStatus);
-      const row = sel.closest('.lead-row');
-      if (row) {
-        row.setAttribute('data-status', newStatus);
-      }
-    });
-  });
-
-  // Partner Assignment
-  document.querySelectorAll('.admin-partner-input').forEach(inp => {
-    inp.addEventListener('change', (e) => {
-      const leadId = inp.getAttribute('data-lead-id');
-      const partnerName = e.target.value.trim();
-      const currentStatus = inp.closest('.lead-row')?.querySelector('.admin-lead-status-select')?.value || 'Encaminhado';
-      db.updateLeadStatus(leadId, currentStatus, partnerName);
-    });
-  });
-
-  // Delete Lead
-  document.querySelectorAll('.btn-delete-lead').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const leadId = btn.getAttribute('data-lead-id');
-      if (confirm(`Deseja realmente excluir a solicitação ${leadId}?`)) {
-        db.deleteLead(leadId);
-        btn.closest('.lead-row')?.remove();
-      }
-    });
-  });
+  let data = null;
+  try { data = await res.json(); } catch { /* resposta sem JSON */ }
+  if (!data) return { ok: false, error: 'bad_response', httpStatus: res.status };
+  data.httpStatus = res.status;
+  return data;
 }
 
 function escapeHtml(str) {
-  if (!str) return '';
+  if (str === null || str === undefined) return '';
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export function renderAdminView() {
+  return `<div id="admin-root" class="bg-slate-100 min-h-screen"></div>`;
+}
+
+export function initAdminEvents() {
+  // Página interna: pede para buscadores não indexarem.
+  let robots = document.querySelector('meta[name="robots"]');
+  if (!robots) {
+    robots = document.createElement('meta');
+    robots.setAttribute('name', 'robots');
+    document.head.appendChild(robots);
+  }
+  robots.setAttribute('content', 'noindex, nofollow');
+
+  if (getToken()) {
+    showLoading();
+    loadLeads();
+  } else {
+    showLogin();
+  }
+}
+
+function root() { return document.getElementById('admin-root'); }
+
+function showLoading() {
+  const r = root();
+  if (r) r.innerHTML = `<div class="py-24 text-center text-slate-500 text-sm">Carregando leads…</div>`;
+}
+
+/* ---------------------------- Login ---------------------------- */
+
+function showLogin(message = '') {
+  const r = root();
+  if (!r) return;
+  r.innerHTML = `
+    <div class="min-h-screen flex items-center justify-center px-4 py-12">
+      <form id="admin-login-form" class="w-full max-w-sm bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-5" autocomplete="on">
+        <div>
+          <h1 class="text-xl font-black text-navy">Painel Clima16</h1>
+          <p class="text-xs text-slate-500 mt-1">Acesso restrito à equipe.</p>
+        </div>
+        <div>
+          <label for="admin-email" class="block text-xs font-semibold text-slate-700 mb-1">E-mail</label>
+          <input id="admin-email" type="email" required autocomplete="username" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:border-brand-blue" />
+        </div>
+        <div>
+          <label for="admin-password" class="block text-xs font-semibold text-slate-700 mb-1">Senha</label>
+          <input id="admin-password" type="password" required autocomplete="current-password" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:border-brand-blue" />
+        </div>
+        <p id="admin-login-error" class="text-xs text-rose-600 min-h-[1rem]" role="alert">${escapeHtml(message)}</p>
+        <button id="admin-login-btn" type="submit" class="w-full gradient-brand text-white font-bold text-sm py-3 rounded-xl shadow-sm disabled:opacity-60">Entrar</button>
+        <a href="/" class="block text-center text-xs text-slate-500 hover:text-navy">Voltar ao site</a>
+      </form>
+    </div>`;
+
+  document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('admin-login-btn');
+    const err = document.getElementById('admin-login-error');
+    btn.disabled = true;
+    btn.textContent = 'Entrando…';
+    err.textContent = '';
+    const out = await api({
+      action: 'login',
+      email: document.getElementById('admin-email').value,
+      password: document.getElementById('admin-password').value
+    }, false);
+    if (out.ok && out.access_token) {
+      setToken(out.access_token);
+      state.email = out.email || '';
+      showLoading();
+      loadLeads();
+      return;
+    }
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+    err.textContent = loginErrorText(out);
+  });
+}
+
+function loginErrorText(out) {
+  if (out.error === 'invalid_credentials') return 'E-mail ou senha incorretos.';
+  if (out.error === 'auth_unavailable') return 'Serviço de login indisponível. Veja a configuração SUPABASE_ANON_KEY.';
+  if (out.error === 'server_not_configured') return 'Servidor sem configuração do painel (variáveis de ambiente).';
+  if (out.error === 'network') return 'Sem conexão. Tente novamente.';
+  return 'Não foi possível entrar agora.';
+}
+
+function logout(message = '') {
+  setToken('');
+  state.leads = [];
+  showLogin(message);
+}
+
+/* ---------------------------- Dados ---------------------------- */
+
+async function loadLeads() {
+  const out = await api({ action: 'list' });
+  if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
+  if (!out.ok) {
+    const r = root();
+    if (r) r.innerHTML = `<div class="py-24 text-center text-sm text-rose-600">Não foi possível carregar os leads. <button id="admin-retry" class="underline font-semibold">Tentar de novo</button></div>`;
+    document.getElementById('admin-retry')?.addEventListener('click', () => { showLoading(); loadLeads(); });
+    return;
+  }
+  state.leads = Array.isArray(out.leads) ? out.leads : [];
+  if (out.admin) state.email = out.admin;
+  const pOut = await api({ action: 'list_partners' });
+  state.partnersError = !pOut.ok;
+  state.partners = pOut.ok && Array.isArray(pOut.partners) ? pOut.partners : [];
+  renderDashboard();
+}
+
+function computeStats(leads) {
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  const real = leads.filter((l) => l.status !== 'duplicado' && l.status !== 'invalido');
+  const within = (l, ms) => now - new Date(l.created_at).getTime() <= ms;
+  const byService = {};
+  const bySource = {};
+  real.forEach((l) => {
+    byService[l.service_type || '—'] = (byService[l.service_type || '—'] || 0) + 1;
+    const src = l.utm_source || 'direto';
+    bySource[src] = (bySource[src] || 0) + 1;
+  });
+  return {
+    total: real.length,
+    today: real.filter((l) => within(l, day)).length,
+    sevenDays: real.filter((l) => within(l, 7 * day)).length,
+    thirtyDays: real.filter((l) => within(l, 30 * day)).length,
+    waiting: leads.filter((l) => l.status === 'novo').length,
+    byService,
+    bySource
+  };
+}
+
+/* ---------------------------- Dashboard ---------------------------- */
+
+function kpi(label, value, hint) {
+  return `
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${label}</span>
+      <div class="text-3xl font-extrabold text-navy mt-3">${value}</div>
+      <p class="text-xs text-slate-400 mt-1">${hint}</p>
+    </div>`;
+}
+
+function bars(map, total, barClass) {
+  const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+  if (!entries.length) return '<p class="text-xs text-slate-400">Nenhum dado registrado.</p>';
+  return entries.map(([k, count]) => {
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    return `
+      <div>
+        <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+          <span>${escapeHtml(k)}</span><span>${count} (${pct}%)</span>
+        </div>
+        <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${barClass}" style="width:${pct}%"></div></div>
+      </div>`;
+  }).join('');
+}
+
+function renderDashboard() {
+  const r = root();
+  if (!r) return;
+  const stats = computeStats(state.leads);
+
+  r.innerHTML = `
+    <div class="py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div>
+            <h1 class="text-2xl font-black text-navy">Painel de Gestão Clima16</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Leads reais do banco · ${escapeHtml(state.email)}</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button id="admin-refresh" class="text-xs font-semibold text-slate-600 hover:text-navy px-3 py-2 border border-slate-200 rounded-xl hover:bg-slate-50">Atualizar</button>
+            <button id="btn-export-csv" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-sm">Exportar CSV</button>
+            <a href="/" class="text-xs font-semibold text-slate-600 hover:text-navy px-3 py-2 border border-slate-200 rounded-xl hover:bg-slate-50">Ver site</a>
+            <button id="admin-logout" class="text-xs font-semibold text-rose-600 hover:text-rose-700 px-3 py-2 border border-rose-200 rounded-xl hover:bg-rose-50">Sair</button>
+          </div>
+        </div>
+
+        <div id="admin-notice" class="hidden p-4 rounded-2xl border text-sm" role="status"></div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          ${kpi('Leads 24h', stats.today, 'Últimas 24 horas')}
+          ${kpi('Últimos 7 dias', stats.sevenDays, 'Sem duplicados/inválidos')}
+          ${kpi('Últimos 30 dias', stats.thirtyDays, 'Volume acumulado')}
+          ${kpi('Aguardando contato', stats.waiting, 'Leads com status "Novo"')}
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 class="text-base font-bold text-navy mb-4">Leads por serviço</h3>
+            <div class="space-y-3">${bars(stats.byService, stats.total, 'gradient-brand')}</div>
+          </div>
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 class="text-base font-bold text-navy mb-4">Leads por origem</h3>
+            <div class="space-y-3">${bars(stats.bySource, stats.total, 'bg-cyan-500')}</div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg font-bold text-navy">Solicitações</h2>
+              <span class="text-xs text-slate-400 font-mono" id="admin-count"></span>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <input type="text" id="admin-search-input" placeholder="Buscar por nome, fone ou bairro..." value="${escapeHtml(state.search)}" class="px-3.5 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-brand-blue" />
+              <select id="admin-filter-status" class="px-3 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700">
+                <option value="">Todos os status</option>
+                ${STATUS.map((s) => `<option value="${s.id}" ${state.status === s.id ? 'selected' : ''}>${s.label}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm">
+              <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                <tr>
+                  <th class="p-4">Data</th>
+                  <th class="p-4">Cliente / contato</th>
+                  <th class="p-4">Bairro</th>
+                  <th class="p-4">Serviço / detalhes</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4">Parceiro</th>
+                  <th class="p-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100" id="admin-leads-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-5 border-b border-slate-100 flex items-center gap-2">
+            <h2 class="text-lg font-bold text-navy">Parceiros (cadastros de interesse)</h2>
+            <span class="text-xs text-slate-400 font-mono">(${state.partners.length})</span>
+          </div>
+          ${state.partnersError ? '<p class="p-5 text-xs text-rose-600">Não foi possível carregar os parceiros. Confira se a tabela "partners" foi criada no Supabase (rode o supabase/schema.sql).</p>' : ''}
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm">
+              <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                <tr>
+                  <th class="p-4">Data</th>
+                  <th class="p-4">Parceiro / contato</th>
+                  <th class="p-4">Serviços</th>
+                  <th class="p-4">Sobre</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4">Acesso ao portal</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100" id="admin-partners-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>`;
+
+  renderRows();
+  renderPartnerRows();
+  bindDashboard();
+}
+
+function renderPartnerRows() {
+  const tbody = document.getElementById('admin-partners-tbody');
+  if (!tbody) return;
+  if (!state.partners.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 text-sm">Nenhum cadastro de parceiro ainda.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = state.partners.map((p) => {
+    const when = new Date(p.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+    const st = PARTNER_STATUS.find((s) => s.id === p.status) || PARTNER_STATUS[0];
+    const digits = (p.phone_digits || '').replace(/\D/g, '');
+    const wa = `https://wa.me/${digits.length <= 11 ? '55' + digits : digits}`;
+    return `
+      <tr class="hover:bg-slate-50/80">
+        <td class="p-4 text-slate-500 text-xs">${when}</td>
+        <td class="p-4">
+          <div class="font-bold text-slate-800">${escapeHtml(p.name)}</div>
+          <a href="${wa}" target="_blank" rel="noopener" class="text-emerald-700 font-medium hover:underline text-xs">${escapeHtml(p.phone)}</a>
+          ${p.email ? `<div class="text-slate-400 text-xs">${escapeHtml(p.email)}</div>` : ''}
+          ${p.cnpj ? `<div class="text-slate-400 text-xs font-mono">CNPJ ${escapeHtml(p.cnpj)}</div>` : ''}
+        </td>
+        <td class="p-4 text-xs text-slate-700">${escapeHtml((p.services || []).join(', '))}<div class="text-slate-400">${escapeHtml(p.city || '')}</div></td>
+        <td class="p-4 text-xs text-slate-500 max-w-xs whitespace-pre-line">${escapeHtml(p.bio || '—')}</td>
+        <td class="p-4">
+          <select class="admin-partner-status text-xs font-bold px-2.5 py-1 rounded-lg border ${st.color}" data-id="${escapeHtml(p.id)}">
+            ${PARTNER_STATUS.map((s) => `<option value="${s.id}" ${s.id === p.status ? 'selected' : ''}>${s.label}</option>`).join('')}
+          </select>
+        </td>
+        <td class="p-4 text-xs">
+          ${p.status !== 'aprovado' ? '<span class="text-slate-400">Aprove para liberar</span>'
+            : !p.email ? '<span class="text-slate-400">Sem e-mail cadastrado</span>'
+            : `<button class="admin-access-btn font-semibold text-brand-blue hover:underline" data-id="${escapeHtml(p.id)}">${p.auth_user_id ? 'Redefinir senha' : 'Criar acesso'}</button>`}
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function visibleLeads() {
+  const q = state.search.toLowerCase().trim();
+  const qDigits = q.replace(/\D/g, '');
+  return state.leads.filter((l) => {
+    if (state.status && l.status !== state.status) return false;
+    if (!q) return true;
+    return (l.name || '').toLowerCase().includes(q)
+      || (l.neighborhood || '').toLowerCase().includes(q)
+      || (qDigits && (l.phone_digits || '').includes(qDigits));
+  });
+}
+
+function protocolFor(id) {
+  return 'C16-' + String(id || '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase();
+}
+
+function renderRows() {
+  const tbody = document.getElementById('admin-leads-tbody');
+  if (!tbody) return;
+  const leads = visibleLeads();
+  const count = document.getElementById('admin-count');
+  if (count) count.textContent = `(${leads.length} de ${state.leads.length})`;
+
+  if (!leads.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 text-sm">Nenhum lead encontrado.</td></tr>`;
+    return;
+  }
+
+  const approved = state.partners.filter((p) => p.status === 'aprovado');
+  tbody.innerHTML = leads.map((l) => {
+    const when = new Date(l.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+    const st = STATUS.find((s) => s.id === l.status) || STATUS[0];
+    const digits = (l.phone_digits || '').replace(/\D/g, '');
+    const wa = `https://wa.me/${digits.length <= 11 ? '55' + digits : digits}`;
+    return `
+      <tr class="hover:bg-slate-50/80" data-id="${escapeHtml(l.id)}">
+        <td class="p-4">
+          <div class="font-bold text-navy font-mono text-xs">${protocolFor(l.id)}</div>
+          <div class="text-slate-400 text-xs">${when}</div>
+          <div class="text-[11px] text-slate-400 font-mono">${escapeHtml(l.utm_source || 'direto')}</div>
+        </td>
+        <td class="p-4">
+          <div class="font-bold text-slate-800">${escapeHtml(l.name)}</div>
+          <a href="${wa}" target="_blank" rel="noopener" class="text-emerald-700 font-medium hover:underline text-xs">${escapeHtml(l.phone)}</a>
+          ${l.email ? `<div class="text-slate-400 text-xs truncate max-w-[160px]">${escapeHtml(l.email)}</div>` : ''}
+        </td>
+        <td class="p-4">
+          <span class="font-semibold text-slate-800">${escapeHtml(l.neighborhood || '—')}</span>
+          <div class="text-xs text-slate-400">${escapeHtml(l.city || '')}</div>
+        </td>
+        <td class="p-4">
+          <div class="font-semibold text-brand-blue">${escapeHtml(l.service_type)}</div>
+          <div class="text-xs text-slate-500">${escapeHtml([l.property_type, l.btu].filter(Boolean).join(' • ') || '—')}</div>
+          ${l.description ? `<div class="text-xs text-slate-500 italic mt-1 max-w-xs whitespace-pre-line">${escapeHtml(l.description)}</div>` : ''}
+        </td>
+        <td class="p-4">
+          <select class="admin-status text-xs font-bold px-2.5 py-1 rounded-lg border ${st.color}" data-id="${escapeHtml(l.id)}">
+            ${STATUS.map((s) => `<option value="${s.id}" ${s.id === l.status ? 'selected' : ''}>${s.label}</option>`).join('')}
+          </select>
+        </td>
+        <td class="p-4">
+          <input type="text" maxlength="120" class="admin-partner text-xs px-2.5 py-1 border border-slate-200 rounded-lg w-36" placeholder="Nome do parceiro..." value="${escapeHtml(l.assigned_partner || '')}" data-id="${escapeHtml(l.id)}" />
+          ${approved.length ? `<select class="admin-dispatch mt-1.5 text-xs px-2 py-1 border border-emerald-200 bg-emerald-50 text-emerald-800 font-semibold rounded-lg w-36" data-id="${escapeHtml(l.id)}">
+            <option value="">${l.partner_id ? 'Reencaminhar a…' : 'Encaminhar a…'}</option>
+            ${approved.map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('')}
+          </select>` : ''}
+          ${l.partner_id ? `<div class="text-[11px] text-slate-500 mt-1">Andamento: <strong>${escapeHtml(PROGRESS_LABEL[l.partner_status] || '—')}</strong></div>` : ''}
+        </td>
+        <td class="p-4 text-right">
+          <button class="admin-delete text-slate-400 hover:text-rose-600 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-rose-50" data-id="${escapeHtml(l.id)}">Excluir</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function showNotice(html, kind = 'ok') {
+  const box = document.getElementById('admin-notice');
+  if (!box) return;
+  const tone = kind === 'ok' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-800';
+  box.className = `p-4 rounded-2xl border text-sm ${tone}`;
+  box.innerHTML = html;
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function bindDashboard() {
+  document.getElementById('admin-logout')?.addEventListener('click', () => logout());
+  document.getElementById('admin-refresh')?.addEventListener('click', () => { showLoading(); loadLeads(); });
+  document.getElementById('btn-export-csv')?.addEventListener('click', exportCsv);
+
+  document.getElementById('admin-search-input')?.addEventListener('input', (e) => {
+    state.search = e.target.value;
+    renderRows();
+  });
+  document.getElementById('admin-filter-status')?.addEventListener('change', (e) => {
+    state.status = e.target.value;
+    renderRows();
+  });
+
+  document.getElementById('admin-partners-tbody')?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.admin-access-btn');
+    if (!btn) return;
+    const partner = state.partners.find((p) => p.id === btn.getAttribute('data-id'));
+    if (!partner) return;
+    const reset = !!partner.auth_user_id;
+    if (!confirm(reset ? `Gerar uma nova senha temporária para ${partner.name}? A senha atual deixa de valer.` : `Criar acesso ao portal para ${partner.name} (${partner.email})?`)) return;
+    const out = await api({ action: 'create_partner_access', partner_id: partner.id });
+    if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
+    if (!out.ok) {
+      const msg = out.error === 'user_exists'
+        ? 'Já existe um usuário com esse e-mail no Supabase (criado fora do painel). Apague-o em Authentication → Users e tente de novo.'
+        : 'Não foi possível criar o acesso. Tente novamente.';
+      return showNotice(msg, 'error');
+    }
+    partner.auth_user_id = partner.auth_user_id || 'ok';
+    renderPartnerRows();
+    const msg = `Olá, ${partner.name}! Seu acesso à Área do parceiro Clima16 está pronto.\nEndereço: https://clima16.com.br/parceiro\nE-mail: ${out.email}\nSenha temporária: ${out.password}\nTroque a senha no primeiro acesso.`;
+    const digits = (partner.phone_digits || '').replace(/\D/g, '');
+    const wa = `https://wa.me/${digits.length <= 11 ? '55' + digits : digits}?text=${encodeURIComponent(msg)}`;
+    showNotice(`Acesso ${reset ? 'redefinido' : 'criado'} para <strong>${escapeHtml(partner.name)}</strong>. E-mail: <strong>${escapeHtml(out.email)}</strong> · Senha temporária: <code class="font-mono font-bold select-all">${escapeHtml(out.password)}</code> (aparece só agora). <a class="underline font-semibold" target="_blank" rel="noopener" href="${escapeHtml(wa)}">Enviar pelo WhatsApp</a>`);
+  });
+
+  document.getElementById('admin-partners-tbody')?.addEventListener('change', async (e) => {
+    const el = e.target;
+    if (!el.classList.contains('admin-partner-status')) return;
+    const partner = state.partners.find((p) => p.id === el.getAttribute('data-id'));
+    if (!partner) return;
+    const previous = partner.status;
+    partner.status = el.value;
+    const out = await api({ action: 'update_partner', id: partner.id, status: el.value });
+    if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
+    if (!out.ok) {
+      partner.status = previous;
+      alert('Não foi possível salvar o status. Tente novamente.');
+    }
+    renderPartnerRows();
+  });
+
+  const tbody = document.getElementById('admin-leads-tbody');
+  tbody?.addEventListener('change', async (e) => {
+    const el = e.target;
+    const id = el.getAttribute('data-id');
+    const lead = state.leads.find((l) => l.id === id);
+    if (!lead) return;
+
+    if (el.classList.contains('admin-dispatch')) {
+      const partner = state.partners.find((p) => p.id === el.value);
+      el.value = '';
+      if (!partner) return;
+      if (!confirm(`Encaminhar o lead ${protocolFor(id)} (${lead.name}) para ${partner.name}? O parceiro receberá os dados do cliente.`)) return;
+      const out = await api({ action: 'dispatch', lead_id: id, partner_id: partner.id });
+      if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
+      if (!out.ok) return showNotice('Não foi possível encaminhar o lead. Tente novamente.', 'error');
+      Object.assign(lead, out.lead || {});
+      renderRows();
+      const mailInfo = out.emailed
+        ? `E-mail enviado para ${escapeHtml(partner.email)}.`
+        : (partner.email ? 'O envio do e-mail falhou.' : 'Esse parceiro não tem e-mail cadastrado.');
+      showNotice(`<strong>${escapeHtml(lead.name)}</strong> encaminhado para <strong>${escapeHtml(partner.name)}</strong>. ${mailInfo} <a class="underline font-semibold" target="_blank" rel="noopener" href="${escapeHtml(out.partner_whatsapp_url)}">Abrir WhatsApp do parceiro com o lead pronto</a>`);
+      return;
+    }
+
+    if (el.classList.contains('admin-status')) {
+      const previous = lead.status;
+      lead.status = el.value;
+      const out = await api({ action: 'update', id, status: el.value });
+      if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
+      if (!out.ok) {
+        lead.status = previous;
+        alert('Não foi possível salvar o status. Tente novamente.');
+      }
+      renderRows();
+    } else if (el.classList.contains('admin-partner')) {
+      const value = el.value.trim();
+      const out = await api({ action: 'update', id, assigned_partner: value });
+      if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
+      if (out.ok) lead.assigned_partner = value || null;
+      else alert('Não foi possível salvar o parceiro. Tente novamente.');
+    }
+  });
+
+  tbody?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.admin-delete');
+    if (!btn) return;
+    const id = btn.getAttribute('data-id');
+    if (!confirm(`Excluir definitivamente a solicitação ${protocolFor(id)}? Não dá para desfazer.`)) return;
+    const out = await api({ action: 'delete', id });
+    if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
+    if (out.ok) {
+      state.leads = state.leads.filter((l) => l.id !== id);
+      renderDashboard();
+    } else {
+      alert('Não foi possível excluir. Tente novamente.');
+    }
+  });
+}
+
+function exportCsv() {
+  const header = ['Protocolo', 'Data', 'Nome', 'Telefone', 'E-mail', 'Bairro', 'Serviço', 'Imóvel', 'BTU', 'Descrição', 'Status', 'Parceiro', 'Andamento do parceiro', 'Origem'];
+  // Evita injeção de fórmula ao abrir no Excel (=, +, -, @).
+  const cell = (v) => {
+    let s = String(v ?? '').replace(/\r?\n/g, ' ');
+    if (/^[=+\-@]/.test(s)) s = "'" + s;
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+  const rows = visibleLeads().map((l) => [
+    protocolFor(l.id),
+    new Date(l.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+    l.name, l.phone, l.email, l.neighborhood, l.service_type, l.property_type, l.btu, l.description,
+    (STATUS.find((s) => s.id === l.status) || {}).label || l.status,
+    l.assigned_partner, PROGRESS_LABEL[l.partner_status] || '', l.utm_source || 'direto'
+  ]);
+  const csv = '﻿' + [header, ...rows].map((r) => r.map(cell).join(';')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `leads_clima16_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }

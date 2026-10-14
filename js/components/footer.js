@@ -15,8 +15,8 @@ export function renderFooter() {
           
           <!-- Column 1: Brand Info -->
           <div class="lg:col-span-2 space-y-4">
-            <a href="#/" class="inline-block">
-              <img src="assets/logo-wordmark.png" alt="Clima16" class="h-12 w-auto object-contain bg-white rounded-xl px-3 py-2" />
+            <a href="/" class="inline-block">
+              <img src="/assets/logo-wordmark.png" alt="Clima16" class="h-12 w-auto object-contain bg-white rounded-xl px-3 py-2" />
             </a>
             <p class="text-slate-300 text-sm leading-relaxed max-w-sm">
               O Clima16 facilita a conexão entre pessoas procurando serviços de climatização e profissionais da região de Ribeirão Preto.
@@ -39,10 +39,10 @@ export function renderFooter() {
           <div class="space-y-3">
             <h4 class="text-sm font-semibold text-white tracking-wider uppercase">Serviços em RP</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#/instalacao-ar-condicionado-ribeirao-preto" class="hover:text-white transition-colors">Instalação de Ar-Condicionado</a></li>
-              <li><a href="#/manutencao-ar-condicionado-ribeirao-preto" class="hover:text-white transition-colors">Manutenção e Reparos</a></li>
-              <li><a href="#/limpeza-ar-condicionado-ribeirao-preto" class="hover:text-white transition-colors">Limpeza e Higienização</a></li>
-              <li><a href="#/ar-condicionado-nao-gela-ribeirao-preto" class="hover:text-white transition-colors">Ar Não Está Gelando</a></li>
+              <li><a href="/instalacao-ar-condicionado-ribeirao-preto" class="hover:text-white transition-colors">Instalação de Ar-Condicionado</a></li>
+              <li><a href="/manutencao-ar-condicionado-ribeirao-preto" class="hover:text-white transition-colors">Manutenção e Reparos</a></li>
+              <li><a href="/limpeza-ar-condicionado-ribeirao-preto" class="hover:text-white transition-colors">Limpeza e Higienização</a></li>
+              <li><a href="/ar-condicionado-nao-gela-ribeirao-preto" class="hover:text-white transition-colors">Ar Não Está Gelando</a></li>
             </ul>
           </div>
 
@@ -50,11 +50,12 @@ export function renderFooter() {
           <div class="space-y-3">
             <h4 class="text-sm font-semibold text-white tracking-wider uppercase">Plataforma</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#/calculadora-de-btus" class="hover:text-white transition-colors">Calculadora de BTUs</a></li>
-              <li><a href="#/como-funciona" class="hover:text-white transition-colors">Como funciona</a></li>
-              <li><a href="#/para-profissionais" class="hover:text-white transition-colors">Para Profissionais & Empresas</a></li>
-              <li><a href="#/blog" class="hover:text-white transition-colors">Blog & Dicas Técnicas</a></li>
-              <li><a href="#/faq" class="hover:text-white transition-colors">Dúvidas Frequentes</a></li>
+              <li><a href="/calculadora-de-btus" class="hover:text-white transition-colors">Calculadora de BTUs</a></li>
+              <li><a href="/como-funciona" class="hover:text-white transition-colors">Como funciona</a></li>
+              <li><a href="/para-profissionais" class="hover:text-white transition-colors">Para Profissionais & Empresas</a></li>
+              <li><a href="/parceiro" class="hover:text-white transition-colors">Área do parceiro (login)</a></li>
+              <li><a href="/blog" class="hover:text-white transition-colors">Blog & Dicas Técnicas</a></li>
+              <li><a href="/faq" class="hover:text-white transition-colors">Dúvidas Frequentes</a></li>
             </ul>
           </div>
 
@@ -62,9 +63,9 @@ export function renderFooter() {
           <div class="space-y-3">
             <h4 class="text-sm font-semibold text-white tracking-wider uppercase">Transparência</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#/politica-de-privacidade" class="hover:text-white transition-colors">Política de Privacidade</a></li>
-              <li><a href="#/termos-de-uso" class="hover:text-white transition-colors">Termos de Uso</a></li>
-              <li><a href="#/admin" class="hover:text-cyan-400 transition-colors flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span> Gestão de Leads</a></li>
+              <li><a href="/politica-de-privacidade" class="hover:text-white transition-colors">Política de Privacidade</a></li>
+              <li><a href="/termos-de-uso" class="hover:text-white transition-colors">Termos de Uso</a></li>
+              <li><a href="/admin" class="hover:text-cyan-400 transition-colors flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span> Gestão de Leads</a></li>
             </ul>
           </div>
 
@@ -76,7 +77,7 @@ export function renderFooter() {
           <div class="flex items-center gap-6">
             <span>Marketplace local de climatização</span>
             <span>Fotos: <a href="https://www.pexels.com/@aleks89" target="_blank" rel="noopener noreferrer" class="hover:text-slate-400 underline">Aleks89</a> e Neosiam / <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer" class="hover:text-slate-400 underline">Pexels</a></span>
-            <a href="#/politica-de-privacidade" class="hover:text-slate-400">Privacidade LGPD</a>
+            <a href="/politica-de-privacidade" class="hover:text-slate-400">Privacidade LGPD</a>
           </div>
         </div>
 

@@ -90,7 +90,7 @@ export function renderHomeView() {
               <div class="text-xs font-semibold text-slate-500 mb-2">Escolha o serviço e comece agora:</div>
               <div class="flex flex-wrap gap-2" id="hero-service-chips">
                 ${CONFIG.services.map(srv => `<button type="button" data-quote="${srv.id}" data-origin="hero_chip" class="service-chip">${CHIP_LABELS[srv.id] || srv.shortTitle}</button>`).join('')}
-                <a href="#/calculadora-de-btus" class="service-chip border-dashed text-brand-blue">Calcular BTUs →</a>
+                <a href="/calculadora-de-btus" class="service-chip border-dashed text-brand-blue">Calcular BTUs →</a>
               </div>
             </div>
 
@@ -135,7 +135,7 @@ export function renderHomeView() {
 
                 <div class="flex items-center justify-between pb-5 border-b border-slate-100">
                   <div class="flex items-center gap-3">
-                    <img src="assets/logo-wordmark.png" alt="Clima16" class="h-8 w-auto object-contain" />
+                    <img src="/assets/logo-wordmark.png" alt="Clima16" class="h-8 w-auto object-contain" />
                     <div>
                       <div class="text-xs font-bold text-navy">Marketplace de Climatização</div>
                       <div class="text-[11px] text-slate-400">Ribeirão Preto & Região</div>
@@ -246,7 +246,7 @@ export function renderHomeView() {
           <p class="text-sm sm:text-base text-muted-rp mt-2">Responda em 10 segundos e peça o orçamento já com o aparelho certo.</p>
         </div>
         <div data-reveal>${renderBtuCalculator()}</div>
-        <p class="text-center text-xs text-slate-500 mt-4"><a href="#/calculadora-de-btus" class="font-semibold text-brand-blue hover:underline">Ver guia completo e tabela de referência →</a></p>
+        <p class="text-center text-xs text-slate-500 mt-4"><a href="/calculadora-de-btus" class="font-semibold text-brand-blue hover:underline">Ver guia completo e tabela de referência →</a></p>
       </div>
     </section>
 
@@ -282,7 +282,7 @@ export function renderHomeView() {
               </div>
 
               <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <a href="#/${srv.slug}" class="text-xs font-semibold text-slate-500 hover:text-navy flex items-center gap-1">
+                <a href="/${srv.slug}" class="text-xs font-semibold text-slate-500 hover:text-navy flex items-center gap-1">
                   Saiba mais →
                 </a>
                 <button type="button" data-quote="${srv.id}" data-origin="service_card" class="gradient-brand text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm hover:shadow transition-all">
@@ -338,8 +338,8 @@ export function renderHomeView() {
     <!-- ================= BLOCO DE CONVERSÃO ================= -->
     <section class="py-16 sm:py-20 gradient-navy-dark text-white relative overflow-hidden">
       <!-- Background Ambient Glow -->
-      <img src="assets/fotos/split.webp" alt="" aria-hidden="true" width="1600" height="1067" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-luminosity" />
-      <div class="absolute inset-0 bg-gradient-to-r from-navy/95 via-navy/85 to-navy/70"></div>
+      <img src="/assets/fotos/split.webp" alt="" aria-hidden="true" width="1600" height="1067" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-50 saturate-50" />
+      <div class="absolute inset-0 bg-gradient-to-r from-navy/90 via-navy/75 to-navy/60"></div>
       ${windHtml(true)}
 
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
@@ -374,7 +374,7 @@ export function renderHomeView() {
           <!-- Foto: conforto em casa -->
           <div class="lg:col-span-5" data-reveal>
             <div class="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] max-h-[560px] mx-auto bg-slate-100">
-              <img src="assets/fotos/sala.webp" alt="Sala iluminada com ar-condicionado instalado na parede" width="960" height="1200" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <img src="/assets/fotos/sala.webp" alt="Sala iluminada com ar-condicionado instalado na parede" width="960" height="1200" loading="lazy" decoding="async" class="w-full h-full object-cover" />
               <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-navy/70 to-transparent"></div>
               <div class="absolute left-4 bottom-4 right-4 flex items-center gap-3 text-white">
                 <div class="w-12 h-12 rounded-2xl gradient-brand flex items-center justify-center text-lg font-extrabold shadow-glow-blue shrink-0">16°</div>

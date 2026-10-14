@@ -1,5 +1,5 @@
 /**
- * Clima16 - Client-side Hash Router
+ * Clima16 - Client-side Router (URLs reais via History API; links antigos com #/ são convertidos)
  * Handles dynamic route rendering, SEO meta titles/descriptions, and history navigation.
  */
 import { renderHomeView, initHomeEvents } from './views/home.js';
@@ -10,9 +10,11 @@ import { renderConfirmationView, initConfirmationEvents } from './views/confirma
 import { renderBtuCalculatorView, initBtuCalculatorView } from './views/btu-calculator.js';
 import { renderPrivacyPolicyView, renderTermsView } from './views/legal.js';
 import { renderAdminView, initAdminEvents } from './views/admin.js';
+import { renderPartnerPortalView, initPartnerPortalEvents } from './views/partner-portal.js';
 import { renderNotFoundView } from './views/not-found.js';
 import { CONFIG } from './config.js';
 import { analytics } from './analytics.js';
+import { BLOG_POSTS } from './blog-data.js';
 
 const ROUTE_META = {
   '/': {
@@ -71,6 +73,10 @@ const ROUTE_META = {
     title: 'Termos de Uso | Clima16 Ribeirão Preto',
     description: 'Termos e condições de uso da plataforma local de orçamentos Clima16.'
   },
+  '/parceiro': {
+    title: 'Área do Parceiro | Clima16',
+    description: 'Área restrita para parceiros do Clima16 acompanharem os pedidos de orçamento encaminhados.'
+  },
   '/admin': {
     title: 'Painel Administrativo | Gestão de Leads Clima16',
     description: 'Painel interno de controle de leads e parceiros do Clima16.'
@@ -80,23 +86,59 @@ const ROUTE_META = {
 export class Router {
   constructor(appContainer) {
     this.appContainer = appContainer;
-    window.addEventListener('hashchange', () => this.handleRoute());
+    window.addEventListener('popstate', () => this.handleRoute());
+    // Links antigos (#/rota) e edição manual do hash viram URLs reais
+    window.addEventListener('hashchange', () => {
+      if (this.migrateLegacyHash()) this.handleRoute();
+    });
+    // Links internos (<a href="/rota">) navegam sem recarregar a página
+    document.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = e.target.closest && e.target.closest('a[href]');
+      if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+      const href = a.getAttribute('href') || '';
+      if (!href.startsWith('/') || href.startsWith('//')) return;
+      e.preventDefault();
+      this.navigate(href);
+    });
+    window.clima16Navigate = (path) => this.navigate(path);
+  }
+
+  /** Converte #/rota em /rota (mantém compatibilidade com links antigos). Retorna true se converteu. */
+  migrateLegacyHash() {
+    const hash = window.location.hash || '';
+    if (!hash || hash === '#') return false;
+    const target = hash.replace(/^#/, '');
+    const path = target.startsWith('/') ? target : `/${target}`;
+    history.replaceState(null, '', path + window.location.search);
+    return true;
+  }
+
+  navigate(path) {
+    const url = new URL(path, window.location.origin);
+    const next = url.pathname + url.search;
+    if (next !== window.location.pathname + window.location.search) {
+      history.pushState(null, '', next);
+    }
+    this.handleRoute();
   }
 
   init() {
+    this.migrateLegacyHash();
     this.handleRoute();
   }
 
   handleRoute() {
-    const rawHash = window.location.hash || '#/';
-    const cleanHash = rawHash.split('?')[0].replace(/^#/, '') || '/';
-    
+    const cleanHash = (window.location.pathname.replace(/\/+$/, '') || '/');
+
     // Handle anchor jump if on home (aceita #/como-funciona e #como-funciona)
     const anchorKey = cleanHash.replace(/^\//, '');
     if (['formulario', 'servicos', 'como-funciona', 'faq', 'cobertura', 'calculadora'].includes(anchorKey)) {
       this.updateMeta('/');
-      this.appContainer.innerHTML = renderHomeView();
-      initHomeEvents();
+      if (!this.appContainer.querySelector('#orcamento-form')) {
+        this.appContainer.innerHTML = renderHomeView();
+        initHomeEvents();
+      }
       const target = document.getElementById(anchorKey === 'formulario' ? 'orcamento-form' : `${anchorKey}-section`) || document.getElementById(anchorKey);
       if (target) {
         target.scrollIntoView({ behavior: 'smooth' });
@@ -126,7 +168,12 @@ export class Router {
 
     if (cleanHash.startsWith('/blog/')) {
       const postId = cleanHash.replace('/blog/', '');
-      this.updateMeta('/blog');
+      const post = BLOG_POSTS.find((p) => p.id === postId);
+      if (post) {
+        this.updateMeta('/blog', { meta: { title: `${post.title} | Clima16`, description: post.summary }, canonical: `/blog/${post.id}` });
+      } else {
+        this.updateMeta('/blog', { noindex: true });
+      }
       this.appContainer.innerHTML = renderBlogView(postId);
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
@@ -180,6 +227,14 @@ export class Router {
         });
         break;
 
+      case '/parceiro':
+      case 'parceiro':
+        this.renderView('/parceiro', () => {
+          this.appContainer.innerHTML = renderPartnerPortalView();
+          initPartnerPortalEvents();
+        });
+        break;
+
       case '/admin':
       case 'admin':
         this.renderView('/admin', () => {
@@ -189,7 +244,7 @@ export class Router {
         break;
 
       default:
-        this.updateMeta('/');
+        this.updateMeta('/', { noindex: true });
         this.appContainer.innerHTML = renderNotFoundView();
         window.scrollTo({ top: 0, behavior: 'instant' });
         break;
@@ -202,13 +257,29 @@ export class Router {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
-  updateMeta(routePath) {
-    const meta = ROUTE_META[routePath] || ROUTE_META['/'];
+  updateMeta(routePath, extra = {}) {
+    const meta = extra.meta || ROUTE_META[routePath] || ROUTE_META['/'];
     document.title = meta.title;
 
-    let descTag = document.querySelector('meta[name="description"]');
-    if (descTag) {
-      descTag.setAttribute('content', meta.description);
+    const descTag = document.querySelector('meta[name="description"]');
+    if (descTag) descTag.setAttribute('content', meta.description);
+
+    const canonicalPath = extra.canonical || routePath;
+    let link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
     }
+    link.setAttribute('href', `https://clima16.com.br${canonicalPath === '/' ? '/' : canonicalPath}`);
+
+    const noindex = ['/admin', '/parceiro', '/solicitacao-recebida'].includes(routePath) || extra.noindex;
+    let robots = document.querySelector('meta[name="robots"]');
+    if (!robots) {
+      robots = document.createElement('meta');
+      robots.setAttribute('name', 'robots');
+      document.head.appendChild(robots);
+    }
+    robots.setAttribute('content', noindex ? 'noindex, nofollow' : 'index, follow');
   }
 }

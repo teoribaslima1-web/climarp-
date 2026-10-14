@@ -258,7 +258,7 @@ export function renderQuoteForm(preselectedServiceId = null) {
               <label class="flex items-start gap-2.5 cursor-pointer select-none">
                 <input type="checkbox" id="lead-privacy" class="mt-1 w-4 h-4 rounded text-brand-blue focus:ring-brand-blue border-slate-300" required />
                 <span class="text-xs text-slate-600 leading-snug">
-                  Li e concordo com a <a href="#/politica-de-privacidade" target="_blank" class="text-brand-blue underline hover:text-blue-700">Política de Privacidade</a> e autorizo o contato relacionado à minha solicitação de orçamento.
+                  Li e concordo com a <a href="/politica-de-privacidade" target="_blank" class="text-brand-blue underline hover:text-blue-700">Política de Privacidade</a> e autorizo o contato relacionado à minha solicitação de orçamento.
                 </span>
               </label>
               <p id="privacy-error" class="text-rose-500 text-xs mt-1 hidden">É necessário concordar com a política de privacidade para prosseguir.</p>
@@ -613,7 +613,7 @@ export function initQuoteFormEvents(initialService = null) {
       .then((res) => {
         // Guarda só o resumo local para a tela de confirmação; o registro oficial está no banco.
         db.createLead(formData, res && res.id);
-        window.location.hash = '#/solicitacao-recebida';
+        window.clima16Navigate('/solicitacao-recebida');
       })
       .catch((err) => {
         analytics.track('form_submit_error', { error: err.code || 'network' });

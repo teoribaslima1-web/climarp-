@@ -10,7 +10,7 @@ export function renderPrivacyPolicyView() {
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <nav class="text-xs text-slate-400 mb-6">
-          <a href="#/" class="hover:text-brand-blue">Início</a> / <span>Política de Privacidade</span>
+          <a href="/" class="hover:text-brand-blue">Início</a> / <span>Política de Privacidade</span>
         </nav>
 
         <h1 class="text-3xl sm:text-4xl font-extrabold text-navy mb-4">Política de Privacidade</h1>
@@ -65,7 +65,7 @@ export function renderPrivacyPolicyView() {
         </div>
 
         <div class="mt-12 pt-6 border-t border-slate-200">
-          <a href="#/" class="gradient-brand text-white font-bold text-sm px-6 py-3 rounded-xl inline-block shadow">
+          <a href="/" class="gradient-brand text-white font-bold text-sm px-6 py-3 rounded-xl inline-block shadow">
             ← Voltar para a Página Inicial
           </a>
         </div>
@@ -81,7 +81,7 @@ export function renderTermsView() {
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <nav class="text-xs text-slate-400 mb-6">
-          <a href="#/" class="hover:text-brand-blue">Início</a> / <span>Termos de Uso</span>
+          <a href="/" class="hover:text-brand-blue">Início</a> / <span>Termos de Uso</span>
         </nav>
 
         <h1 class="text-3xl sm:text-4xl font-extrabold text-navy mb-4">Termos de Uso</h1>
@@ -112,7 +112,7 @@ export function renderTermsView() {
         </div>
 
         <div class="mt-12 pt-6 border-t border-slate-200">
-          <a href="#/" class="gradient-brand text-white font-bold text-sm px-6 py-3 rounded-xl inline-block shadow">
+          <a href="/" class="gradient-brand text-white font-bold text-sm px-6 py-3 rounded-xl inline-block shadow">
             ← Voltar para a Página Inicial
           </a>
         </div>

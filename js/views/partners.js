@@ -2,7 +2,7 @@
  * Clima16 - Partners Landing Page View (/para-profissionais)
  * Dedicated portal for HVAC pros, technicians, and local service providers in Ribeirão Preto.
  */
-import { db } from '../storage.js';
+import { submitPartner, CONSENT_HTML, HONEYPOT_HTML } from '../partners-api.js';
 import { analytics } from '../analytics.js';
 
 export function renderPartnersView() {
@@ -140,6 +140,10 @@ export function renderPartnersView() {
               <textarea id="dp-bio" rows="3" placeholder="Tempo de atuação, marcas atendidas, equipamentos..." class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm"></textarea>
             </div>
 
+            ${HONEYPOT_HTML('dp-website')}
+            ${CONSENT_HTML('dp-consent')}
+            <p id="dp-error" class="text-sm text-rose-600 hidden" role="alert"></p>
+
             <div id="dp-success" class="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-sm font-medium hidden">
               ✓ Cadastro realizado com sucesso! Nossa equipe entrará em contato via WhatsApp para confirmar as informações.
             </div>
@@ -158,33 +162,20 @@ export function renderPartnersView() {
 
 export function initPartnersEvents() {
   const submitBtn = document.getElementById('dp-submit-btn');
-  submitBtn?.addEventListener('click', () => {
-    const name = document.getElementById('dp-name')?.value.trim();
-    const phone = document.getElementById('dp-phone')?.value.trim();
-    const email = document.getElementById('dp-email')?.value.trim();
-    const city = document.getElementById('dp-city')?.value.trim();
-    const cnpj = document.getElementById('dp-cnpj')?.value.trim();
-    const bio = document.getElementById('dp-bio')?.value.trim();
-    const selected = Array.from(document.querySelectorAll('.dp-service-check:checked')).map(cb => cb.value);
-
-    if (!name || !phone) {
-      alert('Por favor, preencha seu Nome/Empresa e WhatsApp.');
-      return;
-    }
-
-    db.createPartner({
-      name,
-      company: name,
-      phone,
-      email,
-      city,
-      services: selected,
-      cnpj,
-      bio
-    });
-
-    const success = document.getElementById('dp-success');
-    success?.classList.remove('hidden');
+  submitBtn?.addEventListener('click', async () => {
+    const ok = await submitPartner({
+      name: document.getElementById('dp-name')?.value,
+      phone: document.getElementById('dp-phone')?.value,
+      email: document.getElementById('dp-email')?.value,
+      city: document.getElementById('dp-city')?.value,
+      cnpj: document.getElementById('dp-cnpj')?.value,
+      bio: document.getElementById('dp-bio')?.value,
+      services: Array.from(document.querySelectorAll('.dp-service-check:checked')).map(cb => cb.value),
+      consent: !!document.getElementById('dp-consent')?.checked,
+      website: document.getElementById('dp-website')?.value || ''
+    }, submitBtn, document.getElementById('dp-error'));
+    if (!ok) return;
+    document.getElementById('dp-success')?.classList.remove('hidden');
     document.getElementById('dedicated-partner-form')?.reset();
   });
 }

@@ -5,10 +5,14 @@
   "description": "Clima16 - Plataforma local de orçamentos de ar-condicionado em Ribeirão Preto (site estático, ES Modules + hash router)",
   "scripts": {
     "build": "node scripts/build-check.mjs",
-    "test": "node scripts/test-leads.mjs",
+    "css": "tailwindcss -c tailwind.config.js -i css/tailwind.input.css -o css/tailwind.css --minify",
+    "test": "node scripts/test-leads.mjs && node scripts/test-partners.mjs && node scripts/test-admin.mjs && node scripts/test-portal.mjs",
     "start": "npx --yes serve . -l 3000"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
   }
 }

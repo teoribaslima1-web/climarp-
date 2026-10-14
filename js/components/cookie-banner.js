@@ -2,6 +2,8 @@
  * Clima16 - LGPD Cookie Banner Component
  * Transparent, non-intrusive cookie consent.
  */
+import { analytics } from '../analytics.js';
+
 export function renderCookieBanner() {
   const hasConsented = localStorage.getItem('clima16_lgpd_consent');
   if (hasConsented) return '';
@@ -15,7 +17,7 @@ export function renderCookieBanner() {
         <div class="flex-1 text-xs text-slate-600 leading-relaxed">
           <p class="font-bold text-navy text-sm mb-1">Privacidade & Cookies (LGPD)</p>
           Utilizamos cookies essenciais e métricas anônimas para proporcionar uma experiência ágil de solicitação de orçamentos e aprimorar nossa plataforma.
-          <a href="#/politica-de-privacidade" class="text-brand-blue underline hover:text-blue-700 block mt-1">Conheça nossa Política de Privacidade</a>
+          <a href="/politica-de-privacidade" class="text-brand-blue underline hover:text-blue-700 block mt-1">Conheça nossa Política de Privacidade</a>
         </div>
       </div>
       <div class="mt-3 flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
@@ -33,6 +35,7 @@ export function initCookieBannerEvents() {
 
   acceptBtn?.addEventListener('click', () => {
     localStorage.setItem('clima16_lgpd_consent', 'true');
+    analytics.loadTrackers();
     banner?.classList.add('opacity-0', 'pointer-events-none');
     setTimeout(() => {
       banner?.remove();
