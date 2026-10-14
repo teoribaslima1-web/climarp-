@@ -18,7 +18,7 @@ function walk(dir) {
   });
 }
 
-const jsFiles = [...walk(join(root, 'js')), ...walk(join(root, 'api'))].filter((f) => f.endsWith('.js'));
+const jsFiles = [...walk(join(root, 'js')), ...walk(join(root, 'api')), ...walk(join(root, 'scripts'))].filter((f) => /\.m?js$/.test(f));
 for (const f of jsFiles) {
   const r = spawnSync(process.execPath, ['--check', '--input-type=module'], { input: readFileSync(f) });
   if (r.status !== 0) errors.push(`Sintaxe inválida: ${f}\n${r.stderr}`);
@@ -82,4 +82,6 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://w
 writeFileSync(join(root, 'sitemap.xml'), sitemap);
 writeFileSync(join(root, 'dist', 'sitemap.xml'), sitemap);
 
-console.log(`Build OK: ${jsFiles.length} módulos JS validados, index.html e assets conferidos, dist/ gerado.`);
+const { prerender } = await import('./prerender.mjs');
+const pageCount = await prerender(root, html);
+console.log(`Build OK: ${jsFiles.length} módulos JS validados, ${pageCount} páginas com HTML pronto, dist/ gerado.`);

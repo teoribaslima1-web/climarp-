@@ -21,6 +21,7 @@ function mockRes() {
 const LEAD_ID = '3b6d1a2e-1111-4222-8333-444455556666';
 const PARTNER_ID = '4b6d1a2e-1111-4222-8333-444455556666';
 const OTHER_LEAD = '5b6d1a2e-1111-4222-8333-444455556666';
+const AUTH_ID = '6b6d1a2e-1111-4222-8333-444455556666';
 
 process.env.SUPABASE_URL = 'https://proj.supabase.co';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'sb_secret_test';
@@ -49,7 +50,7 @@ function mockFetch(opts = {}) {
       return json(401, {});
     }
     if (url.endsWith('/auth/v1/user') && method === 'PUT') return json(opts.pwStatus || 200, {});
-    if (url.includes('/auth/v1/admin/users') && method === 'POST') return opts.userExists ? json(422, {}) : json(200, { id: 'auth-1' });
+    if (url.includes('/auth/v1/admin/users') && method === 'POST') return opts.userExists ? json(422, {}) : json(200, { id: AUTH_ID });
     if (url.includes('/auth/v1/admin/users/') && method === 'PUT') return json(200, {});
     if (url.includes('/auth/v1/admin/users/') && method === 'DELETE') return json(200, {});
     if (url.includes('/rest/v1/partners') && method === 'DELETE') return json(204, null);
@@ -57,7 +58,7 @@ function mockFetch(opts = {}) {
       if (url.includes('email=ilike.')) return json(200, partner.status === 'aprovado' ? [partner] : []);
       return json(200, [partner]);
     }
-    if (url.includes('/rest/v1/partners') && method === 'PATCH') return json(200, [partner]);
+    if (url.includes('/rest/v1/partners') && method === 'PATCH') return opts.linkFails ? json(500, {}) : json(200, [{ ...partner, ...JSON.parse(o.body) }]);
     if (url.includes('/rest/v1/leads') && method === 'GET') {
       if (url.includes('partner_id=eq.')) return json(200, [{ id: LEAD_ID, name: 'Maria', partner_status: 'recebido' }]);
       return json(200, [lead]);
@@ -198,6 +199,15 @@ await test('admin: delete_partner remove o cadastro e o login do portal', async 
   assert.equal((await call(admin, { action: 'delete_partner', id: PARTNER_ID })).statusCode, 401);
   assert.equal((await call(admin, { action: 'delete_partner', id: 'x' }, 'atok')).body.error, 'invalid_id');
   assert.equal((await call(admin, { action: 'delete_partner', id: PARTNER_ID }, 'ptok')).statusCode, 401);
+});
+
+await test('admin: falha no vínculo remove o usuário recém-criado e não entrega senha', async () => {
+  mockFetch({ linkFails: true });
+  const res = await call(admin, { action: 'create_partner_access', partner_id: PARTNER_ID }, 'atok');
+  assert.equal(res.statusCode, 502);
+  assert.equal(res.body.error, 'access_link_failed');
+  assert.equal(res.body.password, undefined);
+  assert.ok(calls.some(c => c.opts.method === 'DELETE' && c.url.endsWith(`/auth/v1/admin/users/${AUTH_ID}`)));
 });
 
 let failed = 0;

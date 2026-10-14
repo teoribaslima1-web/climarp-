@@ -14,6 +14,8 @@
  *   IP_HASH_SALT                 texto aleatório qualquer (opcional)
  */
 const crypto = require('node:crypto');
+const { boundedFetch, normalizePhone } = require('./_lib');
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const MAX_PER_IP_PER_HOUR = 10;
 const DUPLICATE_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -70,11 +72,11 @@ function parseBody(req) {
 function validate(input) {
   const name = clean(input.name, 120);
   const phoneRaw = clean(input.phone, 30);
-  const phoneDigits = phoneRaw.replace(/\D/g, '');
+  const phoneDigits = normalizePhone(phoneRaw);
   const email = clean(input.email, 254);
 
   if (name.length < 2) return { error: 'invalid_name' };
-  if (phoneDigits.length < 10 || phoneDigits.length > 13) return { error: 'invalid_phone' };
+  if (!/^[1-9]{2}\d{8,9}$/.test(phoneDigits)) return { error: 'invalid_phone' };
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: 'invalid_email' };
   if (input.consent !== true) return { error: 'consent_required' };
 
@@ -108,7 +110,7 @@ function validate(input) {
 }
 
 async function findRecent(baseUrl, key, query) {
-  const res = await fetch(`${baseUrl}/rest/v1/leads?${query}`, { headers: supabaseHeaders(key) });
+  const res = await boundedFetch(`${baseUrl}/rest/v1/leads?${query}`, { headers: supabaseHeaders(key) });
   if (!res.ok) throw new Error(`supabase_select_${res.status}`);
   return res.json();
 }
@@ -148,19 +150,19 @@ function buildEmail(lead, createdAt, leadId) {
   return { subject: `🔵 Novo orçamento Clima16 — ${lead.service_type}`.slice(0, 200), text, html };
 }
 
-async function postEmail({ to, subject, html, text, replyTo }) {
+async function postEmail({ to, subject, html, text, replyTo, idempotencyKey }) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.LEAD_FROM;
   if (!apiKey || !from || !to || !to.length) return false;
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 5000);
+  const timer = setTimeout(() => controller.abort(), 3000);
   try {
     const payload = { from, to, subject, html, text };
     if (replyTo) payload.reply_to = replyTo;
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}) },
       body: JSON.stringify(payload),
       signal: controller.signal
     });
@@ -174,11 +176,11 @@ async function postEmail({ to, subject, html, text, replyTo }) {
   }
 }
 
-async function sendNotification(lead, createdAt, leadId) {
+async function sendNotification(lead, createdAt, leadId, attempt = 'initial') {
   const to = (process.env.LEAD_NOTIFY_TO || '').split(',').map((s) => s.trim()).filter(Boolean);
   if (!to.length) return false;
   const { subject, text, html } = buildEmail(lead, createdAt, leadId);
-  return postEmail({ to, subject, html, text });
+  return postEmail({ to, subject, html, text, idempotencyKey: leadId ? `${leadId}/internal/${attempt}` : undefined });
 }
 
 function protocolFor(leadId) {
@@ -233,11 +235,32 @@ function buildCustomerEmail(lead, leadId) {
   return { subject: `Recebemos seu pedido — Clima16${protocol ? ` (${protocol})` : ''}`.slice(0, 200), text, html };
 }
 
-async function sendCustomerConfirmation(lead, leadId) {
+async function sendCustomerConfirmation(lead, leadId, attempt = 'initial') {
   if (!lead.email) return false;
   const { subject, text, html } = buildCustomerEmail(lead, leadId);
   const replyTo = (process.env.LEAD_NOTIFY_TO || '').split(',')[0].trim() || undefined;
-  return postEmail({ to: [lead.email], subject, html, text, replyTo });
+  return postEmail({ to: [lead.email], subject, html, text, replyTo, idempotencyKey: leadId ? `${leadId}/customer/${attempt}` : undefined });
+}
+
+async function deliverNotifications(baseUrl, key, lead, saved, attempt = 'initial') {
+  const [internal, customer] = await Promise.all([
+    sendNotification(lead, saved.created_at, saved.id, attempt),
+    sendCustomerConfirmation(lead, saved.id, attempt)
+  ]);
+  const patch = {
+    notification_status: internal ? 'sent' : 'failed',
+    customer_notification_status: !lead.email ? 'not_applicable' : customer ? 'sent' : 'failed',
+    notification_attempted_at: new Date().toISOString()
+  };
+  let recorded = false;
+  try {
+    const r = await boundedFetch(`${baseUrl}/rest/v1/leads?id=eq.${saved.id}`, {
+      method: 'PATCH', headers: supabaseHeaders(key), body: JSON.stringify(patch)
+    });
+    recorded = r.ok;
+    if (!r.ok) console.error('[leads] notification_record_failed', r.status);
+  } catch { console.error('[leads] notification_record_unavailable'); }
+  return { ...patch, recorded };
 }
 
 module.exports = async function handler(req, res) {
@@ -261,6 +284,10 @@ module.exports = async function handler(req, res) {
   const checked = validate(input);
   if (checked.error) return res.status(422).json({ ok: false, error: checked.error });
   const lead = checked.value;
+  const requestId = input.request_id;
+  if (requestId !== undefined && (typeof requestId !== 'string' || !UUID_RE.test(requestId))) {
+    return res.status(422).json({ ok: false, error: 'invalid_request_id' });
+  }
 
   const baseUrl = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -271,6 +298,19 @@ module.exports = async function handler(req, res) {
 
   const ipHash = hashIp(clientIp(req));
   let status = 'novo';
+
+  // A mesma tentativa usa a PK do banco: funciona inclusive com envios concorrentes.
+  if (requestId) {
+    try {
+      const existing = await findRecent(baseUrl, key, `id=eq.${requestId}&select=id,phone_digits,service_type,status`);
+      if (existing.length) {
+        if (normalizePhone(existing[0].phone_digits) !== lead.phone_digits || existing[0].service_type !== lead.service_type) {
+          return res.status(409).json({ ok: false, error: 'request_conflict' });
+        }
+        return res.status(200).json({ ok: true, id: existing[0].id, replayed: true, duplicate: existing[0].status === 'duplicado' });
+      }
+    } catch { return res.status(502).json({ ok: false, error: 'save_failed' }); }
+  }
 
   // Antiabuso: se a checagem falhar, segue em frente (melhor guardar o lead do que perdê-lo).
   try {
@@ -284,7 +324,7 @@ module.exports = async function handler(req, res) {
     }
     const sinceDup = new Date(Date.now() - DUPLICATE_WINDOW_MS).toISOString();
     const dup = await findRecent(baseUrl, key,
-      `select=id&phone_digits=eq.${lead.phone_digits}&created_at=gte.${encodeURIComponent(sinceDup)}&limit=1`);
+      `select=id&phone_digits=in.(${lead.phone_digits},55${lead.phone_digits})&created_at=gte.${encodeURIComponent(sinceDup)}&limit=1`);
     if (Array.isArray(dup) && dup.length > 0) status = 'duplicado';
   } catch (err) {
     console.error('[leads] precheck_failed', err && err.message);
@@ -292,11 +332,12 @@ module.exports = async function handler(req, res) {
 
   let saved;
   try {
-    const insert = await fetch(`${baseUrl}/rest/v1/leads`, {
+    const insert = await boundedFetch(`${baseUrl}/rest/v1/leads`, {
       method: 'POST',
       headers: supabaseHeaders(key, { Prefer: 'return=representation' }),
       body: JSON.stringify({
         ...lead,
+        ...(requestId ? { id: requestId } : {}),
         status,
         consent: true,
         consent_at: new Date().toISOString(),
@@ -304,11 +345,20 @@ module.exports = async function handler(req, res) {
       })
     });
     if (!insert.ok) {
+      if (insert.status === 409 && requestId) {
+        const existing = await findRecent(baseUrl, key, `id=eq.${requestId}&select=id,phone_digits,service_type,status`);
+        if (existing.length && normalizePhone(existing[0].phone_digits) === lead.phone_digits && existing[0].service_type === lead.service_type) {
+          return res.status(200).json({ ok: true, id: existing[0].id, replayed: true, duplicate: existing[0].status === 'duplicado' });
+        }
+      }
       console.error('[leads] insert_failed', insert.status);
       return res.status(502).json({ ok: false, error: 'save_failed' });
     }
     const rows = await insert.json();
     saved = Array.isArray(rows) ? rows[0] : rows;
+    if (!saved || typeof saved.id !== 'string' || !saved.id) {
+      return res.status(502).json({ ok: false, error: 'save_failed' });
+    }
   } catch (err) {
     console.error('[leads] insert_error', err && err.message);
     return res.status(502).json({ ok: false, error: 'save_failed' });
@@ -316,12 +366,10 @@ module.exports = async function handler(req, res) {
 
   // Lead já está salvo. O aviso por e-mail não pode mudar o resultado.
   if (status === 'novo') {
-    await sendNotification(lead, (saved && saved.created_at) || new Date().toISOString(), saved && saved.id);
-    // Confirmação ao cliente (só se informou e-mail). Falha aqui nunca derruba o pedido.
-    await sendCustomerConfirmation(lead, saved && saved.id);
+    await deliverNotifications(baseUrl, key, lead, saved || {});
   }
 
-  return res.status(200).json({ ok: true, id: saved && saved.id });
+  return res.status(200).json({ ok: true, id: saved && saved.id, duplicate: status === 'duplicado' });
 };
 
-module.exports._internals = { validate, clean, escapeHtml, buildEmail, buildCustomerEmail };
+module.exports._internals = { validate, clean, escapeHtml, buildEmail, buildCustomerEmail, deliverNotifications };

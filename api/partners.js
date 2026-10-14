@@ -6,7 +6,7 @@
  * Usa as mesmas variáveis de ambiente de /api/leads (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
  * RESEND_API_KEY, LEAD_NOTIFY_TO, LEAD_FROM, IP_HASH_SALT).
  */
-const { clean, cleanMultiline, escapeHtml, clientIp, hashIp, supabaseHeaders, parseBody, postEmail } = require('./_lib');
+const { clean, cleanMultiline, escapeHtml, clientIp, hashIp, supabaseHeaders, parseBody, postEmail, boundedFetch: fetch, normalizePhone } = require('./_lib');
 
 const MAX_PER_IP_PER_HOUR = 5;
 const HOUR_MS = 60 * 60 * 1000;
@@ -16,11 +16,11 @@ const ALLOWED_SERVICES = ['Instalação', 'Manutenção', 'Higienização', 'Com
 function validate(input) {
   const name = clean(input.name, 120);
   const phoneRaw = clean(input.phone, 30);
-  const phoneDigits = phoneRaw.replace(/\D/g, '');
+  const phoneDigits = normalizePhone(phoneRaw);
   const email = clean(input.email, 254);
 
   if (name.length < 2) return { error: 'invalid_name' };
-  if (phoneDigits.length < 10 || phoneDigits.length > 13) return { error: 'invalid_phone' };
+  if (!/^[1-9]{2}\d{8,9}$/.test(phoneDigits)) return { error: 'invalid_phone' };
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: 'invalid_email' };
   if (input.consent !== true) return { error: 'consent_required' };
 
@@ -115,7 +115,7 @@ module.exports = async function handler(req, res) {
       }
     }
     const sinceDup = new Date(Date.now() - DUPLICATE_WINDOW_MS).toISOString();
-    const dup = await select(baseUrl, key, `select=id&phone_digits=eq.${partner.phone_digits}&created_at=gte.${encodeURIComponent(sinceDup)}&limit=1`);
+    const dup = await select(baseUrl, key, `select=id&phone_digits=in.(${partner.phone_digits},55${partner.phone_digits})&created_at=gte.${encodeURIComponent(sinceDup)}&limit=1`);
     if (Array.isArray(dup) && dup.length > 0) status = 'duplicado';
   } catch (err) {
     console.error('[partners] precheck_failed', err && err.message);

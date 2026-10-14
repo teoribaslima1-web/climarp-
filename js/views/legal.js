@@ -30,7 +30,7 @@ export function renderPrivacyPolicyView() {
               <li><strong>Dados de identificação e contato:</strong> Nome completo, número de WhatsApp/telefone e endereço de e-mail.</li>
               <li><strong>Dados da solicitação do serviço:</strong> Tipo de serviço procurado (instalação, manutenção, limpeza, etc.), tipo de imóvel (casa, apartamento, empresa), posse do equipamento, capacidade em BTUs, bairro de Ribeirão Preto e observações descritivas.</li>
               <li><strong>Dados profissionais (para parceiros cadastrados):</strong> Razão social/nome fantasia, CNPJ (opcional), cidades de atuação e serviços prestados.</li>
-              <li><strong>Dados de navegação e técnicos:</strong> Endereço IP aproximado, tipo de dispositivo, navegador, páginas visitadas e parâmetros UTM de origem de campanha.</li>
+              <li><strong>Dados de navegação e técnicos:</strong> Hash do endereço IP para prevenção de abuso, tipo de dispositivo, páginas visitadas e parâmetros de origem de campanha.</li>
             </ul>
           </section>
 
@@ -38,7 +38,7 @@ export function renderPrivacyPolicyView() {
             <h2 class="text-xl font-bold text-navy mb-2">3. Finalidade do Tratamento dos Dados</h2>
             <p>Os dados coletados têm como finalidade precípua:</p>
             <ul class="list-disc pl-6 space-y-1.5 text-slate-600">
-              <li>Viabilizar o encaminhamento da solicitação de orçamento a profissionais e empresas de climatização credenciados e atuantes no bairro do solicitante;</li>
+              <li>Viabilizar o encaminhamento da solicitação de orçamento a profissionais e empresas parceiras que atendam a região do solicitante;</li>
               <li>Permitir que os parceiros entrem em contato direto com o usuário para apresentar propostas, sanar dúvidas técnicas e agendar vistorias;</li>
               <li>Aprimorar o funcionamento, a usabilidade e a segurança da plataforma Clima16;</li>
               <li>Cumprir obrigações legais e regulatórias vigentes no ordenamento jurídico brasileiro.</li>
@@ -54,6 +54,7 @@ export function renderPrivacyPolicyView() {
           <section>
             <h2 class="text-xl font-bold text-navy mb-2">5. Armazenamento e Segurança</h2>
             <p>Empregamos medidas técnicas e organizacionais compatíveis com os padrões de mercado para proteger as informações contra acessos não autorizados, destruição, perda ou alteração ilícita.</p>
+            <p class="mt-2">O registro oficial da solicitação é mantido no banco de dados. No navegador, guardamos apenas um resumo da confirmação na sessão da aba, com validade de 30 minutos, sem telefone, e-mail ou descrição do pedido. As ferramentas externas de métricas são carregadas após a escolha de aceitar; você pode continuar usando o site escolhendo apenas os recursos essenciais.</p>
           </section>
 
 

@@ -29,6 +29,7 @@ const ERRORS = {
  * Envia o cadastro. Retorna true em caso de sucesso; em erro mostra a mensagem em errorBox e retorna false.
  */
 export async function submitPartner(data, button, errorBox) {
+  if (button?.disabled) return false;
   const showError = (msg) => {
     if (errorBox) {
       errorBox.textContent = msg;
@@ -44,11 +45,14 @@ export async function submitPartner(data, button, errorBox) {
     button.disabled = true;
     button.textContent = 'Enviando…';
   }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
   try {
     const res = await fetch('/api/partners', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, utm_source: session.utm_source, device: session.device })
+      body: JSON.stringify({ ...data, utm_source: session.utm_source, device: session.device }),
+      signal: controller.signal
     });
     let body = null;
     try { body = await res.json(); } catch { /* sem JSON */ }
@@ -60,6 +64,7 @@ export async function submitPartner(data, button, errorBox) {
   } catch {
     return showError('Sem conexão. Tente novamente em instantes.');
   } finally {
+    clearTimeout(timer);
     if (button) {
       button.disabled = false;
       button.textContent = label;

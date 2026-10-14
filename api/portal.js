@@ -7,7 +7,7 @@
  * Autorização: o token do Supabase Auth precisa ser de um usuário cujo e-mail seja de um parceiro APROVADO.
  * A tabela continua fechada ao público; esta função usa a chave de serviço e filtra por partner_id.
  */
-const { supabaseHeaders, parseBody } = require('./_lib');
+const { supabaseHeaders, parseBody, boundedFetch: fetch } = require('./_lib');
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PARTNER_STATUSES = ['recebido', 'em_atendimento', 'fechado', 'sem_resposta'];

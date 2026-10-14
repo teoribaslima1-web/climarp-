@@ -17,7 +17,8 @@
  */
 
 const crypto = require('node:crypto');
-const { escapeHtml, postEmail } = require('./_lib');
+const { escapeHtml, postEmail, boundedFetch } = require('./_lib');
+const fetch = boundedFetch;
 
 const STATUSES = ['novo', 'em_contato', 'encaminhado', 'convertido', 'perdido', 'invalido', 'duplicado'];
 const PARTNER_STATUSES = ['novo', 'em_analise', 'aprovado', 'recusado', 'duplicado'];
@@ -63,6 +64,15 @@ function buildPatch(input) {
   }
   if (input.assigned_partner !== undefined) patch.assigned_partner = cleanText(input.assigned_partner, 120);
   if (input.notes !== undefined) patch.notes = cleanText(input.notes, 2000);
+  for (const field of ['first_contact_at', 'quoted_at', 'closed_at']) {
+    if (input[field] === undefined) continue;
+    if (input[field] !== null && (typeof input[field] !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(input[field]) || !Number.isFinite(Date.parse(input[field])))) return { error: 'invalid_date' };
+    patch[field] = input[field] === null ? null : new Date(input[field]).toISOString();
+  }
+  if (input.service_value !== undefined) {
+    if (input.service_value !== null && (typeof input.service_value !== 'number' || !Number.isFinite(input.service_value) || input.service_value < 0 || input.service_value > 10000000)) return { error: 'invalid_value' };
+    patch.service_value = input.service_value;
+  }
   if (Object.keys(patch).length === 0) return { error: 'nothing_to_update' };
   return { patch };
 }
@@ -194,6 +204,16 @@ module.exports = async function handler(req, res) {
 
     const admin = await verifyAdmin(req, baseUrl, serviceKey);
     if (!admin) return res.status(401).json({ ok: false, error: 'unauthorized' });
+
+    if (body.action === 'retry_notifications') {
+      if (typeof body.id !== 'string' || !UUID_RE.test(body.id)) return res.status(400).json({ ok: false, error: 'invalid_id' });
+      const [lead] = await getRows(baseUrl, serviceKey, `leads?id=eq.${body.id}&select=*`);
+      if (!lead) return res.status(404).json({ ok: false, error: 'not_found' });
+      if (['duplicado', 'invalido'].includes(lead.status)) return res.status(409).json({ ok: false, error: 'invalid_lead' });
+      const { deliverNotifications } = require('./leads')._internals;
+      const result = await deliverNotifications(baseUrl, serviceKey, lead, lead, `retry-${Date.now()}`);
+      return res.status(200).json({ ok: true, notifications: result });
+    }
 
     if (body.action === 'list') {
       const r = await fetch(`${baseUrl}/rest/v1/leads?select=*&order=created_at.desc&limit=${LIST_LIMIT}`, {
@@ -329,11 +349,29 @@ module.exports = async function handler(req, res) {
           return res.status(502).json({ ok: false, error: 'access_failed' });
         }
         const created = await r.json();
-        await fetch(`${baseUrl}/rest/v1/partners?id=eq.${partner.id}`, {
-          method: 'PATCH',
-          headers: supabaseHeaders(serviceKey),
-          body: JSON.stringify({ auth_user_id: created.id || (created.user && created.user.id) || null, access_created_at: new Date().toISOString() })
-        });
+        const userId = created.id || (created.user && created.user.id);
+        if (!userId || !UUID_RE.test(userId)) return res.status(502).json({ ok: false, error: 'access_failed' });
+        let linked;
+        let linkedRows = [];
+        try {
+          linked = await fetch(`${baseUrl}/rest/v1/partners?id=eq.${partner.id}`, {
+            method: 'PATCH',
+            headers: supabaseHeaders(serviceKey, { Prefer: 'return=representation' }),
+            body: JSON.stringify({ auth_user_id: userId, access_created_at: new Date().toISOString() })
+          });
+          linkedRows = linked.ok ? await linked.json() : [];
+        } catch {
+          // Um timeout não prova que a gravação falhou: confirma antes de desfazer.
+          try {
+            linkedRows = await getRows(baseUrl, serviceKey, `partners?id=eq.${partner.id}&select=id,auth_user_id`);
+            linked = { ok: true };
+          } catch { return res.status(502).json({ ok: false, error: 'access_link_unknown' }); }
+        }
+        if (!linked.ok || !Array.isArray(linkedRows) || !linkedRows.some(row => row.id === partner.id && row.auth_user_id === userId)) {
+          const cleanup = await fetch(`${baseUrl}/auth/v1/admin/users/${userId}`, { method: 'DELETE', headers: supabaseHeaders(serviceKey) });
+          if (!cleanup.ok) console.error('[admin] orphan_cleanup_failed', cleanup.status);
+          return res.status(502).json({ ok: false, error: 'access_link_failed' });
+        }
       }
       return res.status(200).json({ ok: true, email: partner.email, password });
     }

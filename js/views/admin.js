@@ -39,10 +39,14 @@ async function api(payload, withToken = true) {
   const headers = { 'Content-Type': 'application/json' };
   if (withToken) headers.Authorization = `Bearer ${getToken()}`;
   let res;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
   try {
-    res = await fetch('/api/admin', { method: 'POST', headers, body: JSON.stringify(payload) });
+    res = await fetch('/api/admin', { method: 'POST', headers, body: JSON.stringify(payload), signal: controller.signal });
   } catch {
     return { ok: false, error: 'network' };
+  } finally {
+    clearTimeout(timer);
   }
   let data = null;
   try { data = await res.json(); } catch { /* resposta sem JSON */ }
@@ -193,7 +197,11 @@ function computeStats(leads) {
     thirtyDays: real.filter((l) => within(l, 30 * day)).length,
     waiting: leads.filter((l) => l.status === 'novo').length,
     byService,
-    bySource
+    bySource,
+    contacted: real.filter(l => l.first_contact_at).length,
+    quoted: real.filter(l => l.quoted_at).length,
+    closed: real.filter(l => l.closed_at || l.status === 'convertido' || l.partner_status === 'fechado').length,
+    serviceValue: real.reduce((total, l) => total + (l.closed_at || l.status === 'convertido' || l.partner_status === 'fechado' ? Number(l.service_value) || 0 : 0), 0)
   };
 }
 
@@ -255,6 +263,11 @@ function renderDashboard() {
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+            <h3 class="text-base font-bold text-navy mb-3">Resultados comerciais registrados</h3>
+            <p class="text-sm text-slate-600">Contatos: ${stats.contacted} · Orçamentos: ${stats.quoted} · Fechamentos: ${stats.closed} · Valor dos serviços fechados: ${stats.serviceValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+            <p class="text-xs text-slate-400 mt-2">Valor dos serviços é do parceiro, não receita da Clima16. Campos sem feedback permanecem sem resultado.</p>
+          </div>
           <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
             <h3 class="text-base font-bold text-navy mb-4">Leads por serviço</h3>
             <div class="space-y-3">${bars(stats.byService, stats.total, 'gradient-brand')}</div>
@@ -438,6 +451,10 @@ function renderRows() {
           ${l.partner_id ? `<div class="text-[11px] text-slate-500 mt-1">Andamento: <strong>${escapeHtml(PROGRESS_LABEL[l.partner_status] || '—')}</strong></div>` : ''}
         </td>
         <td class="p-4 text-right">
+          <button class="admin-result block text-brand-blue text-xs font-semibold mb-2" data-id="${escapeHtml(l.id)}">Resultado comercial</button>
+          <div class="text-[11px] text-slate-500 mb-1">Aviso: ${escapeHtml(({ sent: 'enviado', failed: 'falhou', unknown: 'não verificado' })[l.notification_status] || 'não verificado')}</div>
+          <div class="text-[11px] text-slate-500 mb-1">Cliente: ${escapeHtml(({ sent: 'enviado', failed: 'falhou', not_applicable: 'sem e-mail', unknown: 'não verificado' })[l.customer_notification_status] || 'não verificado')}</div>
+          ${!['duplicado', 'invalido'].includes(l.status) ? `<button class="admin-retry-mail block text-brand-blue text-xs font-semibold mb-2" data-id="${escapeHtml(l.id)}">Reenviar confirmação e aviso</button>` : ''}
           <button class="admin-delete text-slate-400 hover:text-rose-600 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-rose-50" data-id="${escapeHtml(l.id)}">Excluir</button>
         </td>
       </tr>`;
@@ -563,6 +580,23 @@ function bindDashboard() {
   });
 
   tbody?.addEventListener('click', async (e) => {
+    const retry = e.target.closest('.admin-retry-mail');
+    if (retry) {
+      if (!confirm('Reenviar o aviso interno e a confirmação ao cliente?')) return;
+      retry.disabled = true;
+      const id = retry.getAttribute('data-id');
+      const out = await api({ action: 'retry_notifications', id });
+      if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
+      retry.disabled = false;
+      if (!out.ok) return showNotice('Não foi possível reenviar. Tente novamente.', 'error');
+      const n = out.notifications;
+      Object.assign(state.leads.find(l => l.id === id) || {}, n);
+      renderRows();
+      const failed = n.notification_status === 'failed' || n.customer_notification_status === 'failed';
+      return showNotice(`${failed ? 'Um ou mais envios falharam; confira a configuração do e-mail.' : 'E-mails reenviados.'}${n.recorded ? '' : ' O resultado não foi registrado no banco; a atualização de banco está pendente.'}`, failed ? 'error' : 'ok');
+    }
+    const result = e.target.closest('.admin-result');
+    if (result) return showCommercialResult(state.leads.find(l => l.id === result.getAttribute('data-id')));
     const btn = e.target.closest('.admin-delete');
     if (!btn) return;
     const id = btn.getAttribute('data-id');
@@ -578,8 +612,37 @@ function bindDashboard() {
   });
 }
 
+function showCommercialResult(lead) {
+  if (!lead) return;
+  if (!Object.hasOwn(lead, 'first_contact_at')) return showNotice('Os campos comerciais aguardam a atualização do banco.', 'error');
+  const dateInput = (field, label) => `<label class="block mb-3">${label}<input name="${field}" type="datetime-local" class="block border rounded-lg p-2 w-full" value="${lead[field] ? new Date(new Date(lead[field]).getTime() - 3 * 3600000).toISOString().slice(0, 16) : ''}"></label>`;
+  const modal = document.createElement('dialog');
+  modal.className = 'rounded-2xl p-6 max-w-md w-full shadow-xl';
+  modal.innerHTML = `<form><h2 class="text-lg font-bold mb-4">Resultado ${protocolFor(lead.id)}</h2><p class="text-xs mb-4">Horários de Ribeirão Preto (UTC−3).</p>${dateInput('first_contact_at', 'Primeiro contato')}${dateInput('quoted_at', 'Orçamento emitido')}${dateInput('closed_at', 'Fechamento')}<label class="block mb-3">Valor do serviço (R$)<input name="service_value" type="number" min="0" max="10000000" step="0.01" class="block border rounded-lg p-2 w-full" value="${escapeHtml(lead.service_value ?? '')}"></label><label class="block mb-4">Observações<textarea name="notes" maxlength="2000" class="block border rounded-lg p-2 w-full">${escapeHtml(lead.notes || '')}</textarea></label><p role="alert" class="text-rose-600 text-sm"></p><button type="submit" class="gradient-brand text-white rounded-lg px-4 py-2">Salvar</button><button type="button" data-close class="ml-4">Cancelar</button></form>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('close', () => modal.remove());
+  modal.querySelector('[data-close]').addEventListener('click', () => modal.close());
+  modal.querySelector('form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const values = new FormData(e.target);
+    const patch = { action: 'update', id: lead.id, notes: values.get('notes'), service_value: values.get('service_value') === '' ? null : Number(values.get('service_value')) };
+    for (const field of ['first_contact_at', 'quoted_at', 'closed_at']) patch[field] = values.get(field) ? new Date(`${values.get(field)}:00-03:00`).toISOString() : null;
+    const btn = modal.querySelector('[type="submit"]');
+    btn.disabled = true;
+    const out = await api(patch);
+    btn.disabled = false;
+    if (out.httpStatus === 401) { modal.close(); return logout('Sessão expirada. Entre novamente.'); }
+    if (!out.ok) { modal.querySelector('[role="alert"]').textContent = 'Não foi possível salvar. Tente novamente.'; return; }
+    Object.assign(lead, out.lead);
+    modal.close();
+    renderDashboard();
+    showNotice('Resultado comercial salvo.');
+  });
+  modal.showModal();
+}
+
 function exportCsv() {
-  const header = ['Protocolo', 'Data', 'Nome', 'Telefone', 'E-mail', 'Bairro', 'Serviço', 'Imóvel', 'BTU', 'Descrição', 'Status', 'Parceiro', 'Andamento do parceiro', 'Origem'];
+  const header = ['Protocolo', 'Data', 'Nome', 'Telefone', 'E-mail', 'Bairro', 'Serviço', 'Imóvel', 'BTU', 'Descrição', 'Status', 'Parceiro', 'Andamento do parceiro', 'Origem', 'Primeiro contato', 'Orçamento emitido', 'Fechamento', 'Valor do serviço', 'Aviso interno', 'Confirmação cliente'];
   // Evita injeção de fórmula ao abrir no Excel (=, +, -, @).
   const cell = (v) => {
     let s = String(v ?? '').replace(/\r?\n/g, ' ');
@@ -591,7 +654,8 @@ function exportCsv() {
     new Date(l.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
     l.name, l.phone, l.email, l.neighborhood, l.service_type, l.property_type, l.btu, l.description,
     (STATUS.find((s) => s.id === l.status) || {}).label || l.status,
-    l.assigned_partner, PROGRESS_LABEL[l.partner_status] || '', l.utm_source || 'direto'
+    l.assigned_partner, PROGRESS_LABEL[l.partner_status] || '', l.utm_source || 'direto',
+    l.first_contact_at, l.quoted_at, l.closed_at, l.service_value, l.notification_status, l.customer_notification_status
   ]);
   const csv = '﻿' + [header, ...rows].map((r) => r.map(cell).join(';')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));

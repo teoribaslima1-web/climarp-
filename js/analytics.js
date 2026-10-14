@@ -82,7 +82,8 @@ class AnalyticsTracker {
       : new URLSearchParams();
 
     // Prioritize URL query, then hash query, then fallback to stored session
-    const existing = JSON.parse(sessionStorage.getItem('clima16_utm_session') || '{}');
+    let existing = {};
+    try { existing = JSON.parse(sessionStorage.getItem('clima16_utm_session') || '{}') || {}; } catch { /* sessão bloqueada/corrompida */ }
 
     const sessionData = {
       utm_source: params.get('utm_source') || hashParams.get('utm_source') || existing.utm_source || 'direct',
@@ -128,7 +129,9 @@ class AnalyticsTracker {
 
   loadEventLog() {
     try {
-      return JSON.parse(localStorage.getItem('clima16_analytics_events') || '[]');
+      localStorage.removeItem('clima16_analytics_events');
+      const events = JSON.parse(sessionStorage.getItem('clima16_analytics_events') || '[]');
+      return Array.isArray(events) ? events : [];
     } catch {
       return [];
     }
@@ -157,7 +160,7 @@ class AnalyticsTracker {
       this.eventLog.pop();
     }
     try {
-      localStorage.setItem('clima16_analytics_events', JSON.stringify(this.eventLog));
+      sessionStorage.setItem('clima16_analytics_events', JSON.stringify(this.eventLog));
     } catch (e) {
       console.warn('Local storage error', e);
     }

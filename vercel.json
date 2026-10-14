@@ -29,8 +29,20 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/blog/:slug",
+      "destination": "/blog/:slug/index.html"
+    },
+    {
+      "source": "/:page(instalacao-ar-condicionado-ribeirao-preto|manutencao-ar-condicionado-ribeirao-preto|limpeza-ar-condicionado-ribeirao-preto|ar-condicionado-nao-gela-ribeirao-preto|vazamento-gotejamento-ar-condicionado-ribeirao-preto|recarga-avaliacao-gas-ar-condicionado-ribeirao-preto|blog|para-profissionais|calculadora-de-btus|politica-de-privacidade|termos-de-uso|admin|parceiro|solicitacao-recebida)",
+      "destination": "/:page/index.html"
+    },
+    {
+      "source": "/:anchor(formulario|servicos|como-funciona|faq|cobertura|calculadora)",
       "destination": "/index.html"
+    },
+    {
+      "source": "/((?!api/|assets/|css/|js/|robots\\.txt|sitemap\\.xml).+)",
+      "destination": "/404/index.html"
     }
   ]
 }

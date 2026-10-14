@@ -56,7 +56,7 @@ function setEnv(full = true) {
 }
 
 // fetch simulado: registra chamadas e responde conforme as opções
-function installFetch({ recent = [], dup = [], insertOk = true, emailOk = true, selectThrows = false } = {}) {
+function installFetch({ recent = [], dup = [], existing = [], insertOk = true, insertStatus = 500, emailOk = true, selectThrows = false } = {}) {
   const calls = [];
   global.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
@@ -64,13 +64,14 @@ function installFetch({ recent = [], dup = [], insertOk = true, emailOk = true, 
     const json = (data, ok = true, status = 200) => ({ ok, status, json: async () => data });
     if (u.includes('/rest/v1/leads?') && (init.method || 'GET') === 'GET') {
       if (selectThrows) throw new Error('network');
-      return json(u.includes('ip_hash=') ? recent : dup);
+      return json(u.includes('id=eq.') ? existing : u.includes('ip_hash=') ? recent : dup);
     }
     if (u.endsWith('/rest/v1/leads') && init.method === 'POST') {
       return insertOk
         ? json([{ id: 'lead-1', created_at: new Date().toISOString() }])
-        : json({ message: 'boom' }, false, 500);
+        : json({ message: 'boom' }, false, insertStatus);
     }
+    if (u.includes('/rest/v1/leads?') && init.method === 'PATCH') return json({});
     if (u.startsWith('https://api.resend.com/emails')) return emailOk ? json({ id: 'e1' }) : json({}, false, 422);
     throw new Error('unexpected fetch ' + u);
   };
@@ -242,6 +243,38 @@ await test('chave antiga (JWT) também vai em Authorization', async () => {
   const calls = installFetch();
   await handler(req(validBody()), mockRes());
   assert.equal(insertCall(calls).init.headers.Authorization, 'Bearer eyJhbGciOi.fake.jwt');
+});
+
+await test('normaliza o mesmo telefone com e sem DDI', async () => {
+  assert.equal(handler._internals.validate({ ...validBody(), phone: '+55 (16) 99999-9999' }).value.phone_digits, '16999999999');
+});
+await test('reenvio da mesma tentativa retorna o registro sem inserir nem enviar e-mail', async () => {
+  setEnv();
+  const id = '3b6d1a2e-1111-4222-8333-444455556666';
+  const calls = installFetch({ existing: [{ id, phone_digits: '16999999999', service_type: validBody().service_type }] });
+  const res = mockRes();
+  await handler(req({ ...validBody(), request_id: id }), res);
+  assert.equal(res.body.replayed, true);
+  assert.equal(insertCall(calls), undefined);
+  assert.equal(emailCall(calls), undefined);
+});
+await test('mesma tentativa com dados incompatíveis é rejeitada', async () => {
+  setEnv();
+  const id = '3b6d1a2e-1111-4222-8333-444455556666';
+  installFetch({ existing: [{ id, phone_digits: '16988888888', service_type: validBody().service_type }] });
+  const res = mockRes();
+  await handler(req({ ...validBody(), request_id: id }), res);
+  assert.equal(res.statusCode, 409);
+});
+await test('resultado do envio fica registrado no banco mesmo quando Resend falha', async () => {
+  setEnv();
+  const calls = installFetch({ emailOk: false });
+  const res = mockRes();
+  await handler(req(validBody()), res);
+  const patch = calls.find(c => c.init.method === 'PATCH');
+  assert.equal(JSON.parse(patch.init.body).notification_status, 'failed');
+  assert.equal(JSON.parse(patch.init.body).customer_notification_status, 'failed');
+  assert.equal(res.statusCode, 200);
 });
 
 let failed = 0;

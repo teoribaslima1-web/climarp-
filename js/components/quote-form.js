@@ -258,7 +258,7 @@ export function renderQuoteForm(preselectedServiceId = null) {
               <label class="flex items-start gap-2.5 cursor-pointer select-none">
                 <input type="checkbox" id="lead-privacy" class="mt-1 w-4 h-4 rounded text-brand-blue focus:ring-brand-blue border-slate-300" required />
                 <span class="text-xs text-slate-600 leading-snug">
-                  Li e concordo com a <a href="/politica-de-privacidade" target="_blank" class="text-brand-blue underline hover:text-blue-700">Política de Privacidade</a> e autorizo o contato relacionado à minha solicitação de orçamento.
+                  Li a <a href="/politica-de-privacidade" target="_blank" class="text-brand-blue underline hover:text-blue-700">Política de Privacidade</a> e autorizo o contato e o compartilhamento dos dados desta solicitação com profissionais parceiros para atender meu pedido de orçamento.
                 </span>
               </label>
               <p id="privacy-error" class="text-rose-500 text-xs mt-1 hidden">É necessário concordar com a política de privacidade para prosseguir.</p>
@@ -316,7 +316,10 @@ export function initQuoteFormEvents(initialService = null) {
   const progressBar = document.getElementById('form-progress-bar');
   const stepIndicator = document.getElementById('step-indicator');
 
-  analytics.track('form_start');
+  let started = false;
+  document.getElementById('multi-step-form')?.addEventListener('focusin', () => {
+    if (!started) { analytics.track('form_start'); started = true; }
+  });
 
   function updateStepUI() {
     steps.forEach((s, idx) => {
@@ -534,7 +537,10 @@ export function initQuoteFormEvents(initialService = null) {
 
   // Final Submit
   const submitBtn = document.getElementById('btn-submit-lead');
+  let attemptId = null;
+  let attemptPayload = null;
   submitBtn?.addEventListener('click', () => {
+    if (submitBtn.disabled) return;
     const nameInput = document.getElementById('lead-name');
     const emailInput = document.getElementById('lead-email');
     const descInput = document.getElementById('lead-desc');
@@ -547,7 +553,7 @@ export function initQuoteFormEvents(initialService = null) {
     let hasError = false;
 
     // Name validation
-    if (!nameInput?.value.trim()) {
+    if (!nameInput?.value.trim() || nameInput.value.trim().length < 2) {
       nameError?.classList.remove('hidden');
       hasError = true;
     } else {
@@ -572,6 +578,10 @@ export function initQuoteFormEvents(initialService = null) {
     }
 
     if (hasError) return;
+    if (emailInput?.value.trim() && !emailInput.checkValidity()) {
+      emailInput.reportValidity();
+      return;
+    }
 
     formData.name = nameInput?.value.trim();
     formData.phone = phoneInput?.value.trim();
@@ -609,10 +619,16 @@ export function initQuoteFormEvents(initialService = null) {
       device: session.device
     };
 
+    const fingerprint = JSON.stringify(payload);
+    if (attemptPayload !== fingerprint) {
+      attemptId = crypto.randomUUID();
+      attemptPayload = fingerprint;
+    }
+    payload.request_id = attemptId;
     sendLead(payload)
       .then((res) => {
         // Guarda só o resumo local para a tela de confirmação; o registro oficial está no banco.
-        db.createLead(formData, res && res.id);
+        db.createLead(formData, res && res.id, !!res.duplicate);
         window.clima16Navigate('/solicitacao-recebida');
       })
       .catch((err) => {
@@ -640,7 +656,7 @@ const SUBMIT_ERROR_MESSAGES = {
 
 async function sendLead(payload) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
+  const timer = setTimeout(() => controller.abort(), 30000);
   try {
     const res = await fetch('/api/leads', {
       method: 'POST',

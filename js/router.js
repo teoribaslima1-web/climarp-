@@ -16,7 +16,7 @@ import { CONFIG } from './config.js';
 import { analytics } from './analytics.js';
 import { BLOG_POSTS } from './blog-data.js';
 
-const ROUTE_META = {
+export const ROUTE_META = {
   '/': {
     title: 'Ar-Condicionado em Ribeirão Preto | Instalação e Manutenção | Clima16',
     description: 'Solicite orçamento para instalação, manutenção, limpeza e serviços de ar-condicionado em Ribeirão Preto. Encontre profissionais da região pelo Clima16.'
@@ -146,7 +146,10 @@ export class Router {
       this.updateMeta('/');
       if (!this.appContainer.querySelector('#orcamento-form')) {
         this.appContainer.innerHTML = renderHomeView();
+      }
+      if (!this.homeInitialized) {
         initHomeEvents();
+        this.homeInitialized = true;
       }
       const target = document.getElementById(anchorKey === 'formulario' ? 'orcamento-form' : `${anchorKey}-section`) || document.getElementById(anchorKey);
       if (target) {
@@ -157,6 +160,7 @@ export class Router {
       return;
     }
 
+    this.homeInitialized = cleanHash === '/';
     // Check service pages
     const serviceMatch = CONFIG.services.find(s => cleanHash === `/${s.slug}` || cleanHash === s.slug);
     if (serviceMatch) {
