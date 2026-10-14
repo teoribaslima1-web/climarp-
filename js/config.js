@@ -18,8 +18,8 @@ export const CONFIG = {
 
   analytics: {
     enabled: true,
-    gtmId: 'GTM-XXXXXXX', // [PLACEHOLDER GTM ID]
-    ga4Id: 'G-XXXXXXXXXX', // [PLACEHOLDER GA4 ID]
+    gtmId: 'GTM-M24C8R3M',
+    ga4Id: 'G-P3KCGYSZMB',
     metaPixelId: 'XXXXXXXXXXXXXXX' // [PLACEHOLDER Meta Pixel ID]
   },
 
