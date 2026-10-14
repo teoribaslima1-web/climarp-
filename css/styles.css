@@ -251,3 +251,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .vento-gelado { display: none; }
 }
+
+
+/* Fade ao trocar de página (opacidade apenas, para não afetar elementos fixed) */
+@keyframes viewIn { from { opacity: 0; } to { opacity: 1; } }
+.view-enter { animation: viewIn 0.3s ease both; }
+@media (prefers-reduced-motion: reduce) { .view-enter { animation: none; } }

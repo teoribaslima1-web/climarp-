@@ -2,6 +2,7 @@
  * Clima16 - Home Page View
  * High-converting, modern, tech-enabled landing page for Ribeirão Preto HVAC quote requests.
  */
+import { serviceIcon } from '../icons.js';
 import { CONFIG } from '../config.js';
 import { renderQuoteForm, initQuoteFormEvents } from '../components/quote-form.js';
 import { renderFAQ, initFAQEvents } from '../components/faq.js';
@@ -275,7 +276,7 @@ export function renderHomeView() {
             <div data-reveal class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-subtle hover:shadow-card-hover transition-all flex flex-col justify-between group">
               <div>
                 <div class="w-12 h-12 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center mb-4 group-hover:bg-brand-blue group-hover:text-white transition-colors">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                  ${serviceIcon(srv.icon)}
                 </div>
                 <h3 class="text-lg font-bold text-navy mb-2">${srv.name}</h3>
                 <p class="text-sm text-slate-600 leading-relaxed mb-6">${srv.description}</p>

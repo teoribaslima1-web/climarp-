@@ -129,6 +129,15 @@ export class Router {
   }
 
   handleRoute() {
+    this.renderRoute();
+    // Fade suave ao trocar de página (só opacidade; respeita prefers-reduced-motion no CSS)
+    const c = this.appContainer;
+    c.classList.remove('view-enter');
+    void c.offsetWidth;
+    c.classList.add('view-enter');
+  }
+
+  renderRoute() {
     const cleanHash = (window.location.pathname.replace(/\/+$/, '') || '/');
 
     // Handle anchor jump if on home (aceita #/como-funciona e #como-funciona)

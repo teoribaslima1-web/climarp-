@@ -217,6 +217,27 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, partners: await r.json() });
     }
 
+    if (body.action === 'delete_partner') {
+      if (typeof body.id !== 'string' || !UUID_RE.test(body.id)) return res.status(400).json({ ok: false, error: 'invalid_id' });
+      const [partner] = await getRows(baseUrl, serviceKey, `partners?id=eq.${body.id}&select=id,auth_user_id`);
+      if (!partner) return res.status(404).json({ ok: false, error: 'not_found' });
+      // Remove também o login do portal, se existir (falha aqui não impede a exclusão do cadastro).
+      if (partner.auth_user_id) {
+        try {
+          const r = await fetch(`${baseUrl}/auth/v1/admin/users/${partner.auth_user_id}`, { method: 'DELETE', headers: supabaseHeaders(serviceKey) });
+          if (!r.ok && r.status !== 404) console.error('[admin] delete_auth_user_failed', r.status);
+        } catch (err) {
+          console.error('[admin] delete_auth_user_error', err && err.message);
+        }
+      }
+      const r = await fetch(`${baseUrl}/rest/v1/partners?id=eq.${body.id}`, { method: 'DELETE', headers: supabaseHeaders(serviceKey) });
+      if (!r.ok) {
+        console.error('[admin] delete_partner_failed', r.status);
+        return res.status(502).json({ ok: false, error: 'delete_failed' });
+      }
+      return res.status(200).json({ ok: true });
+    }
+
     if (body.action === 'update_partner') {
       if (typeof body.id !== 'string' || !UUID_RE.test(body.id)) return res.status(400).json({ ok: false, error: 'invalid_id' });
       const patch = {};

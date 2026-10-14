@@ -108,6 +108,13 @@ export function renderHeader() {
 }
 
 export function initHeaderEvents() {
+  const header = document.getElementById('main-header');
+  if (header) {
+    const onScroll = () => header.classList.toggle('shadow-md', window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
   const hamburgerIcon = document.getElementById('hamburger-icon');

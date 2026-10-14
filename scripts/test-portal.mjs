@@ -51,6 +51,8 @@ function mockFetch(opts = {}) {
     if (url.endsWith('/auth/v1/user') && method === 'PUT') return json(opts.pwStatus || 200, {});
     if (url.includes('/auth/v1/admin/users') && method === 'POST') return opts.userExists ? json(422, {}) : json(200, { id: 'auth-1' });
     if (url.includes('/auth/v1/admin/users/') && method === 'PUT') return json(200, {});
+    if (url.includes('/auth/v1/admin/users/') && method === 'DELETE') return json(200, {});
+    if (url.includes('/rest/v1/partners') && method === 'DELETE') return json(204, null);
     if (url.includes('/rest/v1/partners') && method === 'GET') {
       if (url.includes('email=ilike.')) return json(200, partner.status === 'aprovado' ? [partner] : []);
       return json(200, [partner]);
@@ -185,6 +187,17 @@ await test('admin: create_partner_access redefine a senha se já existe vínculo
   assert.equal((await call(admin, { action: 'create_partner_access', partner_id: PARTNER_ID }, 'atok')).body.error, 'partner_not_approved');
   mockFetch({ userExists: true });
   assert.equal((await call(admin, { action: 'create_partner_access', partner_id: PARTNER_ID }, 'atok')).body.error, 'user_exists');
+});
+
+await test('admin: delete_partner remove o cadastro e o login do portal', async () => {
+  mockFetch({ partner: { auth_user_id: 'auth-1' } });
+  const res = await call(admin, { action: 'delete_partner', id: PARTNER_ID }, 'atok');
+  assert.equal(res.statusCode, 200);
+  assert.ok(calls.some((c) => c.opts.method === 'DELETE' && c.url.endsWith('/auth/v1/admin/users/auth-1')));
+  assert.ok(calls.some((c) => c.opts.method === 'DELETE' && c.url.endsWith(`/rest/v1/partners?id=eq.${PARTNER_ID}`)));
+  assert.equal((await call(admin, { action: 'delete_partner', id: PARTNER_ID })).statusCode, 401);
+  assert.equal((await call(admin, { action: 'delete_partner', id: 'x' }, 'atok')).body.error, 'invalid_id');
+  assert.equal((await call(admin, { action: 'delete_partner', id: PARTNER_ID }, 'ptok')).statusCode, 401);
 });
 
 let failed = 0;

@@ -313,6 +313,7 @@ function renderDashboard() {
                   <th class="p-4">Sobre</th>
                   <th class="p-4">Status</th>
                   <th class="p-4">Acesso ao portal</th>
+                  <th class="p-4 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100" id="admin-partners-tbody"></tbody>
@@ -332,7 +333,7 @@ function renderPartnerRows() {
   const tbody = document.getElementById('admin-partners-tbody');
   if (!tbody) return;
   if (!state.partners.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 text-sm">Nenhum cadastro de parceiro ainda.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 text-sm">Nenhum cadastro de parceiro ainda.</td></tr>`;
     return;
   }
   tbody.innerHTML = state.partners.map((p) => {
@@ -360,6 +361,9 @@ function renderPartnerRows() {
           ${p.status !== 'aprovado' ? '<span class="text-slate-400">Aprove para liberar</span>'
             : !p.email ? '<span class="text-slate-400">Sem e-mail cadastrado</span>'
             : `<button class="admin-access-btn font-semibold text-brand-blue hover:underline" data-id="${escapeHtml(p.id)}">${p.auth_user_id ? 'Redefinir senha' : 'Criar acesso'}</button>`}
+        </td>
+        <td class="p-4 text-right">
+          <button class="admin-partner-delete text-slate-400 hover:text-rose-600 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-rose-50" data-id="${escapeHtml(p.id)}">Excluir</button>
         </td>
       </tr>`;
   }).join('');
@@ -464,6 +468,19 @@ function bindDashboard() {
   });
 
   document.getElementById('admin-partners-tbody')?.addEventListener('click', async (e) => {
+    const del = e.target.closest('.admin-partner-delete');
+    if (del) {
+      const target = state.partners.find((p) => p.id === del.getAttribute('data-id'));
+      if (!target) return;
+      if (!confirm(`Excluir definitivamente o parceiro "${target.name}"? Se ele tiver acesso ao portal, o login também será removido. Não dá para desfazer.`)) return;
+      const out = await api({ action: 'delete_partner', id: target.id });
+      if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
+      if (!out.ok) return showNotice('Não foi possível excluir o parceiro. Tente novamente.', 'error');
+      state.partners = state.partners.filter((p) => p.id !== target.id);
+      state.leads.forEach((l) => { if (l.partner_id === target.id) l.partner_id = null; });
+      renderDashboard();
+      return showNotice(`Parceiro <strong>${escapeHtml(target.name)}</strong> excluído.`);
+    }
     const btn = e.target.closest('.admin-access-btn');
     if (!btn) return;
     const partner = state.partners.find((p) => p.id === btn.getAttribute('data-id'));
