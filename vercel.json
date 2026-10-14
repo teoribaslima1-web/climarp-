@@ -44,5 +44,11 @@
       "source": "/((?!api/|assets/|css/|js/|robots\\.txt|sitemap\\.xml).+)",
       "destination": "/404/index.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/health",
+      "schedule": "0 12 * * *"
+    }
   ]
 }

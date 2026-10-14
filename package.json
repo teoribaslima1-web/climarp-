@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node scripts/build-check.mjs",
     "css": "tailwindcss -c tailwind.config.js -i css/tailwind.input.css -o css/tailwind.css --minify",
-    "test": "node scripts/test-leads.mjs && node scripts/test-partners.mjs && node scripts/test-admin.mjs && node scripts/test-portal.mjs && node scripts/test-reliability.mjs",
+    "test": "node scripts/test-leads.mjs && node scripts/test-partners.mjs && node scripts/test-admin.mjs && node scripts/test-portal.mjs && node scripts/test-reliability.mjs && node scripts/test-health.mjs",
     "start": "node scripts/serve.mjs",
     "smoke": "node scripts/serve.mjs --fixtures"
   },
