@@ -253,6 +253,9 @@ export function renderQuoteForm(preselectedServiceId = null) {
               <textarea id="lead-desc" rows="2" placeholder="Ex: Preciso instalar split de 12.000 BTUs no 3º andar, condomínio com dreno pronto..." class="w-full px-4 py-2 border-2 border-slate-200 focus:border-brand-blue focus:ring-0 rounded-xl text-slate-800 text-sm transition-all"></textarea>
             </div>
 
+            <div class="p-4 bg-blue-50 rounded-xl text-sm text-slate-700">
+              <strong>Depois do envio:</strong> a Clima16 poderá entrar em contato pelo WhatsApp para confirmar os detalhes. Profissionais parceiros disponíveis poderão receber seu pedido e falar com você pelo WhatsApp ou e-mail informado. O envio não garante profissional disponível, prazo de atendimento ou quantidade de propostas. Você decide se quer contratar.
+            </div>
             <!-- LGPD Consent Checkbox -->
             <div class="pt-2">
               <label class="flex items-start gap-2.5 cursor-pointer select-none">

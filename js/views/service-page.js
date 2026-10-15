@@ -36,6 +36,7 @@ export function renderServicePageView(slug) {
           <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mt-4 leading-relaxed">
             ${service.description}
           </p>
+          <p class="text-sm text-slate-600 max-w-2xl mx-auto mt-3">A Clima16 conecta você a profissionais e não executa o serviço. Estamos formando a rede em Ribeirão Preto; a disponibilidade depende do serviço e da região.</p>
 
           <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button onclick="document.getElementById('orcamento-form')?.scrollIntoView({behavior:'smooth'});" class="gradient-brand text-white font-bold px-7 py-3.5 rounded-xl shadow-lg hover:brightness-105 active:scale-95 transition-all text-sm sm:text-base">

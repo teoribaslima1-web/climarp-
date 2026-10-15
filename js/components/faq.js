@@ -2,6 +2,8 @@
  * Clima16 - FAQ Component (Accordion)
  * Clear, transparent answers for consumer confidence.
  */
+import { CONFIG } from '../config.js';
+
 export function renderFAQ() {
   const faqs = [
     {
@@ -14,7 +16,7 @@ export function renderFAQ() {
     },
     {
       q: 'Sou obrigado a contratar?',
-      a: 'Não. O envio de uma solicitação de orçamento não gera nenhuma obrigação de contratação. Você recebe os contatos, avalia as propostas e decide livremente se deseja fechar o serviço.'
+      a: 'Não. O envio de uma solicitação de orçamento não gera nenhuma obrigação de contratação. Se houver profissionais disponíveis, você poderá receber contatos e propostas e decidir livremente se deseja fechar o serviço.'
     },
     {
       q: 'Quais serviços posso solicitar?',
@@ -22,7 +24,11 @@ export function renderFAQ() {
     },
     {
       q: 'Vocês atendem quais cidades?',
-      a: 'Na primeira fase, o foco operacional do Clima16 é a cidade de Ribeirão Preto – SP (todos os bairros e distritos, como Bonfim Paulista). Outras cidades da região metropolitana poderão ser adicionadas futuramente.'
+      a: 'Nesta fase, recebemos solicitações de Ribeirão Preto – SP, incluindo Bonfim Paulista. Estamos formando a rede de parceiros; a disponibilidade depende do bairro e do serviço solicitado.'
+    },
+    {
+      q: 'O envio garante atendimento ou um prazo de resposta?',
+      a: 'Não. A Clima16 verifica a disponibilidade de profissionais para o serviço e a região. Não há garantia de atendimento, prazo de retorno ou quantidade de propostas. A Clima16 poderá confirmar os detalhes pelo WhatsApp; profissionais disponíveis poderão entrar em contato pelo WhatsApp ou e-mail informado.'
     },
     {
       q: 'Como os meus dados serão usados?',
@@ -66,11 +72,11 @@ export function renderFAQ() {
         <div class="mt-10 p-6 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h4 class="font-bold text-navy text-base">Ainda tem alguma dúvida?</h4>
-            <p class="text-sm text-slate-600">Fale com a gente pelo WhatsApp ou pelo e-mail contato@clima16.com.br.</p>
+            <p class="text-sm text-slate-600">Fale com a gente pelo WhatsApp ou pelo e-mail <a href="mailto:${CONFIG.brand.emailContact}" class="text-brand-blue underline">${CONFIG.brand.emailContact}</a>.</p>
           </div>
-          <button onclick="window.clima16Navigate('/formulario');" class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm hover:shadow whitespace-nowrap">
-            Fazer solicitação gratuita
-          </button>
+          <a href="https://wa.me/${CONFIG.brand.whatsappNumber}?text=${encodeURIComponent('Olá! Tenho uma dúvida sobre a Clima16.')}" target="_blank" rel="noopener noreferrer" class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm hover:shadow whitespace-nowrap">
+            Tirar dúvidas pelo WhatsApp
+          </a>
         </div>
 
       </div>

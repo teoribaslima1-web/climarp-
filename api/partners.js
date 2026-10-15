@@ -18,6 +18,7 @@ function validate(input) {
   const phoneRaw = clean(input.phone, 30);
   const phoneDigits = normalizePhone(phoneRaw);
   const email = clean(input.email, 254);
+  const coverage = cleanMultiline(input.coverage, 400);
 
   if (name.length < 2) return { error: 'invalid_name' };
   if (!/^[1-9]{2}\d{8,9}$/.test(phoneDigits)) return { error: 'invalid_phone' };
@@ -41,7 +42,8 @@ function validate(input) {
       city: clean(input.city, 80) || 'Ribeirão Preto – SP',
       services,
       cnpj: cnpjDigits || null,
-      bio: cleanMultiline(input.bio, 1500) || null,
+      // Coverage stays in the existing notes field, visible in admin and notification emails.
+      bio: [coverage ? `Regiões atendidas: ${coverage}` : '', cleanMultiline(input.bio, coverage ? 1000 : 1500)].filter(Boolean).join('\n\n') || null,
       utm_source: clean(input.utm_source, 200) || null,
       device: clean(input.device, 20) || null
     }

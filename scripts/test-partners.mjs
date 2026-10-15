@@ -86,6 +86,23 @@ await test('cadastro válido salva e envia o e-mail de aviso', async () => {
   assert.match(mail.subject, /Novo parceiro/);
 });
 
+await test('região atendida é salva com a apresentação e enviada no aviso sem exigir coluna nova', async () => {
+  mockFetch();
+  const res = await post({ ...validBody(), coverage: 'Zona Sul e Bonfim Paulista' });
+  assert.equal(res.statusCode, 200);
+  const saved = JSON.parse(inserts()[0].opts.body);
+  assert.equal(saved.bio, 'Regiões atendidas: Zona Sul e Bonfim Paulista\n\nDez anos de experiência');
+  assert.equal(saved.coverage, undefined);
+  assert.match(JSON.parse(emails()[0].opts.body).text, /Zona Sul e Bonfim Paulista/);
+});
+
+await test('limita região e apresentação preservando ambos no cadastro', async () => {
+  mockFetch();
+  await post({ ...validBody(), coverage: 'Z'.repeat(800), bio: 'B'.repeat(2000) });
+  const saved = JSON.parse(inserts()[0].opts.body);
+  assert.equal(saved.bio, `Regiões atendidas: ${'Z'.repeat(400)}\n\n${'B'.repeat(1000)}`);
+});
+
 await test('honeypot preenchido finge sucesso sem salvar', async () => {
   mockFetch();
   const res = await post({ ...validBody(), website: 'http://spam' });

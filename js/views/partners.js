@@ -11,7 +11,7 @@ const PARTNER_FAQ = [
   ['Sou obrigado a atender todos os pedidos?', 'Não. Se não puder atender, é só avisar para encaminharmos a outro profissional. Quando aceitar, pedimos que responda o cliente o quanto antes.'],
   ['Existe exclusividade?', 'Não. Você continua com seus clientes e canais de sempre. E o cliente pode receber contato de mais de um profissional para comparar propostas.'],
   ['Preciso ter CNPJ?', 'Não. Técnicos autônomos, MEIs e empresas podem se cadastrar. O CNPJ é opcional.'],
-  ['Quanto tempo leva a aprovação?', 'Respondemos em até 1 dia útil pelo WhatsApp para confirmar seus dados. Depois de aprovado, você recebe o acesso à área do parceiro.'],
+  ['Quanto tempo leva a aprovação?', 'Analisamos os dados e poderemos entrar em contato pelo WhatsApp para confirmar serviços e regiões atendidas. Não há prazo garantido de aprovação. Depois de aprovado, você recebe o acesso à área do parceiro.'],
   ['Quantos pedidos vou receber?', 'Depende da procura na sua região e dos serviços que você faz. O Clima16 está começando em Ribeirão Preto, então não prometemos um volume mínimo.']
 ];
 
@@ -114,32 +114,32 @@ export function renderPartnersView() {
         <div id="cadastro-parceiro-form" class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-subtle max-w-2xl mx-auto">
           <div class="text-center mb-8">
             <h3 class="text-2xl font-bold text-navy">Formulário de Cadastro de Parceiro</h3>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1">Preencha seus dados. Respondemos em até 1 dia útil pelo WhatsApp para confirmar seu cadastro.</p>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Analisaremos seu cadastro e poderemos falar com você pelo WhatsApp para confirmar serviços e regiões atendidas. Não há prazo garantido de aprovação.</p>
           </div>
 
           <form id="dedicated-partner-form" onsubmit="return false;" class="space-y-4 text-left">
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nome ou Nome da Empresa <span class="text-rose-500">*</span></label>
-                <input type="text" id="dp-name" placeholder="Ex: Climatização Silva" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm font-medium" required />
+                <label for="dp-name" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nome ou Nome da Empresa <span class="text-rose-500">*</span></label>
+              <input type="text" id="dp-name" placeholder="Ex: Climatização Silva" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm font-medium" required />
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WhatsApp <span class="text-rose-500">*</span></label>
-                <input type="tel" id="dp-phone" placeholder="(16) 99999-9999" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm font-medium" required />
+                <label for="dp-phone" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WhatsApp <span class="text-rose-500">*</span></label>
+              <input type="tel" id="dp-phone" placeholder="(16) 99999-9999" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm font-medium" required />
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">E-mail</label>
-                <input type="email" id="dp-email" placeholder="seuemail@exemplo.com" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm" />
+                <label for="dp-email" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">E-mail</label>
+              <input type="email" id="dp-email" placeholder="seuemail@exemplo.com" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm" />
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Cidade</label>
-                <input type="text" id="dp-city" value="Ribeirão Preto – SP" class="w-full px-4 py-2.5 border border-slate-200 bg-slate-50 rounded-xl text-sm font-semibold text-slate-700" />
+                <label for="dp-city" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Cidade</label>
+              <input type="text" id="dp-city" value="Ribeirão Preto – SP" class="w-full px-4 py-2.5 border border-slate-200 bg-slate-50 rounded-xl text-sm font-semibold text-slate-700" />
               </div>
             </div>
 
@@ -147,15 +147,15 @@ export function renderPartnersView() {
               <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Serviços que você executa: <span class="text-rose-500">*</span></label>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
-                  <input type="checkbox" value="Instalação" class="dp-service-check text-brand-blue rounded" checked />
+                  <input type="checkbox" value="Instalação" class="dp-service-check text-brand-blue rounded" />
                   <span>Instalação</span>
                 </label>
                 <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
-                  <input type="checkbox" value="Manutenção" class="dp-service-check text-brand-blue rounded" checked />
+                  <input type="checkbox" value="Manutenção" class="dp-service-check text-brand-blue rounded" />
                   <span>Manutenção</span>
                 </label>
                 <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
-                  <input type="checkbox" value="Higienização" class="dp-service-check text-brand-blue rounded" checked />
+                  <input type="checkbox" value="Higienização" class="dp-service-check text-brand-blue rounded" />
                   <span>Higienização</span>
                 </label>
                 <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
@@ -163,7 +163,7 @@ export function renderPartnersView() {
                   <span>Comercial</span>
                 </label>
                 <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
-                  <input type="checkbox" value="Residencial" class="dp-service-check text-brand-blue rounded" checked />
+                  <input type="checkbox" value="Residencial" class="dp-service-check text-brand-blue rounded" />
                   <span>Residencial</span>
                 </label>
                 <label class="flex items-center gap-2 p-2.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
@@ -174,21 +174,26 @@ export function renderPartnersView() {
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">CNPJ <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
+              <label for="dp-cnpj" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">CNPJ <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
               <input type="text" id="dp-cnpj" placeholder="00.000.000/0001-00" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm" />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Conte brevemente sobre seu trabalho</label>
-              <textarea id="dp-bio" rows="3" placeholder="Tempo de atuação, marcas atendidas, equipamentos..." class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm"></textarea>
+              <label for="dp-bio" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Conte brevemente sobre seu trabalho</label>
+              <textarea id="dp-bio" maxlength="1000" rows="3" placeholder="Tempo de atuação, marcas atendidas, equipamentos..." class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm"></textarea>
             </div>
 
+            <div>
+              <label for="dp-coverage" class="block text-xs font-semibold text-slate-700 mb-1">Bairros ou regiões que atende (opcional)</label>
+              <textarea id="dp-coverage" maxlength="400" rows="2" placeholder="Ex.: Zona Sul, Centro e Bonfim Paulista" class="w-full px-4 py-2 border-2 border-slate-200 rounded-xl text-sm"></textarea>
+              <p class="text-xs text-slate-500 mt-1">Informe onde consegue atender. Confirmaremos a cobertura antes de encaminhar pedidos.</p>
+            </div>
             ${HONEYPOT_HTML('dp-website')}
             ${CONSENT_HTML('dp-consent')}
             <p id="dp-error" class="text-sm text-rose-600 hidden" role="alert"></p>
 
             <div id="dp-success" class="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-sm font-medium hidden">
-              ✓ Recebemos seu cadastro! Vamos falar com você pelo WhatsApp em até 1 dia útil para confirmar as informações.
+              ✓ Recebemos seu cadastro! Poderemos falar com você pelo WhatsApp para confirmar as informações.
             </div>
 
             <button type="button" id="dp-submit-btn" class="w-full gradient-brand text-white font-extrabold text-base py-4 rounded-xl shadow-lg hover:shadow-xl transition-all">
@@ -216,6 +221,7 @@ export function initPartnersEvents() {
       city: document.getElementById('dp-city')?.value,
       cnpj: document.getElementById('dp-cnpj')?.value,
       bio: document.getElementById('dp-bio')?.value,
+      coverage: document.getElementById('dp-coverage')?.value,
       services: Array.from(document.querySelectorAll('.dp-service-check:checked')).map(cb => cb.value),
       consent: !!document.getElementById('dp-consent')?.checked,
       website: document.getElementById('dp-website')?.value || ''

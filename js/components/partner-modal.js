@@ -22,7 +22,7 @@ export function renderPartnerModal() {
           </span>
           <h3 class="text-2xl font-bold text-navy">Cadastre seu interesse como parceiro</h3>
           <p class="text-xs sm:text-sm text-slate-600 mt-1">
-            Receba solicitações de clientes em Ribeirão Preto que precisam de instalação, manutenção e higienização.
+            Cadastre interesse em receber solicitações compatíveis com seus serviços e região. Estamos formando a rede e não garantimos um volume mínimo de pedidos.
           </p>
           <p class="text-xs font-semibold text-emerald-700 mt-2">Cadastro gratuito · Sem mensalidade · Sem exclusividade</p>
         </div>
@@ -31,24 +31,24 @@ export function renderPartnerModal() {
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nome ou Empresa <span class="text-rose-500">*</span></label>
+              <label for="partner-name" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nome ou Empresa <span class="text-rose-500">*</span></label>
               <input type="text" id="partner-name" placeholder="Ex: Marcos Refrigeração" class="w-full px-3.5 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm font-medium" required />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WhatsApp Comercial <span class="text-rose-500">*</span></label>
+              <label for="partner-phone" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WhatsApp Comercial <span class="text-rose-500">*</span></label>
               <input type="tel" id="partner-phone" placeholder="(16) 99999-9999" class="w-full px-3.5 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm font-medium" required />
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">E-mail</label>
+              <label for="partner-email" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">E-mail</label>
               <input type="email" id="partner-email" placeholder="contato@empresa.com.br" class="w-full px-3.5 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm" />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Cidade Principal</label>
+              <label for="partner-city" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Cidade Principal</label>
               <input type="text" id="partner-city" value="Ribeirão Preto – SP" class="w-full px-3.5 py-2.5 border border-slate-200 bg-slate-50 rounded-xl text-sm font-semibold text-slate-700" />
             </div>
           </div>
@@ -58,15 +58,15 @@ export function renderPartnerModal() {
             <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Serviços que você executa: <span class="text-rose-500">*</span></label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <label class="flex items-center gap-2 p-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
-                <input type="checkbox" value="Instalação" class="partner-service-check text-brand-blue rounded" checked />
+                <input type="checkbox" value="Instalação" class="partner-service-check text-brand-blue rounded" />
                 <span>Instalação</span>
               </label>
               <label class="flex items-center gap-2 p-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
-                <input type="checkbox" value="Manutenção" class="partner-service-check text-brand-blue rounded" checked />
+                <input type="checkbox" value="Manutenção" class="partner-service-check text-brand-blue rounded" />
                 <span>Manutenção</span>
               </label>
               <label class="flex items-center gap-2 p-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
-                <input type="checkbox" value="Higienização" class="partner-service-check text-brand-blue rounded" checked />
+                <input type="checkbox" value="Higienização" class="partner-service-check text-brand-blue rounded" />
                 <span>Higienização</span>
               </label>
               <label class="flex items-center gap-2 p-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
@@ -74,7 +74,7 @@ export function renderPartnerModal() {
                 <span>Comercial</span>
               </label>
               <label class="flex items-center gap-2 p-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
-                <input type="checkbox" value="Residencial" class="partner-service-check text-brand-blue rounded" checked />
+                <input type="checkbox" value="Residencial" class="partner-service-check text-brand-blue rounded" />
                 <span>Residencial</span>
               </label>
               <label class="flex items-center gap-2 p-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
@@ -85,21 +85,26 @@ export function renderPartnerModal() {
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">CNPJ <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
-            <input type="text" id="partner-cnpj" placeholder="00.000.000/0001-00" class="w-full px-3.5 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm" />
+            <label for="partner-cnpj" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">CNPJ <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
+              <input type="text" id="partner-cnpj" placeholder="00.000.000/0001-00" class="w-full px-3.5 py-2.5 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Conte brevemente sobre seu trabalho</label>
-            <textarea id="partner-bio" rows="2" placeholder="Experiência, marcas com as quais trabalha, ferramentas, etc..." class="w-full px-3.5 py-2 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm"></textarea>
+            <label for="partner-bio" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Conte brevemente sobre seu trabalho</label>
+              <textarea id="partner-bio" maxlength="1000" rows="2" placeholder="Experiência, marcas com as quais trabalha, ferramentas, etc..." class="w-full px-3.5 py-2 border-2 border-slate-200 focus:border-brand-blue rounded-xl text-sm"></textarea>
           </div>
 
+          <div>
+            <label for="partner-coverage" class="block text-xs font-semibold text-slate-700 mb-1">Bairros ou regiões que atende (opcional)</label>
+            <textarea id="partner-coverage" maxlength="400" rows="2" placeholder="Ex.: Zona Sul, Centro e Bonfim Paulista" class="w-full px-4 py-2 border-2 border-slate-200 rounded-xl text-sm"></textarea>
+            <p class="text-xs text-slate-500 mt-1">Informe onde consegue atender. Confirmaremos a cobertura antes de encaminhar pedidos.</p>
+          </div>
           ${HONEYPOT_HTML('partner-website')}
           ${CONSENT_HTML('partner-consent')}
           <p id="partner-error-msg" class="text-xs text-rose-600 hidden" role="alert"></p>
 
           <div id="partner-success-msg" class="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-medium hidden">
-            ✓ Recebemos seu cadastro! Vamos falar com você pelo WhatsApp em até 1 dia útil para confirmar os dados.
+            ✓ Recebemos seu cadastro! Poderemos falar com você pelo WhatsApp para confirmar os dados.
           </div>
 
           <div class="pt-2 flex justify-end gap-3">
@@ -150,6 +155,7 @@ export function initPartnerModalEvents() {
       city: document.getElementById('partner-city')?.value,
       cnpj: document.getElementById('partner-cnpj')?.value,
       bio: document.getElementById('partner-bio')?.value,
+      coverage: document.getElementById('partner-coverage')?.value,
       services: Array.from(document.querySelectorAll('.partner-service-check:checked')).map(cb => cb.value),
       consent: !!document.getElementById('partner-consent')?.checked,
       website: document.getElementById('partner-website')?.value || ''

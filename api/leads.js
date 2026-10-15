@@ -207,8 +207,8 @@ function buildCustomerEmail(lead, leadId) {
     ...resumo.map(([k, v]) => `${k}: ${v}`),
     '',
     'O que acontece agora:',
-    '1. Vamos entrar em contato, normalmente pelo WhatsApp, para confirmar os detalhes.',
-    '2. Seu pedido pode ser encaminhado a profissionais da região para você comparar propostas.',
+    '1. A Clima16 poderá entrar em contato pelo WhatsApp para confirmar os detalhes.',
+    '2. Profissionais disponíveis poderão receber seu pedido e entrar em contato pelo WhatsApp ou e-mail informado. Não há garantia de atendimento, prazo de retorno ou quantidade de propostas.',
     '3. Você escolhe livremente, sem compromisso.',
     '',
     `Quer agilizar? Fale com a gente: ${wa}`,
@@ -224,8 +224,8 @@ function buildCustomerEmail(lead, leadId) {
   </table>
   <h3 style="color:#092B55;margin:22px 0 8px;font-size:15px">O que acontece agora</h3>
   <ol style="padding-left:18px;margin:0;color:#334155;font-size:14px;line-height:1.6">
-    <li>Vamos entrar em contato, normalmente pelo WhatsApp, para confirmar os detalhes.</li>
-    <li>Seu pedido pode ser encaminhado a profissionais da região para você comparar propostas.</li>
+    <li>A Clima16 poderá entrar em contato pelo WhatsApp para confirmar os detalhes.</li>
+    <li>Profissionais disponíveis poderão receber seu pedido e entrar em contato pelo WhatsApp ou e-mail informado. Não há garantia de atendimento, prazo de retorno ou quantidade de propostas.</li>
     <li>Você escolhe livremente, sem compromisso.</li>
   </ol>
   <p style="margin:20px 0"><a href="${escapeHtml(wa)}" style="background:#10b981;color:#fff;text-decoration:none;padding:11px 20px;border-radius:8px;font-weight:bold;display:inline-block">Falar no WhatsApp agora</a></p>

@@ -42,9 +42,9 @@ const waveLayer = (cls, fill, top) => `
 
 const TIMELINE_STEPS = [
   { n: 1, title: 'Pedido', text: 'Você conta o que precisa: serviço, imóvel e bairro, em menos de 1 minuto.' },
-  { n: 2, title: 'Contato', text: 'A gente entra em contato, normalmente pelo WhatsApp, para confirmar os detalhes.' },
-  { n: 3, title: 'Orçamentos comparados', text: 'Seu pedido pode ser encaminhado a profissionais da região para você comparar propostas.' },
-  { n: 4, title: 'Serviço feito', text: 'Você escolhe livremente quem contratar e agenda. Sem compromisso até decidir.' }
+  { n: 2, title: 'Contato', text: 'A Clima16 poderá falar com você pelo WhatsApp para confirmar os detalhes.' },
+  { n: 3, title: 'Busca de profissionais', text: 'Verificamos profissionais disponíveis para o serviço e o bairro informado. O envio não garante atendimento ou propostas.' },
+  { n: 4, title: 'Sua escolha', text: 'Se receber uma proposta, você decide livremente se quer contratar e combina o serviço com o profissional.' }
 ];
 
 
@@ -111,7 +111,7 @@ export function renderHomeView() {
 
             <!-- Subtitle -->
             <p class="text-base sm:text-lg text-muted-rp leading-relaxed max-w-2xl font-normal">
-              Solicite seu orçamento e encontre profissionais da região para instalação, manutenção, limpeza e outros serviços de climatização.
+              Solicite seu orçamento para instalação, manutenção e limpeza. Conectamos você a profissionais da região; a Clima16 não executa o serviço.<br /><span class="text-sm">Estamos formando nossa rede em Ribeirão Preto. A disponibilidade depende do serviço e da região.</span>
             </p>
 
             <!-- Service Chips: começar o orçamento sem rolar a página -->
@@ -171,8 +171,8 @@ export function renderHomeView() {
                     </div>
                   </div>
                   <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold text-[11px] rounded-full flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
-                    Online
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                    Plataforma local
                   </span>
                 </div>
 
@@ -334,8 +334,8 @@ export function renderHomeView() {
 
           <div class="lg:col-span-4 lg:sticky lg:top-24" data-reveal>
             <span class="text-xs font-bold tracking-wider text-brand-blue uppercase bg-blue-50 px-3 py-1 rounded-full">Cobertura local</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-3">Ar-condicionado em todos os bairros de Ribeirão Preto</h2>
-            <p class="text-sm sm:text-base text-muted-rp mt-3">Toque no seu bairro e comece o pedido já com a localização preenchida.</p>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-3">Solicite atendimento no seu bairro em Ribeirão Preto</h2>
+            <p class="text-sm sm:text-base text-muted-rp mt-3">Toque no seu bairro e comece o pedido já com a localização preenchida. O atendimento depende da disponibilidade de profissionais.</p>
             <div class="mt-6 rounded-2xl gradient-navy-dark text-white p-6 relative overflow-hidden">
               <div class="absolute -right-6 -top-6 w-32 h-32 rounded-full border border-cyan-400/30"></div>
               <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full border border-cyan-400/20"></div>
