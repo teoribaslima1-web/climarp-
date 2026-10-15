@@ -17,7 +17,7 @@
  */
 
 const crypto = require('node:crypto');
-const { escapeHtml, postEmail, boundedFetch } = require('./_lib');
+const { escapeHtml, postEmail, boundedFetch, loginThrottle } = require('./_lib');
 const fetch = boundedFetch;
 
 const STATUSES = ['novo', 'em_contato', 'encaminhado', 'convertido', 'perdido', 'invalido', 'duplicado'];
@@ -47,6 +47,13 @@ function adminEmails() {
 
 function isAdminEmail(email) {
   return typeof email === 'string' && adminEmails().includes(email.trim().toLowerCase());
+}
+
+/** Se ADMIN_USER_IDS estiver configurado na Vercel, o login de admin também precisa ter um desses IDs. */
+function isAllowedAdminUser(user) {
+  const ids = (process.env.ADMIN_USER_IDS || '').split(',').map((s) => s.trim()).filter(Boolean);
+  if (!ids.length) return true;
+  return !!(user && typeof user.id === 'string' && ids.includes(user.id));
 }
 
 function cleanText(value, max) {
@@ -133,12 +140,13 @@ function buildPartnerEmail(lead, partner, hasAccess) {
   return { subject: `Novo lead Clima16 — ${lead.service_type} (${lead.neighborhood || 'Ribeirão Preto'})`.slice(0, 200), text, html };
 }
 
-async function login(baseUrl, serviceKey, body) {
+async function login(baseUrl, serviceKey, body, req) {
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   const password = typeof body.password === 'string' ? body.password : '';
   if (!email || !password || password.length > 200) return { status: 400, json: { ok: false, error: 'invalid_credentials' } };
-  // Mesma resposta para "senha errada" e "e-mail sem permissão": não revela quem é admin.
-  if (!isAdminEmail(email)) return { status: 401, json: { ok: false, error: 'invalid_credentials' } };
+
+  const throttle = await loginThrottle(baseUrl, serviceKey, req, 'admin', email);
+  if (throttle.blocked) return { status: 429, json: { ok: false, error: 'too_many_attempts' } };
 
   const authKey = process.env.SUPABASE_ANON_KEY || serviceKey;
   const res = await fetch(`${baseUrl}/auth/v1/token?grant_type=password`, {
@@ -147,6 +155,7 @@ async function login(baseUrl, serviceKey, body) {
     body: JSON.stringify({ email, password })
   });
   if (res.status === 400 || res.status === 401 || res.status === 422) {
+    await throttle.fail();
     return { status: 401, json: { ok: false, error: 'invalid_credentials' } };
   }
   if (!res.ok) {
@@ -155,6 +164,11 @@ async function login(baseUrl, serviceKey, body) {
   }
   const data = await res.json();
   if (!data || !data.access_token) return { status: 502, json: { ok: false, error: 'auth_unavailable' } };
+  // A lista de admins é conferida depois da senha: mesma resposta e mesmo tempo para quem não é admin.
+  if (!isAdminEmail(email) || !isAllowedAdminUser(data.user)) {
+    await throttle.fail();
+    return { status: 401, json: { ok: false, error: 'invalid_credentials' } };
+  }
   return {
     status: 200,
     json: { ok: true, access_token: data.access_token, expires_in: data.expires_in || 3600, email }
@@ -172,7 +186,7 @@ async function verifyAdmin(req, baseUrl, serviceKey) {
   });
   if (!res.ok) return null;
   const user = await res.json();
-  return user && isAdminEmail(user.email) ? user.email : null;
+  return user && isAdminEmail(user.email) && isAllowedAdminUser(user) ? user.email : null;
 }
 
 module.exports = async function handler(req, res) {
@@ -198,7 +212,7 @@ module.exports = async function handler(req, res) {
 
   try {
     if (body.action === 'login') {
-      const out = await login(baseUrl, serviceKey, body);
+      const out = await login(baseUrl, serviceKey, body, req);
       return res.status(out.status).json(out.json);
     }
 
@@ -309,7 +323,7 @@ module.exports = async function handler(req, res) {
       let emailed = false;
       if (partner.email) {
         const { subject, text, html } = buildPartnerEmail(lead, partner, !!partner.auth_user_id);
-        emailed = await postEmail({ to: [partner.email], subject, html, text, replyTo: (process.env.LEAD_NOTIFY_TO || '').split(',')[0].trim() || undefined, tag: 'admin' });
+        emailed = await postEmail({ to: [partner.email], subject, html, text, replyTo: (process.env.LEAD_NOTIFY_TO || '').split(',')[0].trim() || undefined, tag: 'admin', idempotencyKey: `${lead.id}/dispatch/${partner.id}/${new Date().toISOString().slice(0, 13)}` });
       }
       return res.status(200).json({
         ok: true,
@@ -325,6 +339,8 @@ module.exports = async function handler(req, res) {
       if (!partner) return res.status(404).json({ ok: false, error: 'not_found' });
       if (partner.status !== 'aprovado') return res.status(409).json({ ok: false, error: 'partner_not_approved' });
       if (!partner.email) return res.status(422).json({ ok: false, error: 'partner_without_email' });
+      // Um parceiro nunca pode ganhar login com o e-mail de um admin (viraria admin).
+      if (isAdminEmail(partner.email)) return res.status(409).json({ ok: false, error: 'email_reserved' });
 
       const password = crypto.randomBytes(9).toString('base64url');
       if (partner.auth_user_id) {

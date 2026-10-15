@@ -7,7 +7,7 @@
  * Autorização: o token do Supabase Auth precisa ser de um usuário cujo e-mail seja de um parceiro APROVADO.
  * A tabela continua fechada ao público; esta função usa a chave de serviço e filtra por partner_id.
  */
-const { supabaseHeaders, parseBody, boundedFetch: fetch } = require('./_lib');
+const { supabaseHeaders, parseBody, boundedFetch: fetch, loginThrottle } = require('./_lib');
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PARTNER_STATUSES = ['recebido', 'em_atendimento', 'fechado', 'sem_resposta'];
@@ -18,16 +18,15 @@ function authKeyOf(serviceKey) {
   return process.env.SUPABASE_ANON_KEY || serviceKey;
 }
 
-/** Procura o parceiro aprovado com este e-mail (comparação exata, sem diferenciar maiúsculas). */
-async function findApprovedPartner(baseUrl, serviceKey, email) {
-  const clean = String(email || '').trim().toLowerCase();
-  if (!clean) return null;
-  const r = await fetch(`${baseUrl}/rest/v1/partners?select=id,name,email,status&status=eq.aprovado&email=ilike.${encodeURIComponent(clean)}&limit=5`, {
+/** Parceiro APROVADO vinculado a este usuário do Supabase Auth (o vínculo é criado pelo admin). */
+async function findPartnerByUser(baseUrl, serviceKey, userId) {
+  if (typeof userId !== 'string' || !UUID_RE.test(userId)) return null;
+  const r = await fetch(`${baseUrl}/rest/v1/partners?select=id,name,email,status,auth_user_id&auth_user_id=eq.${userId}&status=eq.aprovado&limit=1`, {
     headers: supabaseHeaders(serviceKey)
   });
   if (!r.ok) throw new Error(`select_${r.status}`);
   const rows = await r.json();
-  return (Array.isArray(rows) ? rows : []).find((p) => String(p.email || '').trim().toLowerCase() === clean) || null;
+  return (Array.isArray(rows) ? rows : []).find((p) => p.auth_user_id === userId && p.status === 'aprovado') || null;
 }
 
 async function verifyPartner(req, baseUrl, serviceKey) {
@@ -38,8 +37,7 @@ async function verifyPartner(req, baseUrl, serviceKey) {
   });
   if (!res.ok) return null;
   const user = await res.json();
-  if (!user || !user.email) return null;
-  const partner = await findApprovedPartner(baseUrl, serviceKey, user.email);
+  const partner = await findPartnerByUser(baseUrl, serviceKey, user && user.id);
   return partner ? { partner, token: m[1] } : null;
 }
 
@@ -65,22 +63,30 @@ module.exports = async function handler(req, res) {
       const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
       const password = typeof body.password === 'string' ? body.password : '';
       if (!email || !password || password.length > 200) return res.status(400).json({ ok: false, error: 'invalid_credentials' });
-      // Mesma resposta para "sem acesso" e "senha errada": não revela quem é parceiro.
-      const partner = await findApprovedPartner(baseUrl, serviceKey, email);
-      if (!partner) return res.status(401).json({ ok: false, error: 'invalid_credentials' });
+      const throttle = await loginThrottle(baseUrl, serviceKey, req, 'portal', email);
+      if (throttle.blocked) return res.status(429).json({ ok: false, error: 'too_many_attempts' });
 
       const r = await fetch(`${baseUrl}/auth/v1/token?grant_type=password`, {
         method: 'POST',
         headers: supabaseHeaders(authKeyOf(serviceKey)),
         body: JSON.stringify({ email, password })
       });
-      if (r.status === 400 || r.status === 401 || r.status === 422) return res.status(401).json({ ok: false, error: 'invalid_credentials' });
+      if (r.status === 400 || r.status === 401 || r.status === 422) {
+        await throttle.fail();
+        return res.status(401).json({ ok: false, error: 'invalid_credentials' });
+      }
       if (!r.ok) {
         console.error('[portal] login_failed', r.status);
         return res.status(502).json({ ok: false, error: 'auth_unavailable' });
       }
       const data = await r.json();
       if (!data || !data.access_token) return res.status(502).json({ ok: false, error: 'auth_unavailable' });
+      // Mesma resposta para "sem acesso" e "senha errada": não revela quem é parceiro.
+      const partner = await findPartnerByUser(baseUrl, serviceKey, data.user && data.user.id);
+      if (!partner) {
+        await throttle.fail();
+        return res.status(401).json({ ok: false, error: 'invalid_credentials' });
+      }
       return res.status(200).json({ ok: true, access_token: data.access_token, name: partner.name });
     }
 

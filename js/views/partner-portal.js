@@ -114,6 +114,7 @@ function showLogin(message = '') {
     btn.textContent = 'Entrar';
     err.textContent = out.error === 'invalid_credentials'
       ? 'E-mail ou senha incorretos, ou acesso ainda não liberado.'
+      : out.error === 'too_many_attempts' ? 'Muitas tentativas. Aguarde 15 minutos e tente de novo.'
       : out.error === 'network' ? 'Sem conexão. Tente novamente.' : 'Não foi possível entrar agora.';
   });
 }

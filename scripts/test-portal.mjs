@@ -22,6 +22,8 @@ const LEAD_ID = '3b6d1a2e-1111-4222-8333-444455556666';
 const PARTNER_ID = '4b6d1a2e-1111-4222-8333-444455556666';
 const OTHER_LEAD = '5b6d1a2e-1111-4222-8333-444455556666';
 const AUTH_ID = '6b6d1a2e-1111-4222-8333-444455556666';
+const PORTAL_USER = '7b6d1a2e-1111-4222-8333-444455556666';
+const LINKED = { auth_user_id: PORTAL_USER };
 
 process.env.SUPABASE_URL = 'https://proj.supabase.co';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'sb_secret_test';
@@ -42,10 +44,10 @@ function mockFetch(opts = {}) {
     const json = (status, body) => ({ ok: status < 300, status, json: async () => body });
     const method = o.method || 'GET';
     if (url.includes('api.resend.com')) return json(200, { id: 'e' });
-    if (url.includes('/auth/v1/token')) return JSON.parse(o.body).password === 'certa' ? json(200, { access_token: 'ptok' }) : json(400, {});
+    if (url.includes('/auth/v1/token')) return JSON.parse(o.body).password === 'certa' ? json(200, { access_token: 'ptok', user: { id: PORTAL_USER } }) : json(400, {});
     if (url.endsWith('/auth/v1/user') && method === 'GET') {
       const bearer = o.headers.Authorization;
-      if (bearer === 'Bearer ptok') return json(200, { email: opts.userEmail || 'Marcos@X.com' });
+      if (bearer === 'Bearer ptok') return json(200, { id: PORTAL_USER, email: opts.userEmail || 'Marcos@X.com' });
       if (bearer === 'Bearer atok') return json(200, { email: 'contato@clima16.com.br' });
       return json(401, {});
     }
@@ -55,7 +57,7 @@ function mockFetch(opts = {}) {
     if (url.includes('/auth/v1/admin/users/') && method === 'DELETE') return json(200, {});
     if (url.includes('/rest/v1/partners') && method === 'DELETE') return json(204, null);
     if (url.includes('/rest/v1/partners') && method === 'GET') {
-      if (url.includes('email=ilike.')) return json(200, partner.status === 'aprovado' ? [partner] : []);
+      if (url.includes('auth_user_id=eq.')) return json(200, partner.auth_user_id && url.includes(`auth_user_id=eq.${partner.auth_user_id}`) && partner.status === 'aprovado' ? [partner] : []);
       return json(200, [partner]);
     }
     if (url.includes('/rest/v1/partners') && method === 'PATCH') return opts.linkFails ? json(500, {}) : json(200, [{ ...partner, ...JSON.parse(o.body) }]);
@@ -78,23 +80,23 @@ async function call(handler, body, token) {
 
 // ------------------------------ portal ------------------------------
 await test('portal: login de parceiro aprovado devolve token', async () => {
-  mockFetch();
+  mockFetch({ partner: LINKED });
   const res = await call(portal, { action: 'login', email: 'MARCOS@x.com', password: 'certa' });
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.access_token, 'ptok');
 });
 
 await test('portal: senha errada e e-mail sem parceiro respondem igual (401)', async () => {
-  mockFetch();
+  mockFetch({ partner: LINKED });
   assert.equal((await call(portal, { action: 'login', email: 'marcos@x.com', password: 'errada' })).body.error, 'invalid_credentials');
-  mockFetch({ partner: { status: 'novo' } });
+  mockFetch({ partner: { ...LINKED, status: 'novo' } });
   const res = await call(portal, { action: 'login', email: 'marcos@x.com', password: 'certa' });
   assert.equal(res.statusCode, 401);
   assert.equal(res.body.error, 'invalid_credentials');
 });
 
 await test('portal: list exige token e filtra por partner_id, sem campos internos', async () => {
-  mockFetch();
+  mockFetch({ partner: LINKED });
   assert.equal((await call(portal, { action: 'list' })).statusCode, 401);
   const res = await call(portal, { action: 'list' }, 'ptok');
   assert.equal(res.statusCode, 200);
@@ -104,14 +106,14 @@ await test('portal: list exige token e filtra por partner_id, sem campos interno
 });
 
 await test('portal: parceiro não aprovado ou token de outro tipo de usuário é barrado', async () => {
-  mockFetch({ partner: { status: 'recusado' } });
+  mockFetch({ partner: { ...LINKED, status: 'recusado' } });
   assert.equal((await call(portal, { action: 'list' }, 'ptok')).statusCode, 401);
-  mockFetch();
+  mockFetch({ partner: LINKED });
   assert.equal((await call(portal, { action: 'list' }, 'atok')).statusCode, 401);
 });
 
 await test('portal: update_status só altera o lead do próprio parceiro', async () => {
-  mockFetch();
+  mockFetch({ partner: LINKED });
   const ok = await call(portal, { action: 'update_status', id: LEAD_ID, partner_status: 'fechado' }, 'ptok');
   assert.equal(ok.statusCode, 200);
   const patch = calls.find((c) => c.opts.method === 'PATCH');
@@ -123,12 +125,27 @@ await test('portal: update_status só altera o lead do próprio parceiro', async
 });
 
 await test('portal: change_password exige 8+ caracteres e usa o token do usuário', async () => {
-  mockFetch();
+  mockFetch({ partner: LINKED });
   assert.equal((await call(portal, { action: 'change_password', password: 'curta' }, 'ptok')).body.error, 'weak_password');
   const ok = await call(portal, { action: 'change_password', password: 'senha-bem-forte' }, 'ptok');
   assert.equal(ok.statusCode, 200);
   const put = calls.find((c) => c.opts.method === 'PUT');
   assert.equal(put.opts.headers.Authorization, 'Bearer ptok');
+});
+
+await test('portal: mesmo e-mail sem vínculo de acesso (usuário criado fora do painel) não entra', async () => {
+  mockFetch({ partner: { auth_user_id: null } });
+  const res = await call(portal, { action: 'login', email: 'marcos@x.com', password: 'certa' });
+  assert.equal(res.statusCode, 401);
+  assert.equal((await call(portal, { action: 'list' }, 'ptok')).statusCode, 401);
+});
+
+await test('admin: não cria login de parceiro com o e-mail de um admin', async () => {
+  mockFetch({ partner: { email: 'Contato@Clima16.com.br' } });
+  const res = await call(admin, { action: 'create_partner_access', partner_id: PARTNER_ID }, 'atok');
+  assert.equal(res.statusCode, 409);
+  assert.equal(res.body.error, 'email_reserved');
+  assert.ok(!calls.some((c) => c.url.includes('/auth/v1/admin/users')));
 });
 
 // ------------------------------ admin: encaminhar ------------------------------

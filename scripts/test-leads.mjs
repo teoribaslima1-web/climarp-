@@ -56,7 +56,7 @@ function setEnv(full = true) {
 }
 
 // fetch simulado: registra chamadas e responde conforme as opções
-function installFetch({ recent = [], dup = [], existing = [], insertOk = true, insertStatus = 500, emailOk = true, selectThrows = false } = {}) {
+function installFetch({ recent = [], dup = [], existing = [], insertOk = true, insertStatus = 500, emailOk = true, selectThrows = false, sentRecently = [] } = {}) {
   const calls = [];
   global.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
@@ -64,6 +64,7 @@ function installFetch({ recent = [], dup = [], existing = [], insertOk = true, i
     const json = (data, ok = true, status = 200) => ({ ok, status, json: async () => data });
     if (u.includes('/rest/v1/leads?') && (init.method || 'GET') === 'GET') {
       if (selectThrows) throw new Error('network');
+      if (u.includes('customer_notification_status=eq.sent')) return json(sentRecently);
       return json(u.includes('id=eq.') ? existing : u.includes('ip_hash=') ? recent : dup);
     }
     if (u.endsWith('/rest/v1/leads') && init.method === 'POST') {
@@ -275,6 +276,30 @@ await test('resultado do envio fica registrado no banco mesmo quando Resend falh
   assert.equal(JSON.parse(patch.init.body).notification_status, 'failed');
   assert.equal(JSON.parse(patch.init.body).customer_notification_status, 'failed');
   assert.equal(res.statusCode, 200);
+});
+
+await test('serviço fora da lista vira "Outro serviço" e ids conhecidos viram o nome do serviço', async () => {
+  const v = handler._internals.validate;
+  assert.equal(v({ ...validBody(), service_type: 'Seu pagamento falhou, acesse golpe.com' }).value.service_type, 'Outro serviço de ar-condicionado');
+  assert.equal(v({ ...validBody(), service_type: 'instalacao' }).value.service_type, 'Instalação de ar-condicionado');
+  assert.equal(v({ ...validBody(), service_type: 'Vazamentos e gotejamento' }).value.service_type, 'Vazamentos e gotejamento');
+});
+await test('e-mail ao cliente não repete links nem texto livre do formulário', async () => {
+  const { buildCustomerEmail } = handler._internals;
+  const mail = buildCustomerEmail({ ...validBody(), name: 'www.golpe-pix.com/pague', neighborhood: 'Centro http://x.co', service_type: 'Instalação de ar-condicionado' }, 'abc');
+  assert.ok(!/golpe-pix\.com/.test(mail.html + mail.text));
+  assert.ok(!/http:\/\/x\.co/.test(mail.html + mail.text));
+});
+await test('no máximo 1 confirmação por e-mail em 24h (antibombardeio)', async () => {
+  setEnv();
+  const calls = installFetch({ sentRecently: [{ id: 'outro-lead' }] });
+  const res = mockRes();
+  await handler(req(validBody()), res);
+  assert.equal(res.statusCode, 200);
+  const mails = calls.filter((c) => c.url.includes('api.resend.com'));
+  assert.equal(mails.length, 1, 'só o aviso interno');
+  const patch = calls.find((c) => c.init.method === 'PATCH');
+  assert.equal(JSON.parse(patch.init.body).customer_notification_status, 'skipped');
 });
 
 let failed = 0;

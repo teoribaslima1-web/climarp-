@@ -28,9 +28,9 @@ module.exports = async function handler(req, res) {
 
   try {
     const r = await fetch(`${baseUrl}/rest/v1/leads?select=id&limit=1`, { headers: supabaseHeaders(key) });
-    if (!r.ok) return res.status(502).json({ ok: false, error: `supabase_${r.status}` });
+    if (!r.ok) { console.error('[health] supabase', r.status); return res.status(502).json({ ok: false, error: 'unavailable' }); }
     return res.status(200).json({ ok: true, checked_at: new Date().toISOString() });
   } catch (err) {
-    return res.status(502).json({ ok: false, error: 'supabase_unreachable' });
+    return res.status(502).json({ ok: false, error: 'unavailable' });
   }
 };

@@ -52,6 +52,7 @@ await test('reenvio administrativo recupera as duas notificações e registra o 
   globalThis.fetch = async (url, init = {}) => {
     if (url.endsWith('/auth/v1/user')) return json({ email: 'contato@clima16.com.br' });
     if (url.includes('api.resend.com')) { emailCount++; return json({}); }
+    if (url.includes('customer_notification_status=eq.sent')) return json([]);
     if (init.method === 'PATCH') { recorded = JSON.parse(init.body); return json({}); }
     return json([{ ...body, id, status: 'novo', phone_digits: '16999999999' }]);
   };

@@ -46,6 +46,50 @@ function hashIp(ip) {
   return crypto.createHash('sha256').update(`${salt}:${ip}`).digest('hex');
 }
 
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const MAX_FAILS_PER_EMAIL = 8;
+const MAX_FAILS_PER_IP = 30;
+
+function hashKey(value) {
+  const salt = process.env.IP_HASH_SALT || 'clima16';
+  return crypto.createHash('sha256').update(`${salt}:login:${value}`).digest('hex');
+}
+
+/**
+ * Limita tentativas de login (tabela auth_failures). Falha "aberta": se a tabela não existir
+ * ou o Supabase falhar, não bloqueia ninguém — só deixa de contar.
+ */
+async function loginThrottle(baseUrl, key, req, scope, email) {
+  const ipHash = hashKey(`${scope}:ip:${clientIp(req)}`);
+  const emailHash = hashKey(`${scope}:email:${String(email || '').toLowerCase()}`);
+  const since = encodeURIComponent(new Date(Date.now() - LOGIN_WINDOW_MS).toISOString());
+  async function count(col, value, limit) {
+    const r = await boundedFetch(`${baseUrl}/rest/v1/auth_failures?select=id&${col}=eq.${value}&created_at=gte.${since}&limit=${limit}`, {
+      headers: supabaseHeaders(key)
+    });
+    if (!r.ok) return 0;
+    const rows = await r.json();
+    return Array.isArray(rows) ? rows.length : 0;
+  }
+  let blocked = false;
+  try {
+    blocked = (await count('email_hash', emailHash, MAX_FAILS_PER_EMAIL)) >= MAX_FAILS_PER_EMAIL
+      || (await count('ip_hash', ipHash, MAX_FAILS_PER_IP)) >= MAX_FAILS_PER_IP;
+  } catch { blocked = false; }
+  return {
+    blocked,
+    async fail() {
+      try {
+        await boundedFetch(`${baseUrl}/rest/v1/auth_failures`, {
+          method: 'POST',
+          headers: supabaseHeaders(key, { Prefer: 'return=minimal' }),
+          body: JSON.stringify({ scope, ip_hash: ipHash, email_hash: emailHash })
+        });
+      } catch { /* só registro */ }
+    }
+  };
+}
+
 function supabaseHeaders(key, extra = {}) {
   const headers = { apikey: key, 'Content-Type': 'application/json', ...extra };
   if (key.startsWith('eyJ')) headers.Authorization = `Bearer ${key}`;
@@ -87,4 +131,4 @@ async function postEmail({ to, subject, html, text, replyTo, tag = 'api', idempo
   }
 }
 
-module.exports = { clean, cleanMultiline, escapeHtml, clientIp, hashIp, supabaseHeaders, parseBody, postEmail, boundedFetch, normalizePhone };
+module.exports = { loginThrottle, clean, cleanMultiline, escapeHtml, clientIp, hashIp, supabaseHeaders, parseBody, postEmail, boundedFetch, normalizePhone };

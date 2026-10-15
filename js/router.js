@@ -117,6 +117,13 @@ export class Router {
   navigate(path) {
     const url = new URL(path, window.location.origin);
     const next = url.pathname + url.search;
+    // Entrar ou sair do painel/área do parceiro recarrega a página: aplica a política de segurança
+    // dessas rotas e descarta scripts de terceiros carregados no resto do site.
+    const isPrivate = (p) => /^\/(admin|parceiro)(\/|$)/.test(p);
+    if (isPrivate(url.pathname) !== isPrivate(window.location.pathname)) {
+      window.location.assign(next);
+      return;
+    }
     if (next !== window.location.pathname + window.location.search) {
       history.pushState(null, '', next);
     }

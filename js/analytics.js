@@ -20,6 +20,8 @@ class AnalyticsTracker {
    */
   loadTrackers() {
     if (this.mode) return;
+    // Nunca carregar scripts de terceiros nas áreas com dados pessoais (painel e área do parceiro).
+    if (/^\/(admin|parceiro)(\/|$)/.test(window.location.pathname)) return;
     const cfg = CONFIG.analytics || {};
     if (!cfg.enabled) return;
     try {

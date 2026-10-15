@@ -64,7 +64,7 @@ await test('login com senha certa devolve token; usa a chave pública', async ()
   const res = await call({ action: 'login', email: 'Contato@Clima16.com.br', password: 'certa' });
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.access_token, 'tok123');
-  assert.equal(calls[0].opts.headers.apikey, 'sb_publishable_test');
+  assert.equal(calls.find((c) => c.url.includes('/auth/v1/token')).opts.headers.apikey, 'sb_publishable_test');
 });
 
 await test('login com senha errada devolve 401 invalid_credentials', async () => {
@@ -74,12 +74,35 @@ await test('login com senha errada devolve 401 invalid_credentials', async () =>
   assert.equal(res.body.error, 'invalid_credentials');
 });
 
-await test('e-mail fora da lista nem chega ao Supabase e responde igual', async () => {
+await test('e-mail fora da lista responde igual à senha errada (mesmo caminho, sem revelar quem é admin)', async () => {
   mockFetch();
   const res = await call({ action: 'login', email: 'intruso@x.com', password: 'certa' });
   assert.equal(res.statusCode, 401);
   assert.equal(res.body.error, 'invalid_credentials');
-  assert.equal(calls.length, 0);
+  assert.ok(calls.some((c) => c.url.includes('/auth/v1/token')), 'consulta a senha antes de checar a lista');
+  assert.ok(calls.some((c) => c.url.includes('/rest/v1/auth_failures') && c.opts.method === 'POST'), 'registra a falha');
+});
+
+await test('login bloqueia com 429 depois de muitas falhas', async () => {
+  mockFetch();
+  const base = globalThis.fetch;
+  globalThis.fetch = async (url, opts = {}) => {
+    if (url.includes('/rest/v1/auth_failures') && (opts.method || 'GET') === 'GET') {
+      return { ok: true, status: 200, json: async () => Array.from({ length: 8 }, (_, i) => ({ id: i })) };
+    }
+    return base(url, opts);
+  };
+  const res = await call({ action: 'login', email: 'contato@clima16.com.br', password: 'certa' });
+  assert.equal(res.statusCode, 429);
+  assert.equal(res.body.error, 'too_many_attempts');
+  assert.ok(!calls.some((c) => c.url.includes('/auth/v1/token')));
+});
+
+await test('ADMIN_USER_IDS, se configurado, exige o ID certo além do e-mail', async () => {
+  process.env.ADMIN_USER_IDS = '11111111-1111-4111-8111-111111111111';
+  mockFetch();
+  assert.equal((await call({ action: 'list' }, 'tok123')).statusCode, 401);
+  delete process.env.ADMIN_USER_IDS;
 });
 
 await test('list sem token devolve 401', async () => {

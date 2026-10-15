@@ -69,6 +69,39 @@ function parseBody(req) {
   return typeof body === 'object' ? body : null;
 }
 
+// Serviços que o site oferece. Texto livre vira "Outro serviço" (evita usar o e-mail ao cliente para golpes).
+const OTHER_SERVICE = 'Outro serviço de ar-condicionado';
+const SERVICE_ALIASES = {
+  instalacao: 'Instalação de ar-condicionado',
+  manutencao: 'Manutenção de ar-condicionado',
+  limpeza: 'Limpeza e higienização',
+  nao_gela: 'Ar-condicionado não está gelando',
+  vazamento: 'Vazamento / gotejamento',
+  gas: 'Recarga / avaliação de gás',
+  outro: OTHER_SERVICE
+};
+const ALLOWED_SERVICES = new Set([
+  ...Object.values(SERVICE_ALIASES),
+  'Vazamentos e gotejamento',
+  'Recarga e avaliação de gás'
+]);
+
+function normalizeService(value) {
+  if (!value) return null;
+  if (ALLOWED_SERVICES.has(value)) return value;
+  const key = value.toLowerCase();
+  if (SERVICE_ALIASES[key]) return SERVICE_ALIASES[key];
+  const found = [...ALLOWED_SERVICES].find((s) => s.toLowerCase() === key);
+  return found || OTHER_SERVICE;
+}
+
+/** Só letras, números, espaço, apóstrofo e hífen: impede links e frases de golpe no e-mail ao cliente. */
+function safeLabel(value, max) {
+  return String(value || '').replace(/[^\p{L}\p{N} '\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+const CUSTOMER_EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
 function validate(input) {
   const name = clean(input.name, 120);
   const phoneRaw = clean(input.phone, 30);
@@ -80,7 +113,7 @@ function validate(input) {
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: 'invalid_email' };
   if (input.consent !== true) return { error: 'consent_required' };
 
-  const service = clean(input.service_type, 120);
+  const service = normalizeService(clean(input.service_type, 120));
   if (!service) return { error: 'invalid_service' };
 
   return {
@@ -189,18 +222,18 @@ function protocolFor(leadId) {
 
 function buildCustomerEmail(lead, leadId) {
   const protocol = protocolFor(leadId);
-  const firstName = (lead.name || '').split(' ')[0] || 'Olá';
+  const firstName = safeLabel((lead.name || '').split(' ')[0], 30);
   const contactEmail = process.env.LEAD_NOTIFY_TO ? process.env.LEAD_NOTIFY_TO.split(',')[0].trim() : 'contato@clima16.com.br';
   const waText = `Olá! Fiz um pedido no Clima16${protocol ? ` (protocolo ${protocol})` : ''}. Serviço: ${lead.service_type}.`;
   const wa = `https://wa.me/5516981570034?text=${encodeURIComponent(waText)}`;
   const resumo = [
     ['Serviço', lead.service_type],
-    ['Bairro', lead.neighborhood ? `${lead.neighborhood}, Ribeirão Preto – SP` : 'Ribeirão Preto – SP'],
+    ['Bairro', safeLabel(lead.neighborhood, 60) ? `${safeLabel(lead.neighborhood, 60)}, Ribeirão Preto – SP` : 'Ribeirão Preto – SP'],
     ...(protocol ? [['Protocolo', protocol]] : [])
   ];
 
   const text = [
-    `Olá, ${firstName}!`,
+    firstName ? `Olá, ${firstName}!` : 'Olá!',
     '',
     'Recebemos o seu pedido de orçamento no Clima16.',
     '',
@@ -217,7 +250,7 @@ function buildCustomerEmail(lead, leadId) {
   ].join('\n');
 
   const html = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#0f172a">
-  <h2 style="color:#092B55;margin:0 0 8px">Olá, ${escapeHtml(firstName)}!</h2>
+  <h2 style="color:#092B55;margin:0 0 8px">${firstName ? `Olá, ${escapeHtml(firstName)}!` : 'Olá!'}</h2>
   <p style="margin:0 0 16px;color:#334155">Recebemos o seu pedido de orçamento no <strong>Clima16</strong>.</p>
   <table style="width:100%;border-collapse:collapse;font-size:14px;background:#f8fafc;border-radius:8px">
     ${resumo.map(([k, v]) => `<tr><td style="padding:8px 12px;color:#64748b;width:110px">${escapeHtml(k)}</td><td style="padding:8px 12px"><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}
@@ -242,14 +275,33 @@ async function sendCustomerConfirmation(lead, leadId, attempt = 'initial') {
   return postEmail({ to: [lead.email], subject, html, text, replyTo, idempotencyKey: leadId ? `${leadId}/customer/${attempt}` : undefined });
 }
 
+/**
+ * No máximo 1 confirmação por e-mail a cada 24h (evita usar o formulário para bombardear alguém).
+ * Retorna 'ok', 'skip' (já recebeu ou e-mail fora do padrão) ou 'ok' se a checagem falhar.
+ */
+async function customerEmailAllowed(baseUrl, key, lead, leadId) {
+  if (!lead.email) return 'skip';
+  if (!CUSTOMER_EMAIL_RE.test(lead.email)) return 'skip';
+  try {
+    const since = encodeURIComponent(new Date(Date.now() - DUPLICATE_WINDOW_MS).toISOString());
+    const r = await boundedFetch(`${baseUrl}/rest/v1/leads?select=id&email=eq.${encodeURIComponent(lead.email)}&customer_notification_status=eq.sent&created_at=gte.${since}${leadId ? `&id=neq.${leadId}` : ''}&limit=1`, {
+      headers: supabaseHeaders(key)
+    });
+    if (!r.ok) return 'ok';
+    const rows = await r.json();
+    return Array.isArray(rows) && rows.length ? 'skip' : 'ok';
+  } catch { return 'ok'; }
+}
+
 async function deliverNotifications(baseUrl, key, lead, saved, attempt = 'initial') {
+  const allowed = await customerEmailAllowed(baseUrl, key, lead, saved.id);
   const [internal, customer] = await Promise.all([
     sendNotification(lead, saved.created_at, saved.id, attempt),
-    sendCustomerConfirmation(lead, saved.id, attempt)
+    allowed === 'ok' ? sendCustomerConfirmation(lead, saved.id, attempt) : Promise.resolve(null)
   ]);
   const patch = {
     notification_status: internal ? 'sent' : 'failed',
-    customer_notification_status: !lead.email ? 'not_applicable' : customer ? 'sent' : 'failed',
+    customer_notification_status: !lead.email ? 'not_applicable' : customer === null ? 'skipped' : customer ? 'sent' : 'failed',
     notification_attempted_at: new Date().toISOString()
   };
   let recorded = false;
@@ -372,4 +424,4 @@ module.exports = async function handler(req, res) {
   return res.status(200).json({ ok: true, id: saved && saved.id, duplicate: status === 'duplicado' });
 };
 
-module.exports._internals = { validate, clean, escapeHtml, buildEmail, buildCustomerEmail, deliverNotifications };
+module.exports._internals = { normalizeService, safeLabel, customerEmailAllowed, validate, clean, escapeHtml, buildEmail, buildCustomerEmail, deliverNotifications };

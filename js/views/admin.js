@@ -147,8 +147,9 @@ function showLogin(message = '') {
 
 function loginErrorText(out) {
   if (out.error === 'invalid_credentials') return 'E-mail ou senha incorretos.';
-  if (out.error === 'auth_unavailable') return 'Serviço de login indisponível. Veja a configuração SUPABASE_ANON_KEY.';
-  if (out.error === 'server_not_configured') return 'Servidor sem configuração do painel (variáveis de ambiente).';
+  if (out.error === 'auth_unavailable') return 'Serviço de login indisponível. Tente novamente em alguns minutos.';
+  if (out.error === 'too_many_attempts') return 'Muitas tentativas. Aguarde 15 minutos e tente de novo.';
+  if (out.error === 'server_not_configured') return 'Painel indisponível no momento.';
   if (out.error === 'network') return 'Sem conexão. Tente novamente.';
   return 'Não foi possível entrar agora.';
 }
@@ -507,7 +508,9 @@ function bindDashboard() {
     const out = await api({ action: 'create_partner_access', partner_id: partner.id });
     if (out.httpStatus === 401) return logout('Sessão expirada. Entre novamente.');
     if (!out.ok) {
-      const msg = out.error === 'user_exists'
+      const msg = out.error === 'email_reserved'
+        ? 'Esse e-mail é de um administrador do painel e não pode virar login de parceiro. Peça outro e-mail ao parceiro.'
+        : out.error === 'user_exists'
         ? 'Já existe um usuário com esse e-mail no Supabase (criado fora do painel). Apague-o em Authentication → Users e tente de novo.'
         : 'Não foi possível criar o acesso. Tente novamente.';
       return showNotice(msg, 'error');
