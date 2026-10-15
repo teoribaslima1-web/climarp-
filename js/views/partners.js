@@ -5,6 +5,34 @@
 import { submitPartner, CONSENT_HTML, HONEYPOT_HTML } from '../partners-api.js';
 import { analytics } from '../analytics.js';
 
+const PARTNER_FAQ = [
+  ['Quanto custa ser parceiro?', 'Nada. Nesta fase, o cadastro e o recebimento de pedidos são gratuitos, sem mensalidade. Se isso mudar no futuro, avisaremos com antecedência e você decide se quer continuar.'],
+  ['Como eu recebo os pedidos?', 'Quando um pedido combina com os seus serviços e a sua região, enviamos os dados do cliente (nome, WhatsApp, bairro, serviço e detalhes) por e-mail e WhatsApp. Você também vê tudo na área do parceiro.'],
+  ['Sou obrigado a atender todos os pedidos?', 'Não. Se não puder atender, é só avisar para encaminharmos a outro profissional. Quando aceitar, pedimos que responda o cliente o quanto antes.'],
+  ['Existe exclusividade?', 'Não. Você continua com seus clientes e canais de sempre. E o cliente pode receber contato de mais de um profissional para comparar propostas.'],
+  ['Preciso ter CNPJ?', 'Não. Técnicos autônomos, MEIs e empresas podem se cadastrar. O CNPJ é opcional.'],
+  ['Quanto tempo leva a aprovação?', 'Respondemos em até 1 dia útil pelo WhatsApp para confirmar seus dados. Depois de aprovado, você recebe o acesso à área do parceiro.'],
+  ['Quantos pedidos vou receber?', 'Depende da procura na sua região e dos serviços que você faz. O Clima16 está começando em Ribeirão Preto, então não prometemos um volume mínimo.']
+];
+
+function renderPartnerFaq() {
+  return `
+        <div class="max-w-2xl mx-auto mt-16">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-navy text-center mb-6">Dúvidas de quem quer ser parceiro</h2>
+          <div class="space-y-3">
+            ${PARTNER_FAQ.map(([q, a]) => `
+            <details class="group bg-white border border-slate-200 rounded-2xl p-5 open:shadow-subtle">
+              <summary class="flex items-center justify-between cursor-pointer list-none font-bold text-navy text-base">
+                <span class="pr-4">${q}</span>
+                <span class="text-slate-400 group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+              </summary>
+              <p class="mt-3 text-sm text-slate-600 leading-relaxed">${a}</p>
+            </details>`).join('')}
+          </div>
+          <p class="text-sm text-slate-500 text-center mt-6">Outra dúvida? Escreva para <a href="mailto:contato@clima16.com.br" class="text-brand-blue font-semibold hover:underline">contato@clima16.com.br</a>.</p>
+        </div>`;
+}
+
 export function renderPartnersView() {
   return `
     <div class="bg-slate-50 min-h-screen">
@@ -25,6 +53,13 @@ export function renderPartnersView() {
             O Clima16 conecta pessoas procurando serviços de climatização a profissionais e empresas da região. Cadastre seu interesse em receber oportunidades de atendimento.
           </p>
 
+          <ul class="mt-6 flex flex-wrap justify-center gap-2 text-xs sm:text-sm font-semibold" aria-label="Condições da parceria">
+            <li class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-full">✓ Cadastro gratuito</li>
+            <li class="bg-white/10 text-slate-200 border border-white/20 px-3 py-1.5 rounded-full">✓ Sem mensalidade</li>
+            <li class="bg-white/10 text-slate-200 border border-white/20 px-3 py-1.5 rounded-full">✓ Sem exclusividade</li>
+            <li class="bg-white/10 text-slate-200 border border-white/20 px-3 py-1.5 rounded-full">✓ CNPJ não obrigatório</li>
+          </ul>
+
           <div class="mt-8 flex justify-center">
             <button onclick="document.getElementById('cadastro-parceiro-form')?.scrollIntoView({behavior:'smooth'});" class="bg-brand-cyan hover:bg-cyan-400 text-navy font-extrabold text-base px-8 py-4 rounded-xl shadow-lg transition-all">
               Cadastrar meu interesse
@@ -41,7 +76,7 @@ export function renderPartnersView() {
           <p class="text-sm text-slate-600 mt-2">Um canal transparente para expandir seus atendimentos na cidade.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           <div class="bg-white p-7 rounded-2xl border border-slate-200 shadow-subtle text-left">
             <div class="w-12 h-12 bg-blue-100 text-brand-blue rounded-xl flex items-center justify-center font-bold text-lg mb-4">
               1
@@ -65,13 +100,21 @@ export function renderPartnersView() {
             <h3 class="text-lg font-bold text-navy mb-2">Negociação direta</h3>
             <p class="text-sm text-slate-600">Você conversa diretamente com o cliente, apresenta seu preço e estabelece seu cronograma.</p>
           </div>
+
+          <div class="bg-white p-7 rounded-2xl border border-slate-200 shadow-subtle text-left">
+            <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg mb-4">
+              4
+            </div>
+            <h3 class="text-lg font-bold text-navy mb-2">Painel do parceiro</h3>
+            <p class="text-sm text-slate-600">Depois de aprovado, você acompanha os pedidos encaminhados a você e marca o andamento de cada um na <a href="/parceiro" class="text-brand-blue font-semibold hover:underline">área do parceiro</a>.</p>
+          </div>
         </div>
 
         <!-- Embedded Partner Registration Form -->
         <div id="cadastro-parceiro-form" class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-subtle max-w-2xl mx-auto">
           <div class="text-center mb-8">
             <h3 class="text-2xl font-bold text-navy">Formulário de Cadastro de Parceiro</h3>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1">Preencha seus dados para receber o contato da nossa equipe de credenciamento.</p>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Preencha seus dados. Respondemos em até 1 dia útil pelo WhatsApp para confirmar seu cadastro.</p>
           </div>
 
           <form id="dedicated-partner-form" onsubmit="return false;" class="space-y-4 text-left">
@@ -145,14 +188,17 @@ export function renderPartnersView() {
             <p id="dp-error" class="text-sm text-rose-600 hidden" role="alert"></p>
 
             <div id="dp-success" class="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-sm font-medium hidden">
-              ✓ Cadastro realizado com sucesso! Nossa equipe entrará em contato via WhatsApp para confirmar as informações.
+              ✓ Recebemos seu cadastro! Vamos falar com você pelo WhatsApp em até 1 dia útil para confirmar as informações.
             </div>
 
             <button type="button" id="dp-submit-btn" class="w-full gradient-brand text-white font-extrabold text-base py-4 rounded-xl shadow-lg hover:shadow-xl transition-all">
               Cadastrar interesse
             </button>
+            <p class="text-xs text-center text-slate-500">Gratuito, sem mensalidade e sem exclusividade. Você pode pedir para sair a qualquer momento.</p>
           </form>
         </div>
+
+        ${renderPartnerFaq()}
 
       </section>
 

@@ -48,6 +48,34 @@ const TIMELINE_STEPS = [
 ];
 
 
+function escHtml(v) {
+  return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/** Seção "Profissionais parceiros": só aparece quando CONFIG.featuredPartners tiver itens (com autorização de cada parceiro). */
+function renderFeaturedPartners() {
+  const list = Array.isArray(CONFIG.featuredPartners) ? CONFIG.featuredPartners.filter((p) => p && p.name) : [];
+  if (!list.length) return '';
+  return `
+    <section id="parceiros-section" class="py-16 sm:py-20 bg-white border-t border-slate-100">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-10">
+          <span class="text-xs font-bold tracking-wider text-brand-blue uppercase bg-blue-50 px-3 py-1 rounded-full">Profissionais parceiros</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-3">Quem atende pelo Clima16</h2>
+          <p class="text-sm text-slate-600 mt-2">Técnicos e empresas de Ribeirão Preto que recebem os pedidos feitos aqui.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          ${list.map((p) => `
+          <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50 text-left">
+            <h3 class="font-bold text-navy text-lg">${escHtml(p.name)}</h3>
+            ${p.area ? `<p class="text-xs font-semibold text-brand-blue mt-1">${escHtml(p.area)}</p>` : ''}
+            ${p.services ? `<p class="text-sm text-slate-600 mt-2">${escHtml(p.services)}</p>` : ''}
+          </div>`).join('')}
+        </div>
+      </div>
+    </section>`;
+}
+
 export function renderHomeView() {
   const whatsappUrl = `https://wa.me/${CONFIG.brand.whatsappNumber}?text=${encodeURIComponent(CONFIG.brand.whatsappDefaultMessage)}`;
 
@@ -429,6 +457,8 @@ export function renderHomeView() {
     </section>
 
 
+    ${renderFeaturedPartners()}
+
     <!-- ================= ÁREA PARA PROFISSIONAIS ================= -->
     <section id="para-profissionais-section" class="py-16 sm:py-24 bg-slate-50 border-t border-slate-200/80">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -445,6 +475,7 @@ export function renderHomeView() {
             <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
               O Clima16 conecta pessoas procurando serviços de climatização a profissionais e empresas da região. Cadastre seu interesse em receber oportunidades de atendimento.
             </p>
+            <p class="text-sm font-semibold text-emerald-300">Cadastro gratuito, sem mensalidade e sem exclusividade.</p>
           </div>
 
           <div class="shrink-0 w-full sm:w-auto">

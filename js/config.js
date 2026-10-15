@@ -17,6 +17,10 @@ export const CONFIG = {
     whatsappDefaultMessage: 'Olá! Encontrei o Clima16 e gostaria de solicitar um orçamento para ar-condicionado.'
   },
 
+  // Parceiros exibidos na página inicial (só com autorização de cada um). Vazio = seção escondida.
+  // Exemplo: { name: 'Nome da Empresa', area: 'Zona Sul', services: 'Instalação e higienização' }
+  featuredPartners: [],
+
   analytics: {
     enabled: true,
     gtmId: 'GTM-M24C8R3M',

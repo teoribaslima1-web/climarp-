@@ -24,6 +24,7 @@ export function renderPartnerModal() {
           <p class="text-xs sm:text-sm text-slate-600 mt-1">
             Receba solicitações de clientes em Ribeirão Preto que precisam de instalação, manutenção e higienização.
           </p>
+          <p class="text-xs font-semibold text-emerald-700 mt-2">Cadastro gratuito · Sem mensalidade · Sem exclusividade</p>
         </div>
 
         <form id="partner-form" onsubmit="return false;" class="space-y-4 text-left">
@@ -98,7 +99,7 @@ export function renderPartnerModal() {
           <p id="partner-error-msg" class="text-xs text-rose-600 hidden" role="alert"></p>
 
           <div id="partner-success-msg" class="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-medium hidden">
-            ✓ Cadastro de interesse enviado com sucesso! Entraremos em contato para validar os dados.
+            ✓ Recebemos seu cadastro! Vamos falar com você pelo WhatsApp em até 1 dia útil para confirmar os dados.
           </div>
 
           <div class="pt-2 flex justify-end gap-3">

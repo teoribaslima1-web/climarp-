@@ -66,7 +66,7 @@ export function renderFAQ() {
         <div class="mt-10 p-6 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h4 class="font-bold text-navy text-base">Ainda tem alguma dúvida?</h4>
-            <p class="text-sm text-slate-600">Nossa equipe de suporte está à disposição para esclarecer tudo.</p>
+            <p class="text-sm text-slate-600">Fale com a gente pelo WhatsApp ou pelo e-mail contato@clima16.com.br.</p>
           </div>
           <button onclick="window.clima16Navigate('/formulario');" class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm hover:shadow whitespace-nowrap">
             Fazer solicitação gratuita
