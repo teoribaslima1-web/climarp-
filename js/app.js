@@ -31,6 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bannerMount) {
     bannerMount.innerHTML = renderCookieBanner();
     initCookieBannerEvents();
+    document.getElementById('cookie-preferences')?.addEventListener('click', () => {
+      bannerMount.innerHTML = renderCookieBanner(true);
+      initCookieBannerEvents();
+      document.getElementById('btn-reject-cookies')?.focus();
+    });
   }
 
   if (appMount) {

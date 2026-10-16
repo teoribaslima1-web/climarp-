@@ -62,6 +62,16 @@ GTM e GA4 têm IDs em `js/config.js`. Com GTM configurado, a tag GA4 deve existi
 
 Eventos principais: `form_start` após interação com o formulário, `form_step_1` a `form_step_4`, `form_complete` após sucesso do banco, `form_duplicate`, `form_submit_error`, `whatsapp_click`, `professional_signup` e `cta_click`. Validar no GTM/GA4 que cada pedido conta uma vez. Search Console, envio do sitemap e dados reais de campanhas ficam para a próxima etapa.
 
+O rodapé permite reabrir “Preferências de cookies”. Retirar o aceite recarrega a página para descarregar rastreadores. Eventos anteriores ao aceite não são colocados no dataLayer nem reenviados retroativamente; o histórico local da sessão é apenas diagnóstico. As áreas privadas continuam sem rastreadores, inclusive quando existe aceite anterior.
+
+## Divulgação e auditoria de SEO
+
+A tag de verificação do Search Console já existe em `index.html` e é preservada no build. Sua presença não comprova propriedade verificada, sitemap enviado ou páginas indexadas na conta Google. O JSON-LD descreve a Clima16 como organização/plataforma, sem ofertas de serviços próprios ou faixa de preços inventada.
+
+Depois de `npm run build`, execute `npm run audit:seo` para conferir os arquivos gerados. `npm run audit:seo -- --live` consulta somente páginas públicas de `https://clima16.com.br`, sem enviar formulários ou alterar dados. A auditoria verifica URLs do sitemap, títulos, descrições, H1, canonical, noindex e, em produção, CSP das áreas privadas. Não substitui Search Console ou testes de entrega real de e-mails.
+
+Em `divulgacao/`, ficam o relatório de 16/10/2026 e o material inicial de Instagram (bio, três artes PNG, legendas, textos alternativos e links UTM). Esses arquivos são de preparação e não entram em `dist/`. Não publicar sem revisão/autorização do dono e acesso à conta correta. Não há usuário de Instagram presumido nem parceiro fictício no material.
+
 ## Piloto comercial
 
 O material de abordagem está em `EMAILS-PARCEIROS.md`. Começar com cinco contatos personalizados. Confirmar serviços, cobertura, disponibilidade e disposição para dar feedback antes de aprovar o parceiro. Não prometer volume ou prazo de atendimento sem capacidade comprovada.

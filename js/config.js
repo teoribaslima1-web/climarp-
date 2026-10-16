@@ -14,6 +14,8 @@ export const CONFIG = {
     responsibleName: 'Téo Ribas Lima',
     whatsappNumber: '5516981570034',
     whatsappFormatted: '(16) 98157-0034',
+    instagramHandle: 'clima16.rp',
+    instagramUrl: 'https://www.instagram.com/clima16.rp/',
     whatsappDefaultMessage: 'Olá! Encontrei o Clima16 e gostaria de solicitar um orçamento para ar-condicionado.'
   },
 

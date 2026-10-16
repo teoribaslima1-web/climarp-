@@ -4,10 +4,10 @@
  */
 import { analytics } from '../analytics.js';
 
-export function renderCookieBanner() {
+export function renderCookieBanner(force = false) {
   let hasConsented = null;
   try { hasConsented = localStorage.getItem('clima16_lgpd_consent'); } catch { /* mostra escolha sem storage */ }
-  if (hasConsented) return '';
+  if (hasConsented && !force) return '';
 
   return `
     <div id="lgpd-cookie-banner" class="fixed bottom-4 left-4 right-4 md:left-8 md:right-auto md:max-w-md z-50 bg-white/95 backdrop-blur-md p-5 rounded-2xl shadow-2xl border border-slate-200 transition-all duration-300">
@@ -46,5 +46,7 @@ export function initCookieBannerEvents() {
   document.getElementById('btn-reject-cookies')?.addEventListener('click', () => {
     try { localStorage.setItem('clima16_lgpd_consent', 'false'); } catch { /* sem storage */ }
     banner?.remove();
+    // Descarrega também os scripts de métricas já carregados após um aceite anterior.
+    if (analytics.mode) window.location.reload();
   });
 }

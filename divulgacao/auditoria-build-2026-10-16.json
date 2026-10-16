@@ -1,0 +1,159 @@
+{
+  "mode": "build local",
+  "checked_at": "2026-10-16T19:18:35.317Z",
+  "public_pages": 20,
+  "passed": 30,
+  "total": 30,
+  "checks": [
+    {
+      "name": "robots.txt disponível e aponta para sitemap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sitemap disponível com URLs únicas do domínio",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/instalacao-ar-condicionado-ribeirao-preto: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/manutencao-ar-condicionado-ribeirao-preto: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/limpeza-ar-condicionado-ribeirao-preto: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/ar-condicionado-nao-gela-ribeirao-preto: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/vazamento-gotejamento-ar-condicionado-ribeirao-preto: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/recarga-avaliacao-gas-ar-condicionado-ribeirao-preto: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/calculadora-de-btus: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/para-profissionais: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/blog: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/blog/quanto-custa-instalar-ar-condicionado-ribeirao-preto: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/blog/ar-condicionado-9000-ou-12000-btus-qual-escolher: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/blog/com-que-frequencia-fazer-limpeza-do-ar-condicionado: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/blog/por-que-o-ar-condicionado-pinga: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/blog/por-que-o-ar-condicionado-liga-mas-nao-gela: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/blog/split-inverter-realmente-economiza-energia: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/blog/como-escolher-ar-condicionado-para-quarto: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/blog/qual-potencia-de-ar-condicionado-escolher: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/politica-de-privacidade: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/termos-de-uso: HTTP 200, título único, descrição, H1 e canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tag existente de verificação Google preservada",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "dados estruturados descrevem a plataforma sem ofertas próprias",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "imagem de compartilhamento existe no build",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sitemap exclui rotas internas e confirmação",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/admin: noindex",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/parceiro: noindex",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/solicitacao-recebida: noindex",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/404: noindex",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

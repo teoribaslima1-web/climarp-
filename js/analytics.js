@@ -4,7 +4,7 @@
  */
 import { CONFIG } from './config.js';
 
-class AnalyticsTracker {
+export class AnalyticsTracker {
   constructor() {
     this.sessionData = this.captureSessionMetadata();
     this.eventLog = this.loadEventLog();
@@ -27,6 +27,8 @@ class AnalyticsTracker {
     try {
       if (localStorage.getItem('clima16_lgpd_consent') !== 'true') return;
     } catch { return; }
+
+    this.startMeasurement();
 
     const gtm = /^GTM-[A-Z0-9]{4,10}$/.test(cfg.gtmId || '') && !/^GTM-X+$/.test(cfg.gtmId) ? cfg.gtmId : null;
     const ga4 = /^G-[A-Z0-9]{6,12}$/.test(cfg.ga4Id || '') && !/^G-X+$/.test(cfg.ga4Id) ? cfg.ga4Id : null;
@@ -66,7 +68,7 @@ class AnalyticsTracker {
 
   /** Eventos enviados direto (só quando não há GTM). */
   sendDirect(eventName, payload) {
-    if (this.mode !== 'direct') return;
+    if (this.mode !== 'direct' || !this.canMeasure()) return;
     try {
       if (window.gtag) window.gtag('event', eventName, payload);
       if (window.fbq) {
@@ -123,6 +125,17 @@ class AnalyticsTracker {
 
   initializeDataLayer() {
     window.dataLayer = window.dataLayer || [];
+  }
+
+  canMeasure() {
+    if (!CONFIG.analytics?.enabled || /^\/(admin|parceiro)(\/|$)/.test(window.location.pathname)) return false;
+    try { return localStorage.getItem('clima16_lgpd_consent') === 'true'; }
+    catch { return false; }
+  }
+
+  startMeasurement() {
+    if (!this.canMeasure() || this.measurementStarted) return;
+    this.measurementStarted = true;
     window.dataLayer.push({
       event: 'clima16_initialized',
       utm: this.sessionData
@@ -152,9 +165,12 @@ class AnalyticsTracker {
       ...payload
     };
 
-    // Push to browser dataLayer for GTM / GA4 / Meta Pixel
-    window.dataLayer.push(eventObject);
-    this.sendDirect(eventName, { ...payload });
+    // Não disponibiliza eventos anteriores ao aceite para o GTM carregar depois.
+    // O histórico local da sessão continua servindo para diagnóstico, sem envio externo.
+    if (this.canMeasure()) {
+      window.dataLayer.push(eventObject);
+      this.sendDirect(eventName, { ...payload });
+    }
 
     // Save locally for admin dashboard inspection
     this.eventLog.unshift(eventObject);

@@ -42,50 +42,36 @@
   <link rel="stylesheet" href="/css/tailwind.css" />
   <link rel="stylesheet" href="/css/styles.css" />
 
-  <!-- Schema.org JSON-LD Structured Data for Local Business / Platform -->
+  <!-- Plataforma de intermediação: sem ofertas ou preços de serviços próprios. -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "name": "Clima16 - Cotação de Ar-Condicionado",
-    "image": "https://clima16.com.br/assets/logo.png",
-    "description": "Plataforma local para solicitação de orçamentos de instalação, manutenção e limpeza de ar-condicionado em Ribeirão Preto – SP.",
-    "areaServed": {
-      "@type": "City",
-      "name": "Ribeirão Preto",
-      "sameAs": "https://pt.wikipedia.org/wiki/Ribeir%C3%A3o_Preto"
-    },
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Ribeirão Preto",
-      "addressRegion": "SP",
-      "addressCountry": "BR"
-    },
-    "priceRange": "$$",
-    "makesOffer": [
-      {
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Instalação de Ar-Condicionado em Ribeirão Preto"
-        }
-      },
-      {
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Manutenção e Reparo de Ar-Condicionado"
-        }
-      },
-      {
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Limpeza e Higienização de Ar-Condicionado"
-        }
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://clima16.com.br/#organizacao",
+      "name": "Clima16",
+      "url": "https://clima16.com.br/",
+      "logo": "https://clima16.com.br/assets/logo.png",
+      "email": "contato@clima16.com.br",
+      "description": "Plataforma local que conecta solicitações de orçamento de climatização a profissionais parceiros em Ribeirão Preto. A Clima16 não executa serviços.",
+      "areaServed": {
+        "@type": "City",
+        "name": "Ribeirão Preto"
       }
-    ]
-  }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://clima16.com.br/#site",
+      "url": "https://clima16.com.br/",
+      "name": "Clima16",
+      "inLanguage": "pt-BR",
+      "publisher": {
+        "@id": "https://clima16.com.br/#organizacao"
+      }
+    }
+  ]
+}
   </script>
 </head>
 <body class="min-h-screen flex flex-col bg-[#F7F9FC] text-slate-800 antialiased selection:bg-cyan-100 selection:text-navy">

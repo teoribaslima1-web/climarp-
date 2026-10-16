@@ -1,0 +1,72 @@
+CLIMA16 — RESULTADO DA PREPARAÇÃO PARA DIVULGAÇÃO
+Data: 16/10/2026 (America/Sao_Paulo)
+
+O QUE JÁ ESTAVA FEITO (PRESERVADO)
+- c467f0a: clareza de atendimento, cadastro de parceiros e contatos.
+- 35cbb95: segurança de admin/parceiros, limites de login e e-mails e regras AGENTS.md.
+- 823e713: tag de verificação do Search Console.
+- URLs de serviço e blog, sitemap, robots.txt, HTML público gerado no build e metadados por página.
+- IDs de GTM e GA4 em js/config.js. Não foi adicionado um segundo rastreador.
+- Durante esta execução, chegaram alterações paralelas com instagramHandle clima16.rp e link no rodapé; foram preservadas, sem recriar o perfil.
+- CONFIG.featuredPartners vazio; nenhum nome ou depoimento fictício foi adicionado.
+
+GOOGLE — CONFERÊNCIA DE PRODUÇÃO
+Relatório bruto: auditoria-publica-2026-10-16.json.
+20 páginas públicas do sitemap verificadas: 29 verificações aprovadas.
+Títulos, descrições, H1, canonical, robots.txt e sitemap acessíveis.
+A tag de verificação Google já está publicada. Rotas internas possuem noindex e CSP privada em /admin e /parceiro.
+Não foi possível conferir a propriedade dentro da conta: o navegador apresentou a página do Search Console sem login.
+Nenhum novo cadastro de propriedade ou envio duplicado de sitemap foi realizado.
+Acesso técnico não significa indexação confirmada nem posição nas buscas.
+
+GOOGLE — COMPLEMENTO LOCAL
+Dados estruturados atualizados para descrever a Clima16 como organização/plataforma, sem preço ou ofertas de serviços executados pela própria Clima16.
+A tag de verificação adicionada pelo Claude foi preservada.
+Novo comando: npm run audit:seo (build local) ou npm run audit:seo -- --live (produção, somente leitura).
+
+MEDIÇÃO — COMPLEMENTO LOCAL
+Eventos antes do aceite não entram no dataLayer nem são reenviados retroativamente quando o GTM carrega.
+O diagnóstico local da sessão continua existindo; não é um relatório de audiência do GA4.
+Botão Preferências de cookies no rodapé permite rever a escolha.
+Ao retirar o aceite, a página recarrega para descarregar rastreadores já carregados.
+As proteções de /admin e /parceiro foram preservadas.
+Há cinco novos testes automatizados para aceite, recusa, ausência de storage, áreas privadas e retirada do aceite.
+A publicação do contêiner GTM, tags GA4, eventos-chave e recebimento real na conta GA4 continuam sem verificação por falta de sessão autenticada.
+Não foi colocado GA4 direto junto com GTM, para não criar uma segunda instalação.
+
+SITE — VERIFICAÇÃO LOCAL
+- npm test aprovado: 85 testes (26 leads, 12 parceiros, 16 admin, 15 portal, 8 confiabilidade, 3 health, 5 métricas).
+- npm run css e npm run build aprovados: 25 páginas HTML.
+- Auditoria do build: conferir auditoria-build-2026-10-16.json.
+- Navegador: preferências de cookies abrem; Só essenciais mantém somente o script próprio da aplicação.
+- Tela de celular de 390 x 844: cadastro de parceiro com serviço e região concluído; fluxo de orçamento de cinco etapas concluído com protocolo.
+- Não houve rolagem horizontal nas telas verificadas do cadastro e da confirmação.
+- Supabase e Resend simulados: nenhum registro ou e-mail de produção foi criado para testes.
+- Esses testes não comprovam entrega de mensagens reais nem a aplicação das migrações SQL na produção.
+- Nenhuma alteração de banco foi feita nesta etapa.
+
+INSTAGRAM — MATERIAL PRONTO, NÃO PUBLICADO
+Pasta instagram/: três artes PNG 1080x1350, bio de 129 caracteres, três legendas, textos alternativos, links UTM e instruções.
+Pacote: pacote-instagram-clima16.zip.
+O Instagram abriu sem conta autenticada. O perfil @clima16.rp foi informado em uma atualização paralela de js/config.js e seu link no rodapé foi preservado. Nenhum perfil foi criado, alterado ou publicado nesta execução.
+Não foi possível verificar publicações feitas pelo Claude fora deste repositório/conta; comparar os rascunhos com a conta ao entrar.
+O texto deixa claro que a rede está em formação, sem promessa de volume, prazo ou atendimento garantido.
+
+PRÓXIMAS ETAPAS QUE EXIGEM ACESSO
+1. Entrar na conta Google que administra a propriedade existente. Conferir antes de criar ou enviar algo novamente.
+2. Search Console: verificar propriedade, sitemap https://clima16.com.br/sitemap.xml e inspeção da home e principais páginas. Solicitar indexação somente se ainda necessário.
+3. GTM/GA4: conferir contêiner publicado, tag GA4 e eventos form_complete, whatsapp_click e professional_signup. Validar sem duplicar page_view em navegação SPA.
+4. Entrar na conta correta do Instagram, comparar o que já existe e revisar bio/artes/legendas antes de publicar.
+5. Validar notificações reais com acesso ao painel e e-mail antes de aumentar divulgação ou iniciar anúncios.
+
+REFERÊNCIAS OFICIAIS CONSULTADAS
+https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl
+https://developers.google.com/analytics/devguides/collection/ga4/single-page-applications
+
+PUBLICAÇÃO DO CÓDIGO LOCAL
+cd C:\Users\teori\.gemini\antigravity\scratch\climarp
+git add .
+git commit -m "Prepara divulgacao, revisa SEO e melhora consentimento de metricas"
+git push
+
+O push publica o código pela integração existente da Vercel. Não publica as artes no Instagram, não configura contas Google e não roda SQL.

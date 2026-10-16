@@ -28,6 +28,10 @@ export function renderFooter() {
                 </svg>
                 <span>Atendimento via WhatsApp</span>
               </a>
+              <a href="${CONFIG.brand.instagramUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-xs font-bold text-pink-300 hover:text-pink-200 transition-colors" aria-label="Instagram do Clima16">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"></circle></svg>
+                <span>@${CONFIG.brand.instagramHandle}</span>
+              </a>
               <div class="flex items-center gap-2 text-xs font-semibold text-cyan-400 bg-slate-800/80 px-3 py-1.5 rounded-full w-fit">
                 <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
                 Atendimento inicial: Ribeirão Preto – SP
@@ -65,6 +69,7 @@ export function renderFooter() {
             <ul class="space-y-2 text-sm">
               <li><a href="/politica-de-privacidade" class="hover:text-white transition-colors">Política de Privacidade</a></li>
               <li><a href="/termos-de-uso" class="hover:text-white transition-colors">Termos de Uso</a></li>
+              <li><button type="button" id="cookie-preferences" class="hover:text-white transition-colors">Preferências de cookies</button></li>
             </ul>
           </div>
 
