@@ -4,6 +4,102 @@
  */
 export const BLOG_POSTS = [
   {
+    id: 'ar-condicionado-com-cheiro-de-mofo',
+    title: 'Ar-condicionado com cheiro de mofo: causas e o que fazer',
+    category: 'Saúde & Manutenção',
+    date: '18 de Outubro, 2026',
+    readTime: '4 min',
+    summary: 'Ligou o ar e sentiu cheiro de mofo ou de "pano molhado"? Veja de onde vem esse cheiro, o que você mesmo pode fazer e quando chamar um técnico.',
+    imageBg: 'from-emerald-500 to-teal-600',
+    content: `
+      <p class="mb-4">Sentir cheiro de mofo, de "pano molhado" ou de guardado logo que o ar-condicionado liga é um dos sinais mais comuns de que o aparelho precisa de limpeza. O cheiro quase sempre vem de sujeira e umidade acumuladas dentro da evaporadora (a parte que fica dentro do cômodo).</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">De onde vem o cheiro</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Filtros sujos:</strong> a poeira presa nos filtros retém umidade e vira um ambiente favorável para fungos.</li>
+        <li><strong>Serpentina e turbina com sujeira:</strong> mesmo com o filtro limpo, a parte interna acumula uma camada de sujeira que só sai com limpeza técnica.</li>
+        <li><strong>Bandeja e dreno com água parada:</strong> quando a água de condensação não escoa direito, ela fica parada e cria odor.</li>
+        <li><strong>Aparelho parado por muito tempo:</strong> depois de semanas sem uso, é comum o primeiro funcionamento soltar cheiro.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">O que você mesmo pode fazer</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li>Desligue o aparelho da tomada, retire os filtros e lave com água corrente e sabão neutro.</li>
+        <li>Deixe secar à sombra e só recoloque quando estiverem totalmente secos.</li>
+        <li>Se o seu aparelho tiver função de autolimpeza ou de secagem, use-a de vez em quando depois de desligar.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Quando chamar um técnico</h3>
+      <p class="mb-4">Se o cheiro continua depois de lavar os filtros, a sujeira está na parte interna. Nesse caso, o indicado é uma higienização completa, feita por um profissional, que limpa serpentina, turbina, bandeja e dreno. Em Ribeirão Preto, com o tempo seco e a poeira de boa parte do ano, isso costuma ser necessário com mais frequência. Veja também <a href="/blog/com-que-frequencia-fazer-limpeza-do-ar-condicionado" class="text-brand-blue font-semibold underline">com que frequência fazer a limpeza</a>.</p>
+      <p class="mb-4">Para receber orçamentos de <a href="/limpeza-ar-condicionado-ribeirao-preto" class="text-brand-blue font-semibold underline">limpeza e higienização em Ribeirão Preto</a>, é só pedir pelo formulário abaixo: é grátis e sem compromisso.</p>
+    `
+  },
+  {
+    id: 'ar-condicionado-fazendo-barulho',
+    title: 'Ar-condicionado fazendo barulho: o que pode ser?',
+    category: 'Problemas Comuns',
+    date: '18 de Outubro, 2026',
+    readTime: '4 min',
+    summary: 'Estalo, zumbido, chiado ou vibração: cada barulho do ar-condicionado tem causas diferentes. Saiba o que é normal e o que precisa de um técnico.',
+    imageBg: 'from-amber-500 to-orange-600',
+    content: `
+      <p class="mb-4">Todo ar-condicionado faz algum ruído, mas quando aparece um barulho novo ou mais alto do que antes, vale prestar atenção. O tipo de som ajuda a entender o que está acontecendo.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Barulhos que costumam ser normais</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Estalos leves ao ligar ou desligar:</strong> o plástico do gabinete dilata e contrai com a mudança de temperatura.</li>
+        <li><strong>Som de água correndo:</strong> é o fluido refrigerante circulando ou a água de condensação escoando.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Barulhos que pedem atenção</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Vibração ou trepidação:</strong> suporte frouxo, parafusos soltos ou a unidade externa encostada na parede.</li>
+        <li><strong>Chiado ou assobio contínuo:</strong> pode indicar vazamento de gás ou filtro muito sujo forçando a passagem de ar.</li>
+        <li><strong>Batidas ou raspado na unidade interna:</strong> sujeira ou alguma peça encostando na turbina.</li>
+        <li><strong>Zumbido forte na unidade externa:</strong> pode ser problema no compressor, no ventilador ou em componentes elétricos, como o capacitor.</li>
+        <li><strong>Gotejamento barulhento:</strong> dreno parcialmente entupido. Veja <a href="/blog/por-que-o-ar-condicionado-pinga" class="text-brand-blue font-semibold underline">por que o ar-condicionado pinga</a>.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">O que fazer</h3>
+      <p class="mb-4">Comece pelo simples: limpe os filtros e veja se não há nada encostado ou tampando a unidade externa. Se o barulho continuar, desligue o aparelho para não piorar o problema e chame um técnico para avaliar. Barulho no compressor ou cheiro de queimado são motivos para desligar na hora.</p>
+      <p class="mb-4">Pelo Clima16 você descreve o problema em um minuto e o pedido chega a técnicos de Ribeirão Preto. É grátis e sem compromisso.</p>
+    `
+  },
+  {
+    id: 'como-gastar-menos-energia-com-ar-condicionado',
+    title: 'Como gastar menos energia com o ar-condicionado no calor de Ribeirão Preto',
+    category: 'Tecnologia & Economia',
+    date: '18 de Outubro, 2026',
+    readTime: '4 min',
+    summary: 'Dicas práticas de uso, manutenção e instalação para manter a casa fresca no calor de Ribeirão sem a conta de luz disparar.',
+    imageBg: 'from-violet-600 to-purple-700',
+    content: `
+      <p class="mb-4">Em Ribeirão Preto o ar-condicionado fica ligado muitas horas por dia em boa parte do ano. Pequenos hábitos fazem diferença na conta de luz sem tirar o conforto.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">No uso do dia a dia</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Temperatura entre 23 °C e 25 °C:</strong> costuma ser confortável e exige menos do aparelho do que 17 °C ou 18 °C. Baixar demais não esfria mais rápido.</li>
+        <li><strong>Portas e janelas fechadas:</strong> e cortinas ou persianas fechadas nos horários de sol forte, principalmente à tarde.</li>
+        <li><strong>Timer e modo noturno:</strong> evitam que o aparelho fique ligado sem necessidade de madrugada ou com o cômodo vazio.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Na manutenção</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Filtros limpos:</strong> filtro sujo dificulta a passagem de ar e o aparelho trabalha mais para gelar. Com uso diário, lave a cada 15 dias.</li>
+        <li><strong>Higienização periódica:</strong> a limpeza interna feita por um técnico mantém a troca de calor eficiente.</li>
+        <li><strong>Unidade externa livre:</strong> nada encostado, coberto ou tampando a saída de ar.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Na compra e na instalação</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Potência certa:</strong> aparelho pequeno demais fica ligado no máximo o tempo todo. Faça a conta na <a href="/calculadora-de-btus" class="text-brand-blue font-semibold underline">calculadora de BTUs</a>.</li>
+        <li><strong>Modelos Inverter:</strong> para quem usa muitas horas por dia, costumam consumir menos. Entenda mais em <a href="/blog/split-inverter-realmente-economiza-energia" class="text-brand-blue font-semibold underline">Split Inverter economiza mesmo?</a></li>
+        <li><strong>Instalação bem feita:</strong> tubulação isolada, vácuo bem feito e condensadora em local ventilado evitam perda de rendimento.</li>
+      </ul>
+      <p class="mb-4">Precisa instalar, limpar ou revisar o seu aparelho? Peça orçamentos a técnicos de Ribeirão Preto pelo formulário abaixo, sem custo e sem compromisso.</p>
+    `
+  },
+  {
     id: 'quanto-custa-instalar-ar-condicionado-ribeirao-preto',
     title: 'Quanto custa instalar um ar-condicionado em Ribeirão Preto?',
     category: 'Custos & Orçamentos',

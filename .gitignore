@@ -30,3 +30,6 @@ __pycache__/
 .gemini/
 
 prospeccao/
+
+# Arquivos que o app do Claude salva na pasta
+Claude outputs/
