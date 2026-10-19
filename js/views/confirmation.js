@@ -78,6 +78,11 @@ export function renderConfirmationView() {
           <a href="/blog" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm px-6 py-3.5 rounded-xl transition-all text-center">Ver dicas no Blog</a>
         </div>
 
+        <a href="${CONFIG.brand.instagramUrl}" target="_blank" rel="noopener noreferrer" data-instagram-follow="confirmation" class="mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-pink-600 hover:text-pink-700 hover:underline">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          Siga @${CONFIG.brand.instagramHandle} no Instagram para dicas de ar-condicionado
+        </a>
+
         <div class="mt-8 pt-6 border-t border-slate-100 text-xs text-slate-400">Clima16 • Marketplace de Climatização em Ribeirão Preto – SP</div>
       </div>
     </div>

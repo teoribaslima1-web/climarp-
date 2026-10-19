@@ -343,6 +343,15 @@ function renderDashboard() {
   bindDashboard();
 }
 
+function lastAccess(p) {
+  if (!p.auth_user_id) return '';
+  if (!p.last_sign_in_at) return '<div class="text-slate-400 mt-1">Ainda não entrou no painel</div>';
+  const d = new Date(p.last_sign_in_at);
+  if (Number.isNaN(d.getTime())) return '';
+  const txt = d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+  return `<div class="text-emerald-700 mt-1">Último acesso: ${escapeHtml(txt)}</div>`;
+}
+
 function renderPartnerRows() {
   const tbody = document.getElementById('admin-partners-tbody');
   if (!tbody) return;
@@ -374,7 +383,7 @@ function renderPartnerRows() {
         <td class="p-4 text-xs">
           ${p.status !== 'aprovado' ? '<span class="text-slate-400">Aprove para liberar</span>'
             : !p.email ? '<span class="text-slate-400">Sem e-mail cadastrado</span>'
-            : `<button class="admin-access-btn font-semibold text-brand-blue hover:underline" data-id="${escapeHtml(p.id)}">${p.auth_user_id ? 'Redefinir senha' : 'Criar acesso'}</button>`}
+            : `<button class="admin-access-btn font-semibold text-brand-blue hover:underline" data-id="${escapeHtml(p.id)}">${p.auth_user_id ? 'Redefinir senha' : 'Criar acesso'}</button>${lastAccess(p)}`}
         </td>
         <td class="p-4 text-right">
           <button class="admin-partner-delete text-slate-400 hover:text-rose-600 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-rose-50" data-id="${escapeHtml(p.id)}">Excluir</button>

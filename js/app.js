@@ -38,6 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Cliques nos links do Instagram (rodapé, blog e confirmação) viram evento no GA4, se houver aceite.
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest && e.target.closest('[data-instagram-follow]');
+    if (link) window.clima16Analytics?.track('instagram_click', { origin: link.getAttribute('data-instagram-follow') });
+  });
+
   if (appMount) {
     const router = new Router(appMount);
     router.init();

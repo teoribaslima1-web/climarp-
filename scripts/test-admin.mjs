@@ -188,6 +188,46 @@ await test('sem variáveis de ambiente responde 500', async () => {
   process.env.SUPABASE_URL = keep;
 });
 
+await test('list_partners mostra último acesso só de quem tem acesso (UUID válido)', async () => {
+  const AUTH = '9c1d2e3f-aaaa-4bbb-8ccc-ddddeeeeffff';
+  calls = [];
+  globalThis.fetch = async (url, opts = {}) => {
+    calls.push({ url, opts });
+    const json = (status, body) => ({ ok: status < 300, status, json: async () => body });
+    if (url.includes('/auth/v1/user')) return json(200, { email: 'contato@clima16.com.br' });
+    if (url.includes('/auth/v1/admin/users/')) return json(200, { id: AUTH, email: 'p@x.com', last_sign_in_at: '2026-10-19T17:05:00Z', phone: '999' });
+    if (url.includes('/rest/v1/partners')) return json(200, [
+      { id: ID, name: 'Com acesso', auth_user_id: AUTH },
+      { id: ID, name: 'ID estranho', auth_user_id: "x' or 1=1" },
+      { id: ID, name: 'Sem acesso', auth_user_id: null }
+    ]);
+    return json(500, {});
+  };
+  const res = await call({ action: 'list_partners' }, 'tok123');
+  assert.equal(res.statusCode, 200);
+  const [a, b, c] = res.body.partners;
+  assert.equal(a.last_sign_in_at, '2026-10-19T17:05:00Z');
+  assert.equal(b.last_sign_in_at, undefined);
+  assert.equal(c.last_sign_in_at, undefined);
+  assert.equal(a.phone, undefined);
+  const authCalls = calls.filter((x) => x.url.includes('/auth/v1/admin/users/'));
+  assert.equal(authCalls.length, 1);
+  assert.ok(authCalls[0].url.endsWith(AUTH));
+});
+
+await test('list_partners continua funcionando se o Supabase Auth falhar', async () => {
+  globalThis.fetch = async (url) => {
+    const json = (status, body) => ({ ok: status < 300, status, json: async () => body });
+    if (url.includes('/auth/v1/user')) return json(200, { email: 'contato@clima16.com.br' });
+    if (url.includes('/auth/v1/admin/users/')) throw new Error('timeout');
+    if (url.includes('/rest/v1/partners')) return json(200, [{ id: ID, name: 'A', auth_user_id: '9c1d2e3f-aaaa-4bbb-8ccc-ddddeeeeffff' }]);
+    return json(500, {});
+  };
+  const res = await call({ action: 'list_partners' }, 'tok123');
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.partners[0].last_sign_in_at, null);
+});
+
 let failed = 0;
 for (const [ok, name, err] of results) {
   console.log(`${ok ? 'OK  ' : 'FAIL'} ${name}`);

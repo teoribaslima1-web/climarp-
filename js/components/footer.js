@@ -28,7 +28,7 @@ export function renderFooter() {
                 </svg>
                 <span>Atendimento via WhatsApp</span>
               </a>
-              <a href="${CONFIG.brand.instagramUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-xs font-bold text-pink-300 hover:text-pink-200 transition-colors" aria-label="Instagram do Clima16">
+              <a href="${CONFIG.brand.instagramUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-xs font-bold text-pink-300 hover:text-pink-200 transition-colors" aria-label="Instagram do Clima16" data-instagram-follow="footer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"></circle></svg>
                 <span>@${CONFIG.brand.instagramHandle}</span>
               </a>

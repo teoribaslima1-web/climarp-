@@ -248,7 +248,27 @@ module.exports = async function handler(req, res) {
         console.error('[admin] list_partners_failed', r.status);
         return res.status(502).json({ ok: false, error: 'list_failed' });
       }
-      return res.status(200).json({ ok: true, partners: await r.json() });
+      const partners = await r.json();
+      // Último login no portal: vem do Supabase Auth (só para quem já tem acesso criado).
+      const withAccess = (Array.isArray(partners) ? partners : [])
+        .filter((p) => typeof p.auth_user_id === 'string' && UUID_RE.test(p.auth_user_id))
+        .slice(0, 50);
+      await Promise.all(withAccess.map(async (p) => {
+        p.last_sign_in_at = null;
+        try {
+          const u = await fetch(`${baseUrl}/auth/v1/admin/users/${p.auth_user_id}`, {
+            headers: supabaseHeaders(serviceKey),
+            signal: AbortSignal.timeout(4000)
+          });
+          if (!u.ok) return;
+          const data = await u.json();
+          const user = data && data.user ? data.user : data;
+          if (user && typeof user.last_sign_in_at === 'string' && !Number.isNaN(Date.parse(user.last_sign_in_at))) {
+            p.last_sign_in_at = user.last_sign_in_at;
+          }
+        } catch { /* sem a data, o painel mostra "sem informação" */ }
+      }));
+      return res.status(200).json({ ok: true, partners });
     }
 
     if (body.action === 'delete_partner') {

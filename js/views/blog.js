@@ -3,6 +3,7 @@
  * Displays technical guides, buying tips, and practical articles with high conversion CTAs.
  */
 import { BLOG_POSTS } from '../blog-data.js';
+import { CONFIG } from '../config.js';
 
 export function renderBlogView(postId = null) {
   if (postId) {
@@ -128,6 +129,11 @@ function renderSingleArticle(article) {
             Solicitar orçamento agora
           </a>
         </div>
+
+        <p class="text-center text-sm text-slate-600 -mt-6 mb-10">
+          Quer mais dicas como esta?
+          <a href="${CONFIG.brand.instagramUrl}" target="_blank" rel="noopener noreferrer" data-instagram-follow="blog" class="font-semibold text-pink-600 hover:text-pink-700 hover:underline">Siga @${CONFIG.brand.instagramHandle} no Instagram</a>
+        </p>
 
         <div class="pt-6 border-t border-slate-200 flex justify-between items-center">
           <a href="/blog" class="text-sm font-semibold text-brand-blue hover:underline">← Voltar para todos os artigos</a>
