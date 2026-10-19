@@ -11,7 +11,7 @@ const PARTNER_FAQ = [
   ['Sou obrigado a atender todos os pedidos?', 'Não. Se não puder atender, é só avisar para encaminharmos a outro profissional. Quando aceitar, pedimos que responda o cliente o quanto antes.'],
   ['Existe exclusividade?', 'Não. Você continua com seus clientes e canais de sempre. E o cliente pode receber contato de mais de um profissional para comparar propostas.'],
   ['Preciso ter CNPJ?', 'Não. Técnicos autônomos, MEIs e empresas podem se cadastrar. O CNPJ é opcional.'],
-  ['Quanto tempo leva a aprovação?', 'Analisamos os dados e poderemos entrar em contato pelo WhatsApp para confirmar serviços e regiões atendidas. Não há prazo garantido de aprovação. Depois de aprovado, você recebe o acesso à área do parceiro.'],
+  ['Quanto tempo leva a aprovação?', 'Analisamos os dados e poderemos entrar em contato pelo WhatsApp para confirmar serviços e regiões atendidas. Não há prazo garantido de aprovação. Depois de aprovado, enviamos o acesso à área do parceiro pelo WhatsApp informado no cadastro.'],
   ['Quantos pedidos vou receber?', 'Depende da procura na sua região e dos serviços que você faz. O Clima16 está começando em Ribeirão Preto, então não prometemos um volume mínimo.']
 ];
 
@@ -193,7 +193,7 @@ export function renderPartnersView() {
             <p id="dp-error" class="text-sm text-rose-600 hidden" role="alert"></p>
 
             <div id="dp-success" class="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-sm font-medium hidden">
-              ✓ Recebemos seu cadastro! Poderemos falar com você pelo WhatsApp para confirmar as informações.
+              ✓ Recebemos seu cadastro! Poderemos falar com você pelo WhatsApp para confirmar as informações. Se aprovado, o acesso à área do parceiro também chega por lá.
             </div>
 
             <button type="button" id="dp-submit-btn" class="w-full gradient-brand text-white font-extrabold text-base py-4 rounded-xl shadow-lg hover:shadow-xl transition-all">

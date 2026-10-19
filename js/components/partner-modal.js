@@ -104,7 +104,7 @@ export function renderPartnerModal() {
           <p id="partner-error-msg" class="text-xs text-rose-600 hidden" role="alert"></p>
 
           <div id="partner-success-msg" class="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-medium hidden">
-            ✓ Recebemos seu cadastro! Poderemos falar com você pelo WhatsApp para confirmar os dados.
+            ✓ Recebemos seu cadastro! Poderemos falar com você pelo WhatsApp para confirmar os dados. Se aprovado, o acesso à área do parceiro também chega por lá.
           </div>
 
           <div class="pt-2 flex justify-end gap-3">
