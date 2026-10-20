@@ -57,6 +57,25 @@ function partnerInitials(name) {
   return String(name || '').split(/\s+/).filter((w) => /^[\p{L}\d]/u.test(w)).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
 }
 
+function renderPartnerStrip() {
+  const list = Array.isArray(CONFIG.featuredPartners) ? CONFIG.featuredPartners.filter((p) => p && p.name) : [];
+  if (!list.length) return '';
+  const safeLogo = (p) => (typeof p.logo === 'string' && /^\/[\w\-./]+\.(png|jpe?g|webp|svg)$/i.test(p.logo) ? p.logo : '');
+  const faces = list.slice(0, 4).map((p, i) => {
+    const logo = safeLogo(p);
+    const base = `w-8 h-8 rounded-full border-2 border-white shadow-sm shrink-0 ${i ? '-ml-2' : ''}`;
+    return logo
+      ? `<img src="${escHtml(logo)}" alt="" width="32" height="32" class="${base} bg-white object-cover">`
+      : `<span class="${base} gradient-brand text-white text-[11px] font-extrabold flex items-center justify-center" aria-hidden="true">${escHtml(partnerInitials(p.name))}</span>`;
+  }).join('');
+  const label = list.length === 1 ? `Técnico parceiro: ${list[0].name}` : `${list.length} técnicos e empresas parceiras em Ribeirão Preto`;
+  return `
+            <button type="button" onclick="document.getElementById('parceiros-section')?.scrollIntoView({behavior:'smooth'});" class="inline-flex items-center gap-3 bg-white/80 hover:bg-white border border-slate-200 hover:border-brand-blue/40 rounded-full pl-1.5 pr-4 py-1.5 shadow-sm transition-colors text-left">
+              <span class="flex items-center">${faces}</span>
+              <span class="text-xs sm:text-sm font-semibold text-slate-700">${escHtml(label)} <span class="text-brand-blue">· ver quem atende →</span></span>
+            </button>`;
+}
+
 function renderFeaturedPartners() {
   const list = Array.isArray(CONFIG.featuredPartners) ? CONFIG.featuredPartners.filter((p) => p && p.name) : [];
   if (!list.length) return '';
@@ -75,7 +94,7 @@ function renderFeaturedPartners() {
             return `
           <div class="w-full sm:w-[calc(50%-0.625rem)] lg:w-[calc(33.333%-0.84rem)] max-w-sm p-6 rounded-2xl border border-slate-200 bg-slate-50 text-left flex gap-4 items-start">
             ${logo
-              ? `<img src="${escHtml(logo)}" alt="Logo ${escHtml(p.name)}" width="64" height="64" loading="lazy" class="w-16 h-16 rounded-xl bg-white border border-slate-200 object-contain p-1 shrink-0">`
+              ? `<img src="${escHtml(logo)}" alt="Logo ${escHtml(p.name)}" width="64" height="64" loading="lazy" class="w-16 h-16 rounded-full bg-white border border-slate-200 object-cover shrink-0">`
               : `<div class="w-16 h-16 rounded-xl gradient-brand text-white font-extrabold text-xl flex items-center justify-center shrink-0" aria-hidden="true">${escHtml(partnerInitials(p.name))}</div>`}
             <div class="min-w-0">
               <h3 class="font-bold text-navy text-lg leading-snug">${escHtml(p.name)}</h3>
@@ -152,6 +171,8 @@ export function renderHomeView() {
                 <span>Falar pelo WhatsApp</span>
               </a>
             </div>
+
+            ${renderPartnerStrip()}
 
             <!-- Trust Indicators -->
             <div class="pt-4 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs sm:text-sm font-medium text-slate-600">
@@ -279,6 +300,8 @@ export function renderHomeView() {
       </div>
     </section>
 
+
+    ${renderFeaturedPartners()}
 
     <!-- ================= CALCULADORA DE BTUs ================= -->
     <section id="calculadora-section" class="py-16 sm:py-24 bg-slate-50">
@@ -471,7 +494,6 @@ export function renderHomeView() {
     </section>
 
 
-    ${renderFeaturedPartners()}
 
     <!-- ================= ÁREA PARA PROFISSIONAIS ================= -->
     <section id="para-profissionais-section" class="py-16 sm:py-24 bg-slate-50 border-t border-slate-200/80">

@@ -27,7 +27,8 @@ export const CONFIG = {
       name: 'Linear Elétrica & Ar Condicionado', // autorizado pelo WhatsApp em 20/10/2026
       area: 'Ribeirão Preto e região',
       services: 'Instalação, manutenção e higienização de ar-condicionado. Também faz serviços elétricos.',
-      instagram: 'linear_ribeiraopreto'
+      instagram: 'linear_ribeiraopreto',
+      logo: '/assets/parceiros/linear.webp'
     }
   ],
 
