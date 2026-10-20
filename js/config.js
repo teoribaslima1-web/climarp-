@@ -20,8 +20,16 @@ export const CONFIG = {
   },
 
   // Parceiros exibidos na página inicial (só com autorização de cada um). Vazio = seção escondida.
-  // Exemplo: { name: 'Nome da Empresa', area: 'Zona Sul', services: 'Instalação e higienização' }
-  featuredPartners: [],
+  // Exemplo: { name: 'Nome da Empresa', area: 'Zona Sul', services: 'Instalação e higienização', instagram: 'perfil', logo: '/assets/parceiros/arquivo.png' }
+  // logo: só com o arquivo enviado pelo próprio parceiro e autorização dele. Sem logo, aparecem as iniciais.
+  featuredPartners: [
+    {
+      name: 'Linear Elétrica & Ar Condicionado', // autorizado pelo WhatsApp em 20/10/2026
+      area: 'Ribeirão Preto e região',
+      services: 'Instalação, manutenção e higienização de ar-condicionado. Também faz serviços elétricos.',
+      instagram: 'linear_ribeiraopreto'
+    }
+  ],
 
   analytics: {
     enabled: true,

@@ -53,6 +53,10 @@ function escHtml(v) {
 }
 
 /** Seção "Profissionais parceiros": só aparece quando CONFIG.featuredPartners tiver itens (com autorização de cada parceiro). */
+function partnerInitials(name) {
+  return String(name || '').split(/\s+/).filter((w) => /^[\p{L}\d]/u.test(w)).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
+}
+
 function renderFeaturedPartners() {
   const list = Array.isArray(CONFIG.featuredPartners) ? CONFIG.featuredPartners.filter((p) => p && p.name) : [];
   if (!list.length) return '';
@@ -64,13 +68,23 @@ function renderFeaturedPartners() {
           <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-3">Quem atende pelo Clima16</h2>
           <p class="text-sm text-slate-600 mt-2">Técnicos e empresas de Ribeirão Preto que recebem os pedidos feitos aqui.</p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          ${list.map((p) => `
-          <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50 text-left">
-            <h3 class="font-bold text-navy text-lg">${escHtml(p.name)}</h3>
-            ${p.area ? `<p class="text-xs font-semibold text-brand-blue mt-1">${escHtml(p.area)}</p>` : ''}
-            ${p.services ? `<p class="text-sm text-slate-600 mt-2">${escHtml(p.services)}</p>` : ''}
-          </div>`).join('')}
+        <div class="flex flex-wrap justify-center gap-5">
+          ${list.map((p) => {
+            const logo = typeof p.logo === 'string' && /^\/[\w\-./]+\.(png|jpe?g|webp|svg)$/i.test(p.logo) ? p.logo : '';
+            const ig = typeof p.instagram === 'string' && /^[a-z0-9._]{1,30}$/i.test(p.instagram) ? p.instagram : '';
+            return `
+          <div class="w-full sm:w-[calc(50%-0.625rem)] lg:w-[calc(33.333%-0.84rem)] max-w-sm p-6 rounded-2xl border border-slate-200 bg-slate-50 text-left flex gap-4 items-start">
+            ${logo
+              ? `<img src="${escHtml(logo)}" alt="Logo ${escHtml(p.name)}" width="64" height="64" loading="lazy" class="w-16 h-16 rounded-xl bg-white border border-slate-200 object-contain p-1 shrink-0">`
+              : `<div class="w-16 h-16 rounded-xl gradient-brand text-white font-extrabold text-xl flex items-center justify-center shrink-0" aria-hidden="true">${escHtml(partnerInitials(p.name))}</div>`}
+            <div class="min-w-0">
+              <h3 class="font-bold text-navy text-lg leading-snug">${escHtml(p.name)}</h3>
+              ${p.area ? `<p class="text-xs font-semibold text-brand-blue mt-1">${escHtml(p.area)}</p>` : ''}
+              ${p.services ? `<p class="text-sm text-slate-600 mt-2">${escHtml(p.services)}</p>` : ''}
+              ${ig ? `<a href="https://www.instagram.com/${escHtml(ig)}/" target="_blank" rel="noopener noreferrer" class="inline-block mt-3 text-xs font-semibold text-pink-600 hover:text-pink-700 hover:underline">@${escHtml(ig)}</a>` : ''}
+            </div>
+          </div>`;
+          }).join('')}
         </div>
       </div>
     </section>`;
