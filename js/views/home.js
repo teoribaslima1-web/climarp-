@@ -511,7 +511,7 @@ export function renderHomeView() {
             <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
               O Clima16 conecta pessoas procurando serviços de climatização a profissionais e empresas da região. Cadastre seu interesse em receber oportunidades de atendimento.
             </p>
-            <p class="text-sm font-semibold text-emerald-300">Cadastro gratuito, sem mensalidade e sem exclusividade.</p>
+            <p class="text-sm font-semibold text-emerald-300">Cadastro gratuito durante a fase de lançamento, sem mensalidade e sem exclusividade.</p>
           </div>
 
           <div class="shrink-0 w-full sm:w-auto">

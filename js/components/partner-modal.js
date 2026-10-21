@@ -24,7 +24,7 @@ export function renderPartnerModal() {
           <p class="text-xs sm:text-sm text-slate-600 mt-1">
             Cadastre interesse em receber solicitações compatíveis com seus serviços e região. Estamos formando a rede e não garantimos um volume mínimo de pedidos.
           </p>
-          <p class="text-xs font-semibold text-emerald-700 mt-2">Cadastro gratuito · Sem mensalidade · Sem exclusividade</p>
+          <p class="text-xs font-semibold text-emerald-700 mt-2">Gratuito na fase de lançamento · Sem mensalidade · Sem exclusividade</p>
         </div>
 
         <form id="partner-form" onsubmit="return false;" class="space-y-4 text-left">

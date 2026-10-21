@@ -6,7 +6,7 @@ import { submitPartner, CONSENT_HTML, HONEYPOT_HTML } from '../partners-api.js';
 import { analytics } from '../analytics.js';
 
 const PARTNER_FAQ = [
-  ['Quanto custa ser parceiro?', 'Nada. Nesta fase, o cadastro e o recebimento de pedidos são gratuitos, sem mensalidade. Se isso mudar no futuro, avisaremos com antecedência e você decide se quer continuar.'],
+  ['Quanto custa ser parceiro?', 'Nada. Durante a fase de lançamento, o cadastro e o recebimento de pedidos são gratuitos, sem mensalidade. Se isso mudar no futuro, avisaremos com antecedência e você decide se quer continuar.'],
   ['Como eu recebo os pedidos?', 'Quando um pedido combina com os seus serviços e a sua região, enviamos os dados do cliente (nome, WhatsApp, bairro, serviço e detalhes) por e-mail e WhatsApp. Você também vê tudo na área do parceiro.'],
   ['Sou obrigado a atender todos os pedidos?', 'Não. Se não puder atender, é só avisar para encaminharmos a outro profissional. Quando aceitar, pedimos que responda o cliente o quanto antes.'],
   ['Existe exclusividade?', 'Não. Você continua com seus clientes e canais de sempre. E o cliente pode receber contato de mais de um profissional para comparar propostas.'],
@@ -54,7 +54,7 @@ export function renderPartnersView() {
           </p>
 
           <ul class="mt-6 flex flex-wrap justify-center gap-2 text-xs sm:text-sm font-semibold" aria-label="Condições da parceria">
-            <li class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-full">✓ Cadastro gratuito</li>
+            <li class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-full">✓ Gratuito na fase de lançamento</li>
             <li class="bg-white/10 text-slate-200 border border-white/20 px-3 py-1.5 rounded-full">✓ Sem mensalidade</li>
             <li class="bg-white/10 text-slate-200 border border-white/20 px-3 py-1.5 rounded-full">✓ Sem exclusividade</li>
             <li class="bg-white/10 text-slate-200 border border-white/20 px-3 py-1.5 rounded-full">✓ CNPJ não obrigatório</li>
@@ -199,7 +199,7 @@ export function renderPartnersView() {
             <button type="button" id="dp-submit-btn" class="w-full gradient-brand text-white font-extrabold text-base py-4 rounded-xl shadow-lg hover:shadow-xl transition-all">
               Cadastrar interesse
             </button>
-            <p class="text-xs text-center text-slate-500">Gratuito, sem mensalidade e sem exclusividade. Você pode pedir para sair a qualquer momento.</p>
+            <p class="text-xs text-center text-slate-500">Gratuito durante a fase de lançamento, sem mensalidade e sem exclusividade. Você pode pedir para sair a qualquer momento.</p>
           </form>
         </div>
 
