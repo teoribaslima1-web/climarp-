@@ -4,6 +4,41 @@
  */
 export const BLOG_POSTS = [
   {
+    id: 'tempestade-e-raio-como-proteger-o-ar-condicionado',
+    title: 'Tempestade e raio: como proteger o ar-condicionado',
+    category: 'Problemas Comuns',
+    date: '21 de Outubro, 2026',
+    readTime: '4 min',
+    summary: 'Na época de chuva forte em Ribeirão Preto, quedas de energia e raios podem danificar a placa do ar-condicionado. Veja o que fazer antes, durante e depois da tempestade.',
+    imageBg: 'from-slate-600 to-blue-800',
+    content: `
+      <p class="mb-4">Entre a primavera e o verão, Ribeirão Preto costuma ter tempestades fortes no fim da tarde, com raios, rajadas de vento e quedas de energia. Para o ar-condicionado, o maior risco não é a chuva em si, mas os picos e oscilações de energia, que podem queimar a placa eletrônica do aparelho.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Antes e durante a tempestade</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Desligue o aparelho</strong> quando começarem os raios. Se ele tiver disjuntor próprio no quadro, desligar o disjuntor é a forma mais segura.</li>
+        <li><strong>Não fique ligando e desligando</strong> o ar enquanto a energia oscila: espere a situação normalizar.</li>
+        <li><strong>Feche janelas</strong> próximas à evaporadora para evitar que entre água no aparelho.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Quando a energia voltar</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Espere alguns minutos</strong> antes de religar. Logo depois de uma queda, a energia pode continuar oscilando.</li>
+        <li>Religue e observe: o aparelho deve ligar normalmente, sem cheiro de queimado, barulho estranho ou código de erro no visor.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Depois da tempestade: confira a condensadora</h3>
+      <p class="mb-4">A condensadora (a parte que fica do lado de fora) pode juntar folhas, galhos e sujeira trazidos pelo vento. Com o aparelho desligado, veja se não há nada obstruindo a passagem de ar. Se a área tiver alagado ou se a unidade estiver danificada, não ligue e chame um técnico.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Proteção que vale a pena</h3>
+      <p class="mb-4">O DPS (dispositivo de proteção contra surtos), instalado no quadro de energia por um eletricista, ajuda a proteger os aparelhos da casa contra picos de tensão. Um circuito exclusivo e bem dimensionado para o ar-condicionado também reduz problemas. Vale conferir ainda se o seu seguro residencial cobre danos elétricos.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">O ar não liga mais depois da chuva?</h3>
+      <p class="mb-4">Se o aparelho não liga, mostra código de erro ou <a href="/blog/por-que-o-ar-condicionado-liga-mas-nao-gela" class="text-brand-blue font-semibold underline">liga mas não gela</a> depois de uma tempestade, não tente abrir a placa por conta própria. O ideal é uma avaliação técnica para identificar o que foi afetado.</p>
+      <p class="mb-4">Para receber orçamentos de <a href="/manutencao-ar-condicionado-ribeirao-preto" class="text-brand-blue font-semibold underline">manutenção de ar-condicionado em Ribeirão Preto</a>, é só pedir pelo formulário abaixo: a solicitação é grátis e sem compromisso.</p>
+    `
+  },
+  {
     id: 'como-limpar-filtro-do-ar-condicionado',
     title: 'Como limpar o filtro do ar-condicionado em casa: passo a passo',
     category: 'Saúde & Manutenção',
