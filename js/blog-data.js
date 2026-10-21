@@ -4,6 +4,49 @@
  */
 export const BLOG_POSTS = [
   {
+    id: 'como-limpar-filtro-do-ar-condicionado',
+    title: 'Como limpar o filtro do ar-condicionado em casa: passo a passo',
+    category: 'Saúde & Manutenção',
+    date: '21 de Outubro, 2026',
+    readTime: '4 min',
+    summary: 'Limpar o filtro do split leva poucos minutos e ajuda o aparelho a gelar melhor. Veja o passo a passo, os erros mais comuns e quando a limpeza do filtro não é suficiente.',
+    imageBg: 'from-sky-500 to-cyan-600',
+    content: `
+      <p class="mb-4">O filtro é a primeira barreira contra a poeira que entra no ar-condicionado. Quando ele fica sujo, o ar passa com mais dificuldade, o aparelho gela menos e trabalha mais para chegar na temperatura. A boa notícia: no split comum, limpar o filtro é simples e você mesmo pode fazer em casa.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Antes de começar</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Desligue o aparelho</strong> pelo controle e tire da tomada ou desligue o disjuntor dele.</li>
+        <li>Separe uma bacia ou pia, sabão neutro e uma escova de cerdas macias (uma escova de dentes velha serve).</li>
+        <li>Confira o manual do seu modelo: a forma de abrir a tampa pode mudar de uma marca para outra.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Passo a passo</h3>
+      <ol class="list-decimal pl-6 space-y-2 mb-4 text-slate-700">
+        <li><strong>Abra a tampa frontal</strong> da evaporadora (a parte que fica dentro do cômodo). Na maioria dos modelos, ela levanta puxando pelas laterais.</li>
+        <li><strong>Retire os filtros</strong> de tela, deslizando-os para baixo com cuidado.</li>
+        <li><strong>Tire o excesso de poeira</strong> com um aspirador ou batendo levemente, longe do aparelho.</li>
+        <li><strong>Lave com água corrente e sabão neutro</strong>, esfregando de leve com a escova. Use água em temperatura ambiente, sem produtos abrasivos.</li>
+        <li><strong>Deixe secar à sombra.</strong> Não use secador nem deixe no sol forte, porque o plástico pode deformar.</li>
+        <li><strong>Recoloque só quando estiverem totalmente secos</strong> e feche a tampa até ouvir o encaixe.</li>
+      </ol>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Erros comuns</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li>Ligar o ar sem filtro "só por um tempo": a poeira vai direto para a parte interna.</li>
+        <li>Recolocar o filtro ainda úmido, o que favorece o cheiro de mofo.</li>
+        <li>Borrifar produtos de limpeza dentro do aparelho sem orientação: isso pode danificar componentes e não substitui a higienização.</li>
+      </ul>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">De quanto em quanto tempo?</h3>
+      <p class="mb-4">Em casa, a referência mais comum é limpar o filtro a cada 15 a 30 dias de uso. Em Ribeirão Preto, nos meses secos e com mais poeira, vale olhar o filtro com mais frequência. Veja mais em <a href="/blog/com-que-frequencia-fazer-limpeza-do-ar-condicionado" class="text-brand-blue font-semibold underline">com que frequência fazer a limpeza do ar-condicionado</a>.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Quando só o filtro não resolve</h3>
+      <p class="mb-4">A limpeza do filtro não alcança a serpentina, a turbina, a bandeja e o dreno, que também acumulam sujeira. Se mesmo com o filtro limpo o aparelho continua com <a href="/blog/ar-condicionado-com-cheiro-de-mofo" class="text-brand-blue font-semibold underline">cheiro de mofo</a>, pingando, fazendo barulho ou gelando pouco, o indicado é uma higienização completa feita por um técnico.</p>
+      <p class="mb-4">Para receber orçamentos de <a href="/limpeza-ar-condicionado-ribeirao-preto" class="text-brand-blue font-semibold underline">limpeza e higienização em Ribeirão Preto</a>, é só pedir pelo formulário abaixo: a solicitação é grátis e sem compromisso.</p>
+    `
+  },
+  {
     id: 'ar-condicionado-com-cheiro-de-mofo',
     title: 'Ar-condicionado com cheiro de mofo: causas e o que fazer',
     category: 'Saúde & Manutenção',
