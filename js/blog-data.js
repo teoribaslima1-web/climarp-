@@ -4,6 +4,45 @@
  */
 export const BLOG_POSTS = [
   {
+    id: 'ar-condicionado-nao-liga-o-que-verificar',
+    title: 'Ar-condicionado não liga: o que verificar antes de chamar o técnico',
+    category: 'Problemas Comuns',
+    date: '26 de Outubro, 2026',
+    readTime: '4 min',
+    summary: 'O ar-condicionado não responde ao controle ou não liga de jeito nenhum? Veja as verificações simples e seguras que você pode fazer em casa e quando é hora de chamar um técnico.',
+    imageBg: 'from-sky-600 to-indigo-800',
+    content: `
+      <p class="mb-4">Com o calor de Ribeirão Preto, descobrir que o ar-condicionado não liga é um problema na hora. Antes de concluir que o aparelho queimou, vale fazer algumas verificações simples. Muitas vezes a causa é algo fácil de resolver.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">1. Controle remoto e pilhas</h3>
+      <p class="mb-4">Veja se o visor do controle acende. Se estiver fraco ou apagado, troque as pilhas. Aponte o controle direto para a evaporadora (a parte de dentro) e confira se o aparelho dá o "bip" ao receber o comando. Alguns modelos têm um botão de emergência no próprio aparelho, que ajuda a saber se o problema é o controle.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">2. Disjuntor e tomada</h3>
+      <p class="mb-4">Confira no quadro de energia se o disjuntor do ar-condicionado não desarmou, o que é comum depois de quedas de energia e tempestades. Se ele desarmar de novo logo depois de religar, <strong>não insista</strong>: isso indica um problema elétrico que precisa de avaliação técnica.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">3. Modo e temperatura</h3>
+      <p class="mb-4">Às vezes o aparelho até liga, mas parece que não. Verifique se está no modo <strong>refrigerar</strong> (ícone de floco de neve) e se a temperatura escolhida está abaixo da temperatura do ambiente. No modo ventilar ou desumidificar, o ar não sai gelado.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">4. Timer e função sleep</h3>
+      <p class="mb-4">Um timer de desligamento programado sem querer pode fazer o aparelho desligar sozinho ou não ligar no horário esperado. Cancele os timers pelo controle e tente de novo.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">5. Espere alguns minutos</h3>
+      <p class="mb-4">Depois de desligado, muitos aparelhos têm uma proteção que segura o compressor por cerca de 3 minutos antes de voltar a funcionar. Se você acabou de desligar e religar, aguarde um pouco antes de concluir que há defeito.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">6. Código de erro ou luz piscando</h3>
+      <p class="mb-4">Se o visor mostrar letras e números (como E1, F3) ou uma luz ficar piscando, o próprio aparelho está indicando uma falha. Anote o código e consulte o manual do fabricante. Isso ajuda o técnico a chegar mais preparado.</p>
+
+      <h3 class="text-xl font-bold text-navy mt-6 mb-3">Quando chamar um técnico</h3>
+      <ul class="list-disc pl-6 space-y-2 mb-4 text-slate-700">
+        <li>O disjuntor desarma sempre que você liga o aparelho.</li>
+        <li>Há cheiro de queimado, faísca ou barulho estranho.</li>
+        <li>O aparelho mostra código de erro mesmo depois de desligar e religar.</li>
+        <li>A evaporadora liga, mas a condensadora (parte de fora) não funciona, e o ar <a href="/blog/por-que-o-ar-condicionado-liga-mas-nao-gela" class="text-brand-blue font-semibold underline">liga mas não gela</a>.</li>
+      </ul>
+      <p class="mb-4">Nesses casos, não abra o aparelho nem mexa na parte elétrica por conta própria. Para receber orçamentos de <a href="/manutencao-ar-condicionado-ribeirao-preto" class="text-brand-blue font-semibold underline">manutenção de ar-condicionado em Ribeirão Preto</a>, é só pedir pelo formulário abaixo: a solicitação é grátis e sem compromisso.</p>
+    `
+  },
+  {
     id: 'tempestade-e-raio-como-proteger-o-ar-condicionado',
     title: 'Tempestade e raio: como proteger o ar-condicionado',
     category: 'Problemas Comuns',
