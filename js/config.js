@@ -35,6 +35,13 @@ export const CONFIG = {
       area: 'Ribeirão Preto e região',
       services: 'Instalação, manutenção e higienização de ar-condicionado.',
       logo: '/assets/parceiros/ludriar.webp'
+    },
+    {
+      name: 'CH Climatização', // autorizado pelo WhatsApp em 26/10/2026 (mandou Instagram e logo)
+      area: 'Ribeirão Preto e região',
+      services: 'Instalação, manutenção e higienização de ar-condicionado residencial e comercial.',
+      instagram: 'ch_climatizacao',
+      logo: '/assets/parceiros/ch-climatizacao.webp'
     }
   ],
 
