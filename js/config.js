@@ -29,6 +29,12 @@ export const CONFIG = {
       services: 'Instalação, manutenção e higienização de ar-condicionado. Também faz serviços elétricos.',
       instagram: 'linear_ribeiraopreto',
       logo: '/assets/parceiros/linear.webp'
+    },
+    {
+      name: 'Ludriar Ar-condicionado e Climatização', // autorizado pelo WhatsApp em 23/10/2026
+      area: 'Ribeirão Preto e região',
+      services: 'Instalação, manutenção e higienização de ar-condicionado.',
+      logo: '/assets/parceiros/ludriar.webp'
     }
   ],
 

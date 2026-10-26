@@ -10,7 +10,28 @@ export class AnalyticsTracker {
     this.eventLog = this.loadEventLog();
     this.initializeDataLayer();
     this.mode = null; // 'gtm' | 'direct' | null (nenhum ID real configurado ou sem consentimento)
+    this.loadCookielessAnalytics();
     this.loadTrackers();
+  }
+
+  /**
+   * Vercel Web Analytics: conta visitas e páginas sem cookies e sem dados pessoais,
+   * por isso roda mesmo sem o aceite do banner. Só no domínio de produção e nunca
+   * nas áreas privadas (painel e área do parceiro).
+   */
+  loadCookielessAnalytics() {
+    try {
+      if (typeof window === 'undefined' || typeof document === 'undefined') return;
+      if (/^\/(admin|parceiro)(\/|$)/.test(window.location.pathname)) return;
+      if (!/(^|\.)clima16\.com\.br$/.test(window.location.hostname || '')) return;
+      if (window.__clima16VercelInsights) return;
+      window.__clima16VercelInsights = true;
+      window.va = window.va || function va() { (window.vaq = window.vaq || []).push(arguments); };
+      const script = document.createElement('script');
+      script.defer = true;
+      script.src = '/_vercel/insights/script.js';
+      document.head.appendChild(script);
+    } catch { /* métricas nunca podem quebrar o site */ }
   }
 
   /**

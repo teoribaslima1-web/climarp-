@@ -57,6 +57,26 @@ test('armazenamento bloqueado mantém o site utilizável sem métricas externas'
   assert.equal(scripts.length, 0);
   assert.deepEqual(window.dataLayer, []);
 });
+test('Vercel Analytics (sem cookies) carrega em produção sem aceite, só uma vez e nunca nas áreas privadas', () => {
+  environment();
+  window.location.hostname = 'clima16.com.br';
+  const tracker = new AnalyticsTracker();
+  tracker.loadCookielessAnalytics();
+  tracker.track('form_start');
+  assert.equal(scripts.length, 1);
+  assert.equal(scripts[0].src, '/_vercel/insights/script.js');
+  assert.deepEqual(window.dataLayer, []);
+  for (const path of ['/admin', '/parceiro/acesso']) {
+    environment(path);
+    window.location.hostname = 'clima16.com.br';
+    new AnalyticsTracker();
+    assert.equal(scripts.length, 0);
+  }
+  environment();
+  window.location.hostname = 'localhost';
+  new AnalyticsTracker();
+  assert.equal(scripts.length, 0);
+});
 // O banner usa o tracker compartilhado pela aplicação.
 environment('/', 'true');
 const { renderCookieBanner, initCookieBannerEvents } = await import('../js/components/cookie-banner.js');

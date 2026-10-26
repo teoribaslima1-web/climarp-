@@ -54,7 +54,7 @@ export function renderPrivacyPolicyView() {
           <section>
             <h2 class="text-xl font-bold text-navy mb-2">5. Armazenamento e Segurança</h2>
             <p>Empregamos medidas técnicas e organizacionais compatíveis com os padrões de mercado para proteger as informações contra acessos não autorizados, destruição, perda ou alteração ilícita.</p>
-            <p class="mt-2">O registro oficial da solicitação é mantido no banco de dados. No navegador, guardamos apenas um resumo da confirmação na sessão da aba, com validade de 30 minutos, sem telefone, e-mail ou descrição do pedido. As ferramentas externas de métricas são carregadas após a escolha de aceitar; você pode continuar usando o site escolhendo apenas os recursos essenciais. A escolha pode ser alterada em “Preferências de cookies”, no rodapé. Ao retirar o aceite, a página é recarregada para interromper as métricas externas.</p>
+            <p class="mt-2">O registro oficial da solicitação é mantido no banco de dados. No navegador, guardamos apenas um resumo da confirmação na sessão da aba, com validade de 30 minutos, sem telefone, e-mail ou descrição do pedido. Para contar visitas e páginas acessadas de forma agregada, usamos o Vercel Web Analytics, que não usa cookies. As demais ferramentas externas de métricas são carregadas após a escolha de aceitar; você pode continuar usando o site escolhendo apenas os recursos essenciais. A escolha pode ser alterada em “Preferências de cookies”, no rodapé. Ao retirar o aceite, a página é recarregada para interromper as métricas externas.</p>
           </section>
 
 
