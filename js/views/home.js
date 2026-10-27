@@ -76,6 +76,30 @@ function renderPartnerStrip() {
             </button>`;
 }
 
+/** Bloco "Quem está por trás": só fatos reais (quem opera, desde quando, como funciona). */
+function renderAboutBlock() {
+  const b = CONFIG.brand;
+  return `
+    <section id="quem-somos" class="py-14 sm:py-16 bg-white border-t border-slate-100">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <span class="text-xs font-bold text-brand-blue uppercase tracking-widest">Quem está por trás</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-3">A Clima16 é de Ribeirão Preto</h2>
+        <p class="text-sm sm:text-base text-slate-600 mt-3 leading-relaxed">A Clima16 foi criada por Téo Ribas Lima, de Ribeirão Preto, e começou a funcionar em outubro de 2026. A ideia é simples: em vez de você procurar e ligar para vários técnicos, faz um pedido só e nós encaminhamos para profissionais parceiros da cidade.</p>
+        <ul class="mt-5 space-y-2.5 text-sm text-slate-700">
+          <li class="flex gap-2.5"><span class="text-brand-blue font-bold shrink-0">1.</span><span>Você descreve o serviço e o bairro.</span></li>
+          <li class="flex gap-2.5"><span class="text-brand-blue font-bold shrink-0">2.</span><span>Conferimos o pedido e encaminhamos a parceiros que atendem a região.</span></li>
+          <li class="flex gap-2.5"><span class="text-brand-blue font-bold shrink-0">3.</span><span>O profissional fala com você, passa o orçamento e, se você aprovar, faz o serviço.</span></li>
+        </ul>
+        <p class="text-sm text-slate-600 mt-5">O pedido é gratuito e sem compromisso. A Clima16 nunca pede pagamento nem dados bancários.</p>
+        <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+          <a href="https://wa.me/${b.whatsappNumber}" target="_blank" rel="noopener noreferrer" onclick="window.clima16Analytics?.track('whatsapp_click', { origin: 'about_block' })" class="text-emerald-700 hover:underline">WhatsApp ${b.whatsappFormatted}</a>
+          <a href="${b.instagramUrl}" target="_blank" rel="noopener noreferrer" onclick="window.clima16Analytics?.track('instagram_click', { origin: 'about_block' })" class="text-brand-blue hover:underline">Instagram @${b.instagramHandle}</a>
+          <a href="mailto:${b.emailContact}" class="text-slate-600 hover:underline">${b.emailContact}</a>
+        </div>
+      </div>
+    </section>`;
+}
+
 function renderFeaturedPartners() {
   const list = Array.isArray(CONFIG.featuredPartners) ? CONFIG.featuredPartners.filter((p) => p && p.name) : [];
   if (!list.length) return '';
@@ -128,7 +152,7 @@ export function renderHomeView() {
           <div class="lg:col-span-7 text-left space-y-6">
             
             <!-- Regional Badge -->
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm text-xs font-semibold text-navy">
+            <div class="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm text-xs font-semibold text-navy">
               <span class="flex h-2 w-2 relative">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-blue"></span>
@@ -144,8 +168,10 @@ export function renderHomeView() {
 
             <!-- Subtitle -->
             <p class="text-base sm:text-lg text-muted-rp leading-relaxed max-w-2xl font-normal">
-              Solicite seu orçamento para instalação, manutenção e limpeza. Conectamos você a profissionais da região; a Clima16 não executa o serviço.<br /><span class="text-sm">Estamos formando nossa rede em Ribeirão Preto. A disponibilidade depende do serviço e da região.</span>
+              Peça orçamento grátis para instalação, manutenção ou limpeza. Conectamos você a profissionais parceiros da região.<br /><span class="text-sm">Quem faz o serviço é o parceiro; o atendimento depende da disponibilidade.</span>
             </p>
+
+            ${renderPartnerStrip()}
 
             <!-- Service Chips: começar o orçamento sem rolar a página -->
             <div>
@@ -171,8 +197,6 @@ export function renderHomeView() {
                 <span>Falar pelo WhatsApp</span>
               </a>
             </div>
-
-            ${renderPartnerStrip()}
 
             <!-- Trust Indicators -->
             <div class="pt-4 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs sm:text-sm font-medium text-slate-600">
@@ -243,7 +267,7 @@ export function renderHomeView() {
                   </div>
                 </div>
 
-                <p class="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-500 text-center">Do calorão de Ribeirão ao conforto dos <strong class="text-brand-blue">16°</strong>.</p>
+                <p class="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-500 text-center">Do calorão de Ribeirão ao ar fresco em casa. O <strong class="text-brand-blue">16</strong> é o DDD da nossa cidade.</p>
               </div>
             </div>
           </div>
@@ -302,6 +326,8 @@ export function renderHomeView() {
 
 
     ${renderFeaturedPartners()}
+
+    ${renderAboutBlock()}
 
     <!-- ================= CALCULADORA DE BTUs ================= -->
     <section id="calculadora-section" class="py-16 sm:py-24 bg-slate-50">

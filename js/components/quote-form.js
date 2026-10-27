@@ -36,7 +36,7 @@ export function renderQuoteForm(preselectedServiceId = null) {
       <!-- Form Header -->
       <div class="text-center mb-6 sm:mb-8">
         <span class="inline-block text-xs font-bold tracking-wider text-brand-blue uppercase bg-blue-50 px-3 py-1 rounded-full mb-2">
-          Orçamento Gratuito & Rápido
+          Pedido de orçamento gratuito
         </span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-navy">Do que você precisa?</h2>
         <p class="text-sm sm:text-base text-muted-rp mt-1">Leva menos de 1 minuto.</p>
@@ -241,7 +241,7 @@ export function renderQuoteForm(preselectedServiceId = null) {
 
             <div>
               <label for="lead-phone" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">WhatsApp <span class="text-rose-500">*</span></label>
-              <input type="tel" id="lead-phone" placeholder="(16) 99999-9999" maxlength="15" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue focus:ring-0 rounded-xl text-slate-800 font-medium text-sm transition-all" required />
+              <input type="tel" id="lead-phone" placeholder="(16) 99999-9999" maxlength="20" autocomplete="tel" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue focus:ring-0 rounded-xl text-slate-800 font-medium text-sm transition-all" required />
               <p id="phone-error" class="text-rose-500 text-xs mt-1 hidden">Informe um WhatsApp válido para contato.</p>
             </div>
 
@@ -563,6 +563,9 @@ export function initQuoteFormEvents(initialService = null) {
   if (phoneInput) {
     phoneInput.addEventListener('input', (e) => {
       let v = e.target.value.replace(/\D/g, '');
+      // Número colado com DDI (+55 16 98157-0034): tira o 55 antes de aplicar a máscara
+      if (v.length > 11 && v.startsWith('55')) v = v.slice(2);
+      if (v.length > 11 && v.startsWith('0')) v = v.replace(/^0+/, '');
       if (v.length > 11) v = v.slice(0, 11);
       if (v.length > 10) {
         v = v.replace(/^(\d\d)(\d{5})(\d{4}).*/, '($1) $2-$3');

@@ -228,6 +228,27 @@ await test('list_partners continua funcionando se o Supabase Auth falhar', async
   assert.equal(res.body.partners[0].last_sign_in_at, null);
 });
 
+await test('pedido manual (WhatsApp): exige login e autorização, valida e salva sem avisos', async () => {
+  mockFetch();
+  const base = { action: 'create_manual', origin: 'whatsapp', name: 'Maria', phone: '+55 (16) 98157-0034', service_type: 'Limpeza e higienização', neighborhood: 'Centro', consent: true };
+  assert.equal((await call(base)).statusCode, 401);
+  assert.equal((await call({ ...base, consent: false }, 'tok123')).body.error, 'consent_required');
+  assert.equal((await call({ ...base, origin: 'site' }, 'tok123')).body.error, 'invalid_origin');
+  assert.equal((await call({ ...base, phone: '123' }, 'tok123')).body.error, 'invalid_phone');
+  globalThis.fetch = (prev => async (url, opts = {}) => {
+    if (url.endsWith('/rest/v1/leads') && opts.method === 'POST') { calls.push({ url, opts }); return { ok: true, status: 201, json: async () => [{ id: ID, ...JSON.parse(opts.body) }] }; }
+    return prev(url, opts);
+  })(globalThis.fetch);
+  const res = await call(base, 'tok123');
+  assert.equal(res.statusCode, 200);
+  const row = JSON.parse(calls.find((c) => c.url.endsWith('/rest/v1/leads') && c.opts.method === 'POST').opts.body);
+  assert.equal(row.phone_digits, '16981570034');
+  assert.equal(row.utm_source, 'whatsapp');
+  assert.equal(row.status, 'novo');
+  assert.equal(row.notification_status, 'skipped');
+  assert.ok(!calls.some((c) => String(c.url).includes('resend.com')));
+});
+
 let failed = 0;
 for (const [ok, name, err] of results) {
   console.log(`${ok ? 'OK  ' : 'FAIL'} ${name}`);

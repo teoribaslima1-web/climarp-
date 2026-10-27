@@ -28,7 +28,7 @@ export function initHeroThermometer() {
     if (bulb) bulb.style.backgroundColor = color;
     const n = Math.round(t);
     if (display) display.textContent = `${n}°C`;
-    if (status) status.textContent = n <= T_COOL ? 'Ambiente em 16°: conforto' : 'Resfriando…';
+    if (status) status.textContent = n <= T_COOL ? 'Ar fresco em Ribeirão Preto' : 'Resfriando…';
   }
 
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

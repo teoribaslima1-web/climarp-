@@ -198,13 +198,28 @@ await test('quebra de linha no serviço não vira cabeçalho do e-mail', async (
   assert.ok(!/[\r\n]/.test(mail.subject));
 });
 
-await test('telefone repetido em 24h: salva como "duplicado" e não manda e-mail', async () => {
-  setEnv(); const calls = installFetch({ dup: [{ id: 'old' }] });
+await test('mesmo pedido repetido em 24h (serviço e bairro iguais): salva como "duplicado" e não manda e-mail', async () => {
+  setEnv(); const calls = installFetch({ dup: [{ id: 'old', service_type: 'Instalação de ar-condicionado', neighborhood: 'jardim  paulistano' }] });
   const res = mockRes();
   await handler(req(validBody()), res);
   assert.equal(res.statusCode, 200);
   assert.equal(JSON.parse(insertCall(calls).init.body).status, 'duplicado');
   assert.equal(emailCall(calls), undefined);
+});
+
+await test('mesmo telefone com outro serviço em 24h: é pedido novo e avisa normalmente', async () => {
+  setEnv(); const calls = installFetch({ dup: [{ id: 'old', service_type: 'Limpeza e higienização', neighborhood: 'Jardim Paulistano' }] });
+  const res = mockRes();
+  await handler(req(validBody()), res);
+  assert.equal(res.statusCode, 200);
+  assert.notEqual(JSON.parse(insertCall(calls).init.body).status, 'duplicado');
+  assert.ok(emailCall(calls));
+});
+
+await test('mesmo telefone e serviço, mas outro bairro: é pedido novo', async () => {
+  setEnv(); const calls = installFetch({ dup: [{ id: 'old', service_type: 'Instalação de ar-condicionado', neighborhood: 'Centro' }] });
+  await handler(req(validBody()), mockRes());
+  assert.notEqual(JSON.parse(insertCall(calls).init.body).status, 'duplicado');
 });
 
 await test('muitos envios do mesmo IP -> 429 e nada é salvo', async () => {

@@ -142,6 +142,19 @@ function validate(input) {
   };
 }
 
+// Mesmo telefone em 24h só é "duplicado" se for o mesmo pedido (mesmo serviço e mesmo bairro).
+// Outro serviço ou outro bairro é uma nova necessidade do cliente e segue o fluxo normal.
+function sameText(a, b) {
+  const norm = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  return norm(a) === norm(b);
+}
+
+function isRepeatRequest(lead, recent) {
+  if (!Array.isArray(recent)) return false;
+  return recent.some((row) => row && sameText(row.service_type, lead.service_type)
+    && (!row.neighborhood || !lead.neighborhood || sameText(row.neighborhood, lead.neighborhood)));
+}
+
 async function findRecent(baseUrl, key, query) {
   const res = await boundedFetch(`${baseUrl}/rest/v1/leads?${query}`, { headers: supabaseHeaders(key) });
   if (!res.ok) throw new Error(`supabase_select_${res.status}`);
@@ -376,8 +389,8 @@ module.exports = async function handler(req, res) {
     }
     const sinceDup = new Date(Date.now() - DUPLICATE_WINDOW_MS).toISOString();
     const dup = await findRecent(baseUrl, key,
-      `select=id&phone_digits=in.(${lead.phone_digits},55${lead.phone_digits})&created_at=gte.${encodeURIComponent(sinceDup)}&limit=1`);
-    if (Array.isArray(dup) && dup.length > 0) status = 'duplicado';
+      `select=id,service_type,neighborhood&phone_digits=in.(${lead.phone_digits},55${lead.phone_digits})&created_at=gte.${encodeURIComponent(sinceDup)}&limit=20`);
+    if (isRepeatRequest(lead, dup)) status = 'duplicado';
   } catch (err) {
     console.error('[leads] precheck_failed', err && err.message);
   }

@@ -2,7 +2,7 @@
  * Clima16 - POST /api/admin
  * Vercel Function (Node 18+, sem dependências). Painel de leads com login.
  *
- * Ações (JSON): { action: 'login' | 'list' | 'funnel' | 'update' | 'delete', ... }
+ * Ações (JSON): { action: 'login' | 'list' | 'funnel' | 'create_manual' | 'update' | 'delete', ... }
  *  - login:  e-mail + senha de um usuário do Supabase Auth que esteja na lista de admins.
  *  - list/update/delete: exigem "Authorization: Bearer <access_token>" do login.
  *
@@ -238,6 +238,41 @@ module.exports = async function handler(req, res) {
         return res.status(502).json({ ok: false, error: 'list_failed' });
       }
       return res.status(200).json({ ok: true, leads: await r.json(), admin });
+    }
+
+    if (body.action === 'create_manual') {
+      // Pedido que chegou fora do site (WhatsApp, Instagram, telefone, indicação): entra no painel sem disparar avisos.
+      const MANUAL_ORIGINS = ['whatsapp', 'instagram', 'telefone', 'indicacao'];
+      if (!MANUAL_ORIGINS.includes(body.origin)) return res.status(400).json({ ok: false, error: 'invalid_origin' });
+      if (body.consent !== true) return res.status(400).json({ ok: false, error: 'consent_required' });
+      const { validate } = require('./leads')._internals;
+      const checked = validate({
+        name: body.name, phone: body.phone, email: body.email, service_type: body.service_type,
+        neighborhood: body.neighborhood, property_type: body.property_type, description: body.description, consent: true
+      });
+      if (checked.error) return res.status(400).json({ ok: false, error: checked.error });
+      const now = new Date().toISOString();
+      const r = await fetch(`${baseUrl}/rest/v1/leads`, {
+        method: 'POST',
+        headers: supabaseHeaders(serviceKey, { Prefer: 'return=representation' }),
+        body: JSON.stringify({
+          ...checked.value,
+          utm_source: body.origin,
+          utm_medium: 'manual',
+          device: null,
+          status: 'novo',
+          consent: true,
+          consent_at: now,
+          notification_status: 'skipped',
+          customer_notification_status: 'skipped'
+        })
+      });
+      if (!r.ok) {
+        console.error('[admin] create_manual_failed', r.status);
+        return res.status(502).json({ ok: false, error: 'create_failed' });
+      }
+      const rows = await r.json();
+      return res.status(200).json({ ok: true, lead: Array.isArray(rows) ? rows[0] : rows });
     }
 
     if (body.action === 'funnel') {

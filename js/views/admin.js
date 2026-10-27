@@ -287,6 +287,7 @@ function renderDashboard() {
             <p class="text-xs sm:text-sm text-slate-500 mt-1">Leads reais do banco · ${escapeHtml(state.email)}</p>
           </div>
           <div class="flex flex-wrap items-center gap-3">
+            <button id="admin-new-lead" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 px-3 py-2 border border-emerald-200 rounded-xl hover:bg-emerald-50">+ Pedido do WhatsApp</button>
             <button id="admin-refresh" class="text-xs font-semibold text-slate-600 hover:text-navy px-3 py-2 border border-slate-200 rounded-xl hover:bg-slate-50">Atualizar</button>
             <button id="btn-export-csv" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-sm">Exportar CSV</button>
             <a href="/" class="text-xs font-semibold text-slate-600 hover:text-navy px-3 py-2 border border-slate-200 rounded-xl hover:bg-slate-50">Ver site</a>
@@ -527,6 +528,7 @@ function showNotice(html, kind = 'ok') {
 function bindDashboard() {
   document.getElementById('admin-logout')?.addEventListener('click', () => logout());
   document.getElementById('admin-refresh')?.addEventListener('click', () => { showLoading(); loadLeads(); });
+  document.getElementById('admin-new-lead')?.addEventListener('click', showManualLead);
   document.getElementById('btn-export-csv')?.addEventListener('click', exportCsv);
 
   document.getElementById('admin-search-input')?.addEventListener('input', (e) => {
@@ -693,6 +695,50 @@ function showCommercialResult(lead) {
     modal.close();
     renderDashboard();
     showNotice('Resultado comercial salvo.');
+  });
+  modal.showModal();
+}
+
+const MANUAL_SERVICES = ['Instalação de ar-condicionado', 'Manutenção de ar-condicionado', 'Limpeza e higienização', 'Ar-condicionado não está gelando', 'Vazamento / gotejamento', 'Recarga / avaliação de gás', 'Outro serviço de ar-condicionado'];
+const MANUAL_ERRORS = { invalid_name: 'Confira o nome.', invalid_phone: 'Confira o telefone (com DDD).', invalid_email: 'Confira o e-mail.', consent_required: 'Marque a autorização do cliente.', invalid_origin: 'Escolha a origem.' };
+
+/** Cadastro de pedido que chegou fora do site (não dispara e-mails). */
+function showManualLead() {
+  const field = 'block border rounded-lg p-2 w-full mt-1';
+  const modal = document.createElement('dialog');
+  modal.className = 'rounded-2xl p-6 max-w-md w-full shadow-xl';
+  modal.innerHTML = `<form class="text-sm"><h2 class="text-lg font-bold mb-1">Novo pedido fora do site</h2><p class="text-xs text-slate-500 mb-4">Entra no painel como "Novo", sem enviar e-mails.</p>
+    <label class="block mb-3">Origem<select name="origin" class="${field}"><option value="whatsapp">WhatsApp</option><option value="instagram">Instagram</option><option value="telefone">Telefone</option><option value="indicacao">Indicação</option></select></label>
+    <label class="block mb-3">Nome<input name="name" required maxlength="120" class="${field}"></label>
+    <label class="block mb-3">WhatsApp / telefone<input name="phone" type="tel" required maxlength="20" placeholder="(16) 99999-9999" class="${field}"></label>
+    <label class="block mb-3">Serviço<select name="service_type" class="${field}">${MANUAL_SERVICES.map((sv) => `<option>${escapeHtml(sv)}</option>`).join('')}</select></label>
+    <label class="block mb-3">Bairro<input name="neighborhood" maxlength="120" class="${field}"></label>
+    <label class="block mb-3">Imóvel<select name="property_type" class="${field}"><option value="">Não informado</option>${['Casa', 'Apartamento', 'Empresa / escritório', 'Comércio', 'Outro'].map((t) => `<option>${t}</option>`).join('')}</select></label>
+    <label class="block mb-3">Detalhes<textarea name="description" maxlength="2000" rows="2" class="${field}"></textarea></label>
+    <label class="flex items-start gap-2 mb-4 text-xs"><input name="consent" type="checkbox" class="mt-0.5"><span>O cliente autorizou o contato e o envio dos dados do pedido a profissionais parceiros.</span></label>
+    <p role="alert" class="text-rose-600 text-sm mb-2"></p>
+    <button type="submit" class="gradient-brand text-white rounded-lg px-4 py-2 font-semibold">Salvar pedido</button><button type="button" data-close class="ml-4">Cancelar</button></form>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('close', () => modal.remove());
+  modal.querySelector('[data-close]').addEventListener('click', () => modal.close());
+  modal.querySelector('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const v = new FormData(e.target);
+    const alertBox = modal.querySelector('[role="alert"]');
+    if (!v.get('consent')) { alertBox.textContent = MANUAL_ERRORS.consent_required; return; }
+    const btn = modal.querySelector('[type="submit"]');
+    btn.disabled = true;
+    const out = await api({
+      action: 'create_manual', origin: v.get('origin'), name: v.get('name'), phone: v.get('phone'), service_type: v.get('service_type'),
+      neighborhood: v.get('neighborhood'), property_type: v.get('property_type'), description: v.get('description'), consent: true
+    });
+    btn.disabled = false;
+    if (out.httpStatus === 401) { modal.close(); return logout('Sessão expirada. Entre novamente.'); }
+    if (!out.ok) { alertBox.textContent = MANUAL_ERRORS[out.error] || 'Não foi possível salvar. Tente novamente.'; return; }
+    if (out.lead) state.leads.unshift(out.lead);
+    modal.close();
+    renderDashboard();
+    showNotice('Pedido registrado no painel.');
   });
   modal.showModal();
 }
