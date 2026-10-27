@@ -26,7 +26,7 @@ const PARTNER_STATUS = [
 
 const PROGRESS_LABEL = { recebido: 'Recebido', em_atendimento: 'Em atendimento', fechado: 'Fechado', sem_resposta: 'Sem resposta' };
 
-const state = { leads: [], partners: [], partnersError: false, email: '', search: '', status: '' };
+const state = { leads: [], partners: [], partnersError: false, funnel: null, email: '', search: '', status: '' };
 
 function getToken() {
   try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; }
@@ -176,6 +176,8 @@ async function loadLeads() {
   const pOut = await api({ action: 'list_partners' });
   state.partnersError = !pOut.ok;
   state.partners = pOut.ok && Array.isArray(pOut.partners) ? pOut.partners : [];
+  const fOut = await api({ action: 'funnel' });
+  state.funnel = fOut.ok && fOut.funnel ? fOut.funnel : null;
   renderDashboard();
 }
 
@@ -207,6 +209,44 @@ function computeStats(leads) {
 }
 
 /* ---------------------------- Dashboard ---------------------------- */
+
+const FUNNEL_STEPS = [
+  ['inicio', 'Começou o formulário'],
+  ['servico', 'Escolheu o serviço'],
+  ['local', 'Informou o imóvel'],
+  ['bairro', 'Informou o bairro'],
+  ['envio', 'Clicou em enviar'],
+  ['enviado', 'Pedido enviado']
+];
+
+function funnelBlock(counts) {
+  const c = counts || {};
+  const base = c.inicio || 0;
+  const rows = FUNNEL_STEPS.map(([key, label]) => {
+    const n = c[key] || 0;
+    const pct = base > 0 ? Math.min(100, Math.round((n / base) * 100)) : 0;
+    return `
+      <div>
+        <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1"><span>${label}</span><span>${n}${base ? ` (${pct}%)` : ''}</span></div>
+        <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full gradient-brand" style="width:${pct}%"></div></div>
+      </div>`;
+  }).join('');
+  return `${rows}<p class="text-xs text-slate-500 pt-1">Foram para o WhatsApp pelo formulário: <strong>${c.whatsapp || 0}</strong></p>`;
+}
+
+function renderFunnel() {
+  if (!state.funnel) {
+    return '<p class="text-xs text-slate-400">Funil indisponível. Se ainda não rodou, execute supabase/migrations/20261027_form_funnel.sql no SQL Editor do Supabase.</p>';
+  }
+  const f = state.funnel;
+  const n = (m, k) => (m && m[k]) || 0;
+  return `
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-3"><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Últimos 30 dias</p>${funnelBlock(f.d30)}</div>
+      <div class="space-y-3"><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Últimos 7 dias</p>${funnelBlock(f.d7)}</div>
+    </div>
+    <p class="text-xs text-slate-400 mt-4">Entrada pela home: ${n(f.home, 'inicio')} começaram, ${n(f.home, 'enviado')} enviaram · Entrada pelas páginas de serviço: ${n(f.servico, 'inicio')} começaram, ${n(f.servico, 'enviado')} enviaram. Contagem sem cookies e sem dados pessoais.</p>`;
+}
 
 function kpi(label, value, hint) {
   return `
@@ -268,6 +308,10 @@ function renderDashboard() {
             <h3 class="text-base font-bold text-navy mb-3">Resultados comerciais registrados</h3>
             <p class="text-sm text-slate-600">Contatos: ${stats.contacted} · Orçamentos: ${stats.quoted} · Fechamentos: ${stats.closed} · Valor dos serviços fechados: ${stats.serviceValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
             <p class="text-xs text-slate-400 mt-2">Valor dos serviços é do parceiro, não receita da Clima16. Campos sem feedback permanecem sem resultado.</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+            <h3 class="text-base font-bold text-navy mb-4">Funil do formulário de orçamento</h3>
+            ${renderFunnel()}
           </div>
           <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
             <h3 class="text-base font-bold text-navy mb-4">Leads por serviço</h3>

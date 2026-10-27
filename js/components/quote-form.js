@@ -1,13 +1,35 @@
 /**
  * Clima16 - Interactive Multi-Step Quote Engine
- * High-conversion 5-step form with step animations, data validation, and event tracking.
+ * Formulário em 4 etapas (3 quando a página de serviço já traz o serviço marcado),
+ * com atalho para o WhatsApp e funil de etapas sem cookies (/api/funnel).
  */
 import { CONFIG } from '../config.js';
 import { db } from '../storage.js';
 import { analytics } from '../analytics.js';
 import { takePrefill } from '../prefill.js';
 
+// Serviços do passo 1 (mesmos data-val/data-service-id dos cartões abaixo).
+const FORM_SERVICES = [
+  { id: 'instalacao', val: 'Instalação de ar-condicionado' },
+  { id: 'manutencao', val: 'Manutenção de ar-condicionado' },
+  { id: 'limpeza', val: 'Limpeza e higienização' },
+  { id: 'nao_gela', val: 'Ar-condicionado não está gelando' },
+  { id: 'vazamento', val: 'Vazamento / gotejamento' },
+  { id: 'gas', val: 'Recarga / avaliação de gás' },
+  { id: 'outro', val: 'Outro serviço de ar-condicionado' }
+];
+const TOTAL_STEPS = 4;
+
+function findFormService(key) {
+  if (!key) return null;
+  return FORM_SERVICES.find(s => s.id === key || s.val === key) || null;
+}
+
+const WA_ICON = '<svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.45 9.45 0 01-4.82-1.32l-.35-.2-3.58.94.96-3.49-.23-.36a9.43 9.43 0 01-1.45-5.03c0-5.22 4.25-9.47 9.48-9.47 2.53 0 4.91.99 6.7 2.78a9.4 9.4 0 012.77 6.7c0 5.22-4.25 9.46-9.47 9.46zm8.06-17.53A11.32 11.32 0 0012.04.63C5.76.63.65 5.74.65 12.02c0 2.01.52 3.97 1.52 5.7L.55 23.63l6.04-1.58a11.36 11.36 0 005.44 1.39h.01c6.28 0 11.39-5.11 11.39-11.39 0-3.04-1.18-5.9-3.33-8.05z"/></svg>';
+
 export function renderQuoteForm(preselectedServiceId = null) {
+  const pre = findFormService(preselectedServiceId);
+  const totalShown = pre ? TOTAL_STEPS - 1 : TOTAL_STEPS;
   return `
     <div id="orcamento-form" class="w-full max-w-2xl mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-subtle border border-slate-100 p-5 sm:p-8 md:p-10 transition-all duration-300">
       
@@ -22,9 +44,9 @@ export function renderQuoteForm(preselectedServiceId = null) {
         <!-- Progress Bar -->
         <div class="mt-6 flex items-center justify-between gap-2 max-w-md mx-auto">
           <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div id="form-progress-bar" class="progress-bar-fill h-full gradient-brand w-1/5"></div>
+            <div id="form-progress-bar" class="progress-bar-fill h-full gradient-brand" style="width:${Math.round(100 / totalShown)}%"></div>
           </div>
-          <span id="step-indicator" class="text-xs font-semibold text-slate-500 whitespace-nowrap">Etapa 1 de 5</span>
+          <span id="step-indicator" class="text-xs font-semibold text-slate-500 whitespace-nowrap">Etapa 1 de ${totalShown}</span>
         </div>
       </div>
 
@@ -38,7 +60,7 @@ export function renderQuoteForm(preselectedServiceId = null) {
       <form id="multi-step-form" onsubmit="return false;" novalidate>
         
         <!-- ================= STEP 1: Serviço ================= -->
-        <div id="step-1" class="form-step transition-all duration-300">
+        <div id="step-1" class="form-step ${pre ? 'hidden ' : ''}transition-all duration-300">
           <h3 class="text-lg sm:text-xl font-bold text-navy mb-4 text-center">Qual serviço você procura?</h3>
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="service-options-container">
@@ -114,52 +136,32 @@ export function renderQuoteForm(preselectedServiceId = null) {
           </div>
         </div>
 
-        <!-- ================= STEP 2: Tipo de Imóvel ================= -->
-        <div id="step-2" class="form-step hidden transition-all duration-300">
+        <!-- ================= STEP 2: Imóvel e aparelho ================= -->
+        <div id="step-2" class="form-step ${pre ? '' : 'hidden '}transition-all duration-300">
+          <p id="form-service-chip" class="${pre ? '' : 'hidden '}text-xs text-center text-slate-500 mb-2">Serviço: <strong class="text-navy">${pre ? pre.val : ''}</strong></p>
           <h3 class="text-lg sm:text-xl font-bold text-navy mb-4 text-center">Qual é o tipo de imóvel?</h3>
-          
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="property-options-container">
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="property-options-container">
             ${CONFIG.propertyTypes.map(prop => `
-              <button type="button" data-val="${prop.label}" class="step-property-card flex items-center p-4 rounded-xl border-2 border-slate-200 hover:border-brand-blue hover:bg-blue-50/40 text-left transition-all">
-                <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center mr-3 shrink-0">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                </div>
-                <span class="font-semibold text-sm sm:text-base text-slate-800">${prop.label}</span>
+              <button type="button" data-val="${prop.label}" class="step-property-card flex items-center justify-center min-h-[3.25rem] p-3 rounded-xl border-2 border-slate-200 hover:border-brand-blue hover:bg-blue-50/40 text-center transition-all">
+                <span class="font-semibold text-sm text-slate-800">${prop.label}</span>
               </button>
             `).join('')}
           </div>
+          <p id="property-error" class="text-rose-500 text-xs mt-2 hidden">Escolha o tipo de imóvel para continuar.</p>
 
-          <div class="mt-6 flex justify-between">
-            <button type="button" class="btn-prev text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 py-2 px-3">
-              ← Voltar
-            </button>
-          </div>
-        </div>
-
-        <!-- ================= STEP 3: Equipamento e BTU ================= -->
-        <div id="step-3" class="form-step hidden transition-all duration-300">
-          <h3 class="text-lg sm:text-xl font-bold text-navy mb-4 text-center">Você já possui o aparelho?</h3>
-          
-          <div class="space-y-3" id="equipment-options-container">
-            <button type="button" data-val="Sim" class="w-full step-equip-card flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 hover:border-brand-blue hover:bg-blue-50/40 text-left transition-all">
-              <span class="font-semibold text-slate-800">Sim, já tenho o aparelho</span>
-              <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">Instalar / Consertar</span>
-            </button>
-            
-            <button type="button" data-val="Não" class="w-full step-equip-card flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 hover:border-brand-blue hover:bg-blue-50/40 text-left transition-all">
-              <span class="font-semibold text-slate-800">Não possuo o aparelho</span>
-              <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">Preciso de orientação</span>
-            </button>
-
-            <button type="button" data-val="Ainda estou pesquisando" class="w-full step-equip-card flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 hover:border-brand-blue hover:bg-blue-50/40 text-left transition-all">
-              <span class="font-semibold text-slate-800">Ainda estou pesquisando para comprar</span>
-              <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">Comparando</span>
-            </button>
+          <div class="mt-5">
+            <span class="block text-sm font-semibold text-navy mb-2">Já tem o aparelho? <span class="font-normal text-slate-400">(opcional)</span></span>
+            <div class="grid grid-cols-3 gap-2" id="equipment-options-container">
+              <button type="button" data-val="Sim" class="step-equip-card p-2.5 rounded-xl border-2 border-slate-200 hover:border-brand-blue hover:bg-blue-50/40 text-xs sm:text-sm font-semibold text-slate-800 transition-all">Já tenho</button>
+              <button type="button" data-val="Não" class="step-equip-card p-2.5 rounded-xl border-2 border-slate-200 hover:border-brand-blue hover:bg-blue-50/40 text-xs sm:text-sm font-semibold text-slate-800 transition-all">Não tenho</button>
+              <button type="button" data-val="Ainda estou pesquisando" class="step-equip-card p-2.5 rounded-xl border-2 border-slate-200 hover:border-brand-blue hover:bg-blue-50/40 text-xs sm:text-sm font-semibold text-slate-800 transition-all">Pesquisando</button>
+            </div>
           </div>
 
-          <!-- Optional BTU Sub-question (shows if Sim or selected) -->
-          <div id="btu-section" class="mt-6 pt-6 border-t border-slate-100 hidden">
-            <label class="block text-sm font-semibold text-navy mb-2">Qual a capacidade aproximada do aparelho? (Opcional)</label>
+          <!-- Capacidade (opcional): aparece quando a pessoa já tem o aparelho -->
+          <div id="btu-section" class="mt-4 hidden">
+            <label class="block text-sm font-semibold text-navy mb-2">Capacidade aproximada <span class="font-normal text-slate-400">(opcional)</span></label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
               ${CONFIG.btuCapacities.map(btu => `
                 <button type="button" data-val="${btu}" class="btn-btu-option py-2 px-3 text-xs sm:text-sm font-medium border border-slate-200 rounded-lg hover:border-brand-blue hover:bg-blue-50/50 text-slate-700 transition-all text-center">
@@ -171,16 +173,16 @@ export function renderQuoteForm(preselectedServiceId = null) {
 
           <div class="mt-6 flex justify-between items-center">
             <button type="button" class="btn-prev text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 py-2 px-3">
-              ← Voltar
+              ${pre ? '← Trocar serviço' : '← Voltar'}
             </button>
-            <button type="button" id="btn-step3-next" class="gradient-brand text-white text-sm font-semibold px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 transition-all">
+            <button type="button" id="btn-local-next" class="gradient-brand text-white text-sm font-semibold px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all">
               Avançar →
             </button>
           </div>
         </div>
 
-        <!-- ================= STEP 4: Localização ================= -->
-        <div id="step-4" class="form-step hidden transition-all duration-300">
+        <!-- ================= STEP 3: Localização ================= -->
+        <div id="step-3" class="form-step hidden transition-all duration-300">
           <h3 class="text-lg sm:text-xl font-bold text-navy mb-4 text-center">Onde será realizado o serviço?</h3>
           
           <div class="space-y-4">
@@ -219,14 +221,14 @@ export function renderQuoteForm(preselectedServiceId = null) {
             <button type="button" class="btn-prev text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 py-2 px-3">
               ← Voltar
             </button>
-            <button type="button" id="btn-step4-next" class="gradient-brand text-white text-sm font-semibold px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all">
+            <button type="button" id="btn-bairro-next" class="gradient-brand text-white text-sm font-semibold px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all">
               Avançar →
             </button>
           </div>
         </div>
 
-        <!-- ================= STEP 5: Contato & Envio ================= -->
-        <div id="step-5" class="form-step hidden transition-all duration-300">
+        <!-- ================= STEP 4: Contato & Envio ================= -->
+        <div id="step-4" class="form-step hidden transition-all duration-300">
           <h3 class="text-lg sm:text-xl font-bold text-navy mb-1 text-center">Para onde enviamos o orçamento?</h3>
           <p class="text-xs text-slate-500 text-center mb-5">Seus dados serão tratados com segurança para viabilizar seu atendimento.</p>
           
@@ -288,6 +290,13 @@ export function renderQuoteForm(preselectedServiceId = null) {
         </div>
 
       </form>
+
+      <!-- Atalho: quem prefere conversar recebe o WhatsApp já com serviço, imóvel e bairro -->
+      <div id="form-wa-shortcut" class="${pre ? '' : 'hidden '}mt-6 pt-4 border-t border-slate-100 text-center">
+        <a id="form-wa-link" href="https://wa.me/${CONFIG.brand.whatsappNumber}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800 py-1">
+          ${WA_ICON}<span>Prefere pelo WhatsApp? Fale com a gente</span>
+        </a>
+      </div>
     </div>
   `;
 }
@@ -308,58 +317,113 @@ export function initQuoteFormEvents(initialService = null) {
   let prefillBtu = '';   // capacidade sugerida pela calculadora
   let prefillCalc = '';  // resumo do cálculo, vai na descrição do pedido
 
-  const steps = [
-    document.getElementById('step-1'),
-    document.getElementById('step-2'),
-    document.getElementById('step-3'),
-    document.getElementById('step-4'),
-    document.getElementById('step-5')
-  ];
-
+  const steps = [1, 2, 3, 4].map(n => document.getElementById(`step-${n}`));
   const progressBar = document.getElementById('form-progress-bar');
   const stepIndicator = document.getElementById('step-indicator');
+  const formEl = document.getElementById('multi-step-form');
+  const neighborhoodInput = document.getElementById('lead-neighborhood');
+  const neighborhoodError = document.getElementById('neighborhood-error');
+  const propertyError = document.getElementById('property-error');
+  const btuSection = document.getElementById('btu-section');
+  const waBox = document.getElementById('form-wa-shortcut');
+  const waLink = document.getElementById('form-wa-link');
 
-  let started = false;
-  document.getElementById('multi-step-form')?.addEventListener('focusin', () => {
-    if (!started) { analytics.track('form_start'); started = true; }
-  });
+  const entry = initialService ? 'servico' : 'home';
+  let skippedService = false; // veio da página de serviço com o serviço já marcado
 
-  function updateStepUI() {
-    steps.forEach((s, idx) => {
-      if (idx + 1 === currentStep) {
-        s?.classList.remove('hidden');
-      } else {
-        s?.classList.add('hidden');
+  // ---- Funil sem cookies e sem dados pessoais: mostra em qual etapa as pessoas param ----
+  const funnelSent = new Set();
+  function funnel(event) {
+    if (event !== 'whatsapp' && funnelSent.has(event)) return;
+    funnelSent.add(event);
+    const session = analytics.getSession() || {};
+    const source = session.gclid ? 'google_ads' : (session.utm_source && session.utm_source !== 'direct' ? session.utm_source : null);
+    if (event !== 'whatsapp') analytics.track('form_step', { step_name: event, entry, service: formData.service_type || '' });
+    try {
+      const body = JSON.stringify({ event, entry, service: formData.service_type || null, step: currentStep, device: session.device || null, source });
+      if (!(navigator.sendBeacon && navigator.sendBeacon('/api/funnel', body))) {
+        fetch('/api/funnel', { method: 'POST', body, keepalive: true }).catch(() => {});
       }
-    });
-
-    if (progressBar) {
-      const percentage = (currentStep / 5) * 100;
-      progressBar.style.width = `${percentage}%`;
-    }
-    if (stepIndicator) {
-      stepIndicator.textContent = `Etapa ${currentStep} de 5`;
-    }
+    } catch { /* métrica nunca atrapalha o pedido */ }
   }
 
-  // Pre-selection if coming from service page
-  if (initialService) {
-    formData.service_type = initialService;
-    const matchedBtn = document.querySelector(`[data-service-id="${initialService}"]`) || document.querySelector(`[data-val*="${initialService}"]`);
-    if (matchedBtn) {
-      matchedBtn.classList.add('option-card-selected');
+  let started = false;
+  function markStart() {
+    if (started) return;
+    started = true;
+    analytics.track('form_start', { entry });
+    funnel('inicio');
+    // Na página de serviço o serviço já vem escolhido: conta como etapa cumprida
+    if (skippedService && formData.service_type) funnel('servico');
+  }
+  // pointerdown cobre o iPhone, onde tocar num botão não dispara foco
+  formEl?.addEventListener('pointerdown', markStart);
+  formEl?.addEventListener('focusin', markStart);
+
+  function scrollFormIntoView() {
+    const box = document.getElementById('orcamento-form');
+    if (box && box.getBoundingClientRect().top < 0) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ---- Atalho para o WhatsApp com o que a pessoa já respondeu ----
+  function whatsAppText() {
+    const bairro = (neighborhoodInput?.value || '').trim().slice(0, 60);
+    const lines = ['Olá! Quero um orçamento pelo Clima16.'];
+    if (formData.service_type) lines.push(`Serviço: ${formData.service_type}`);
+    if (formData.property_type) lines.push(`Imóvel: ${formData.property_type}`);
+    if (formData.btu && !['Não informado', 'Não sei informar'].includes(formData.btu)) lines.push(`Aparelho: ${formData.btu}`);
+    if (bairro) lines.push(`Bairro: ${bairro}`);
+    return lines.join('\n');
+  }
+  function updateWhatsAppShortcut() {
+    if (!waBox || !waLink) return;
+    waBox.classList.toggle('hidden', currentStep < 2);
+    waLink.href = `https://wa.me/${CONFIG.brand.whatsappNumber}?text=${encodeURIComponent(whatsAppText())}`;
+  }
+  waLink?.addEventListener('click', () => {
+    updateWhatsAppShortcut();
+    analytics.track('whatsapp_click', { origin: `form_step_${currentStep}`, entry });
+    funnel('whatsapp');
+  });
+  neighborhoodInput?.addEventListener('input', updateWhatsAppShortcut);
+
+  function updateStepUI() {
+    steps.forEach((s, idx) => s?.classList.toggle('hidden', idx + 1 !== currentStep));
+    if (currentStep === 1) skippedService = false;
+    const total = skippedService ? TOTAL_STEPS - 1 : TOTAL_STEPS;
+    const shown = skippedService ? currentStep - 1 : currentStep;
+    if (progressBar) progressBar.style.width = `${Math.round((shown / total) * 100)}%`;
+    if (stepIndicator) stepIndicator.textContent = `Etapa ${shown} de ${total}`;
+    const chip = document.getElementById('form-service-chip');
+    if (chip) {
+      chip.classList.toggle('hidden', !formData.service_type);
+      const strong = chip.querySelector('strong');
+      if (strong) strong.textContent = formData.service_type;
     }
+    updateWhatsAppShortcut();
+  }
+
+  function goTo(step) {
+    currentStep = step;
+    updateStepUI();
+    scrollFormIntoView();
+  }
+
+  // Página de serviço: o serviço já vem marcado e a pessoa começa no tipo de imóvel
+  const preService = findFormService(initialService);
+  if (preService) {
+    formData.service_type = preService.val;
+    document.querySelector(`.step-option-card[data-service-id="${preService.id}"]`)?.classList.add('option-card-selected');
+    skippedService = true;
+    currentStep = 2;
   }
 
   // ---- Pré-preenchimento (chips do hero, calculadora, bairros) ----
   function markBtuButton(label) {
     document.querySelectorAll('.btn-btu-option').forEach(b => {
       const on = b.getAttribute('data-val') === label;
-      b.classList.toggle('bg-brand-blue', on);
-      b.classList.toggle('text-white', on);
-      b.classList.toggle('border-brand-blue', on);
-      b.classList.toggle('border-slate-200', !on);
-      b.classList.toggle('text-slate-700', !on);
+      b.classList.toggle('option-card-selected', on);
+      b.classList.toggle('font-semibold', on);
     });
   }
 
@@ -378,7 +442,8 @@ export function initQuoteFormEvents(initialService = null) {
         formData.service_type = btn.getAttribute('data-val');
         document.querySelectorAll('.step-option-card').forEach(b => b.classList.remove('option-card-selected'));
         btn.classList.add('option-card-selected');
-        analytics.track('form_step_1', { service: formData.service_type, prefilled: true });
+        markStart();
+        funnel('servico');
         currentStep = 2;
       }
     }
@@ -386,7 +451,6 @@ export function initQuoteFormEvents(initialService = null) {
       prefillBtu = p.btu;
       prefillCalc = p.calc || '';
       formData.btu = p.btu;
-      formData.has_equipment = formData.has_equipment || '';
       markBtuButton(p.btu);
       showPrefillNote(`Orçamento para ${p.btuText || p.btu}${p.calc ? ' · calculado pela Calculadora Clima16' : ''}`);
     }
@@ -408,94 +472,80 @@ export function initQuoteFormEvents(initialService = null) {
     formData.btu = '';
     markBtuButton('');
     showPrefillNote('');
+    updateWhatsAppShortcut();
   });
 
-  // Step 1: Service selection
+  // Etapa 1: serviço
   document.querySelectorAll('.step-option-card').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       const val = btn.getAttribute('data-val');
       formData.service_type = val;
       document.querySelectorAll('.step-option-card').forEach(b => b.classList.remove('option-card-selected'));
       btn.classList.add('option-card-selected');
-      analytics.track('form_step_1', { service: val });
-      
-      setTimeout(() => {
-        currentStep = 2;
-        updateStepUI();
-      }, 150);
+      funnel('servico');
+      setTimeout(() => goTo(2), 150);
     });
   });
 
-  // Step 2: Property selection
+  // Etapa 2: imóvel (obrigatório) + aparelho e capacidade (opcionais)
   document.querySelectorAll('.step-property-card').forEach(btn => {
     btn.addEventListener('click', () => {
-      const val = btn.getAttribute('data-val');
-      formData.property_type = val;
+      formData.property_type = btn.getAttribute('data-val');
       document.querySelectorAll('.step-property-card').forEach(b => b.classList.remove('option-card-selected'));
       btn.classList.add('option-card-selected');
-      analytics.track('form_step_2', { property_type: val });
-
-      setTimeout(() => {
-        currentStep = 3;
-        updateStepUI();
-      }, 150);
+      propertyError?.classList.add('hidden');
+      updateWhatsAppShortcut();
     });
   });
 
-  // Step 3: Equipment & BTU
-  const btuSection = document.getElementById('btu-section');
   document.querySelectorAll('.step-equip-card').forEach(btn => {
     btn.addEventListener('click', () => {
       const val = btn.getAttribute('data-val');
       formData.has_equipment = val;
       document.querySelectorAll('.step-equip-card').forEach(b => b.classList.remove('option-card-selected'));
       btn.classList.add('option-card-selected');
-
       if (val === 'Sim') {
         btuSection?.classList.remove('hidden');
       } else {
         btuSection?.classList.add('hidden');
-        formData.btu = prefillBtu || 'Não informado';
+        formData.btu = prefillBtu || '';
+        markBtuButton(prefillBtu);
       }
+      updateWhatsAppShortcut();
     });
   });
 
   document.querySelectorAll('.btn-btu-option').forEach(btn => {
     btn.addEventListener('click', () => {
-      const val = btn.getAttribute('data-val');
-      formData.btu = val;
-      document.querySelectorAll('.btn-btu-option').forEach(b => {
-        b.classList.remove('bg-brand-blue', 'text-white', 'border-brand-blue');
-        b.classList.add('border-slate-200', 'text-slate-700');
-      });
-      btn.classList.add('bg-brand-blue', 'text-white', 'border-brand-blue');
-      btn.classList.remove('border-slate-200', 'text-slate-700');
+      formData.btu = btn.getAttribute('data-val');
+      markBtuButton(formData.btu);
+      updateWhatsAppShortcut();
     });
   });
 
-  document.getElementById('btn-step3-next')?.addEventListener('click', () => {
-    if (!formData.has_equipment) {
-      formData.has_equipment = 'Sim';
+  document.getElementById('btn-local-next')?.addEventListener('click', () => {
+    if (!formData.property_type) {
+      propertyError?.classList.remove('hidden');
+      return;
     }
-    analytics.track('form_step_3', { has_equipment: formData.has_equipment, btu: formData.btu });
-    currentStep = 4;
-    updateStepUI();
+    if (!formData.has_equipment) formData.has_equipment = 'Não informado';
+    if (!formData.btu) formData.btu = prefillBtu || 'Não informado';
+    funnel('local');
+    goTo(3);
   });
 
-  // Step 4: Neighborhood
-  const neighborhoodInput = document.getElementById('lead-neighborhood');
-  const neighborhoodError = document.getElementById('neighborhood-error');
-
+  // Etapa 3: bairro
   document.querySelectorAll('.btn-quick-bairro').forEach(b => {
     b.addEventListener('click', () => {
       if (neighborhoodInput) {
         neighborhoodInput.value = b.textContent.trim();
         neighborhoodError?.classList.add('hidden');
+        updateWhatsAppShortcut();
       }
     });
   });
 
-  document.getElementById('btn-step4-next')?.addEventListener('click', () => {
+  document.getElementById('btn-bairro-next')?.addEventListener('click', () => {
     const val = neighborhoodInput?.value.trim();
     if (!val) {
       neighborhoodError?.classList.remove('hidden');
@@ -504,12 +554,11 @@ export function initQuoteFormEvents(initialService = null) {
     }
     neighborhoodError?.classList.add('hidden');
     formData.neighborhood = val;
-    analytics.track('form_step_4', { neighborhood: val });
-    currentStep = 5;
-    updateStepUI();
+    funnel('bairro');
+    goTo(4);
   });
 
-  // Step 5: Contact info & Phone mask
+  // Etapa 4: contato e máscara do telefone
   const phoneInput = document.getElementById('lead-phone');
   if (phoneInput) {
     phoneInput.addEventListener('input', (e) => {
@@ -534,6 +583,7 @@ export function initQuoteFormEvents(initialService = null) {
       if (currentStep > 1) {
         currentStep--;
         updateStepUI();
+        scrollFormIntoView();
       }
     });
   });
@@ -585,6 +635,7 @@ export function initQuoteFormEvents(initialService = null) {
       emailInput.reportValidity();
       return;
     }
+    funnel('envio');
 
     formData.name = nameInput?.value.trim();
     formData.phone = phoneInput?.value.trim();
@@ -631,6 +682,7 @@ export function initQuoteFormEvents(initialService = null) {
     sendLead(payload)
       .then((res) => {
         // Guarda só o resumo local para a tela de confirmação; o registro oficial está no banco.
+        funnel('enviado');
         db.createLead(formData, res && res.id, !!res.duplicate);
         window.clima16Navigate('/solicitacao-recebida');
       })
@@ -643,6 +695,7 @@ export function initQuoteFormEvents(initialService = null) {
   });
 
   // Aplica pré-preenchimento pendente e escuta novos pedidos (chips, calculadora, bairros)
+  updateStepUI();
   applyPrefill(takePrefill());
   if (window.__clima16PrefillHandler) window.removeEventListener('clima16:prefill', window.__clima16PrefillHandler);
   window.__clima16PrefillHandler = () => applyPrefill(takePrefill());

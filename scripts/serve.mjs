@@ -11,7 +11,7 @@ if (!existsSync(root)) throw new Error('Execute npm run build antes de iniciar.'
 if (fixtures) {
   // Ambiente descartável local: nenhuma chamada externa, nenhum envio real.
   Object.assign(process.env, { SUPABASE_URL: 'https://fixture.invalid', SUPABASE_SERVICE_ROLE_KEY: 'sb_secret_fixture', SUPABASE_ANON_KEY: 'sb_publishable_fixture', ADMIN_EMAILS: 'admin@example.com', RESEND_API_KEY: 'fixture', LEAD_FROM: 'Clima16 <fixture@example.com>', LEAD_NOTIFY_TO: 'admin@example.com' });
-  const leads = [], partners = [];
+  const leads = [], partners = [], funnelEvents = [];
   globalThis.fetch = async (raw, init = {}) => {
     const url = new URL(raw), method = init.method || 'GET';
     const data = init.body ? JSON.parse(init.body) : {};
@@ -20,7 +20,7 @@ if (fixtures) {
     if (url.hostname !== 'fixture.invalid') throw new Error('external_network_disabled');
     if (url.pathname.endsWith('/auth/v1/token')) return data.email === 'admin@example.com' && data.password === 'test-local' ? result({ access_token: 'fixture-admin', expires_in: 3600 }) : result({}, 400);
     if (url.pathname.endsWith('/auth/v1/user')) return init.headers.Authorization === 'Bearer fixture-admin' ? result({ email: 'admin@example.com' }) : result({}, 401);
-    const table = url.pathname.endsWith('/leads') ? leads : url.pathname.endsWith('/partners') ? partners : null;
+    const table = url.pathname.endsWith('/leads') ? leads : url.pathname.endsWith('/partners') ? partners : url.pathname.endsWith('/form_funnel_events') ? funnelEvents : null;
     if (!table) throw new Error('fixture_route_missing');
     const selected = table.filter(row => [...url.searchParams].every(([key, val]) => {
       if (val.startsWith('eq.')) return String(row[key]) === val.slice(3);
@@ -41,7 +41,7 @@ if (fixtures) {
 const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css', '.png':'image/png', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.xml':'application/xml', '.txt':'text/plain', '.webp':'image/webp' };
 createServer(async (req, res) => {
   const path = decodeURIComponent(new URL(req.url, `http://127.0.0.1:${port}`).pathname);
-  if (/^\/api\/(leads|partners|admin|portal)$/.test(path)) {
+  if (/^\/api\/(leads|partners|admin|portal|funnel)$/.test(path)) {
     let body = '';
     for await (const chunk of req) { body += chunk; if (body.length > 32000) { res.writeHead(413); res.end(); return; } }
     req.body = body;

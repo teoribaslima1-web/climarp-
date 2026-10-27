@@ -2,7 +2,7 @@
  * Clima16 - POST /api/admin
  * Vercel Function (Node 18+, sem dependências). Painel de leads com login.
  *
- * Ações (JSON): { action: 'login' | 'list' | 'update' | 'delete', ... }
+ * Ações (JSON): { action: 'login' | 'list' | 'funnel' | 'update' | 'delete', ... }
  *  - login:  e-mail + senha de um usuário do Supabase Auth que esteja na lista de admins.
  *  - list/update/delete: exigem "Authorization: Bearer <access_token>" do login.
  *
@@ -238,6 +238,28 @@ module.exports = async function handler(req, res) {
         return res.status(502).json({ ok: false, error: 'list_failed' });
       }
       return res.status(200).json({ ok: true, leads: await r.json(), admin });
+    }
+
+    if (body.action === 'funnel') {
+      // Funil do formulário (30 dias). Tabela criada por supabase/migrations/20261027_form_funnel.sql
+      const since = encodeURIComponent(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+      const r = await fetch(`${baseUrl}/rest/v1/form_funnel_events?select=event,entry,created_at&created_at=gte.${since}&order=created_at.desc&limit=10000`, {
+        headers: supabaseHeaders(serviceKey)
+      });
+      if (!r.ok) {
+        console.error('[admin] funnel_failed', r.status);
+        return res.status(502).json({ ok: false, error: 'funnel_unavailable' });
+      }
+      const rows = await r.json();
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const counts = { d30: {}, d7: {}, home: {}, servico: {} };
+      (Array.isArray(rows) ? rows : []).forEach((row) => {
+        const ev = String(row.event || '');
+        counts.d30[ev] = (counts.d30[ev] || 0) + 1;
+        if (new Date(row.created_at).getTime() >= weekAgo) counts.d7[ev] = (counts.d7[ev] || 0) + 1;
+        if (row.entry === 'servico' || row.entry === 'home') counts[row.entry][ev] = (counts[row.entry][ev] || 0) + 1;
+      });
+      return res.status(200).json({ ok: true, funnel: counts });
     }
 
     if (body.action === 'list_partners') {

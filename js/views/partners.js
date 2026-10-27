@@ -4,8 +4,10 @@
  */
 import { submitPartner, CONSENT_HTML, HONEYPOT_HTML } from '../partners-api.js';
 import { analytics } from '../analytics.js';
+import { CONFIG } from '../config.js';
 
 const PARTNER_FAQ = [
+  ['O Clima16 é confiável? Quem está por trás?', 'O Clima16 é uma plataforma de Ribeirão Preto, lançada em outubro de 2026, por isso o site e as redes ainda são novos. O cadastro é gratuito e nunca pedimos pagamento nem dados bancários. Você pode falar com a gente pelo WhatsApp ou pelo e-mail contato@clima16.com.br antes de se cadastrar.'],
   ['Quanto custa ser parceiro?', 'Nada. Durante a fase de lançamento, o cadastro e o recebimento de pedidos são gratuitos, sem mensalidade. Se isso mudar no futuro, avisaremos com antecedência e você decide se quer continuar.'],
   ['Como eu recebo os pedidos?', 'Quando um pedido combina com os seus serviços e a sua região, enviamos os dados do cliente (nome, WhatsApp, bairro, serviço e detalhes) por e-mail e WhatsApp. Você também vê tudo na área do parceiro.'],
   ['Sou obrigado a atender todos os pedidos?', 'Não. Se não puder atender, é só avisar para encaminharmos a outro profissional. Quando aceitar, pedimos que responda o cliente o quanto antes.'],
@@ -31,6 +33,24 @@ function renderPartnerFaq() {
           </div>
           <p class="text-sm text-slate-500 text-center mt-6">Outra dúvida? Escreva para <a href="mailto:contato@clima16.com.br" class="text-brand-blue font-semibold hover:underline">contato@clima16.com.br</a>.</p>
         </div>`;
+}
+
+function escHtml(v) {
+  return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/** Prova social: parceiros que autorizaram aparecer no site. */
+function renderPartnerProof() {
+  const list = Array.isArray(CONFIG.featuredPartners) ? CONFIG.featuredPartners.filter((p) => p && p.name) : [];
+  if (!list.length) return '';
+  const safeLogo = (p) => (typeof p.logo === 'string' && /^\/[\w\-./]+\.(png|jpe?g|webp|svg)$/i.test(p.logo) ? p.logo : '');
+  const faces = list.slice(0, 6).map((p, i) => safeLogo(p) ? `<img src="${escHtml(safeLogo(p))}" alt="" width="36" height="36" class="w-9 h-9 rounded-full border-2 border-slate-900 bg-white object-cover shrink-0 ${i ? '-ml-2' : ''}">` : '').join('');
+  const names = list.map((p) => escHtml(p.name.split(/[,(]/)[0].trim())).join(', ');
+  return `
+          <div class="mt-8 inline-flex flex-col sm:flex-row items-center gap-3 bg-white/5 border border-white/15 rounded-2xl px-4 py-3 max-w-2xl">
+            <span class="flex items-center">${faces}</span>
+            <span class="text-xs sm:text-sm text-slate-300 text-center sm:text-left">Já fazem parte: <strong class="text-white font-semibold">${names}</strong></span>
+          </div>`;
 }
 
 export function renderPartnersView() {
@@ -65,6 +85,7 @@ export function renderPartnersView() {
               Cadastrar meu interesse
             </button>
           </div>
+          ${renderPartnerProof()}
 
         </div>
       </section>
