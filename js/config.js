@@ -43,6 +43,13 @@ export const CONFIG = {
       services: 'Instalação, manutenção e higienização de ar-condicionado residencial e comercial.',
       instagram: 'ch_climatizacao',
       logo: '/assets/parceiros/ch-climatizacao.webp'
+    },
+    {
+      name: 'LP Ar Condicionado Ribeirão/Sertãozinho', // autorizado pelo WhatsApp em 26/10/2026 (mandou Instagram e logo)
+      area: 'Ribeirão Preto, Sertãozinho e região',
+      services: 'Instalação, manutenção e higienização de ar-condicionado residencial e comercial.',
+      instagram: 'lparcondicionadosertaozinho',
+      logo: '/assets/parceiros/lp-ar-condicionado.webp'
     }
   ],
 
