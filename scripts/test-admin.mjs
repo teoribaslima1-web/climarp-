@@ -245,7 +245,6 @@ await test('pedido manual (WhatsApp): exige login e autorização, valida e salv
   assert.equal(row.phone_digits, '16981570034');
   assert.equal(row.utm_source, 'whatsapp');
   assert.equal(row.status, 'novo');
-  assert.equal(row.notification_status, 'skipped');
   assert.ok(!calls.some((c) => String(c.url).includes('resend.com')));
 });
 

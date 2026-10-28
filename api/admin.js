@@ -262,9 +262,7 @@ module.exports = async function handler(req, res) {
           device: null,
           status: 'novo',
           consent: true,
-          consent_at: now,
-          notification_status: 'skipped',
-          customer_notification_status: 'skipped'
+          consent_at: now
         })
       });
       if (!r.ok) {
