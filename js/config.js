@@ -53,6 +53,12 @@ export const CONFIG = {
       services: 'Instalação, manutenção e higienização de ar-condicionado residencial e comercial.',
       instagram: 'lparcondicionadosertaozinho',
       logo: '/assets/parceiros/lp-ar-condicionado.webp'
+    },
+    {
+      name: 'Império Ar Condicionado', // autorizado pelo WhatsApp em 28/10/2026 ("sim", mandou a logo)
+      area: 'Bonfim Paulista e Ribeirão Preto',
+      services: 'Instalação, manutenção e higienização de ar-condicionado residencial e comercial. 17 anos com ar-condicionado.',
+      logo: '/assets/parceiros/imperio.webp'
     }
   ],
 
