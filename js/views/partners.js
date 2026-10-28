@@ -46,10 +46,11 @@ function renderPartnerProof() {
   const safeLogo = (p) => (typeof p.logo === 'string' && /^\/[\w\-./]+\.(png|jpe?g|webp|svg)$/i.test(p.logo) ? p.logo : '');
   const faces = list.slice(0, 6).map((p, i) => safeLogo(p) ? `<img src="${escHtml(safeLogo(p))}" alt="" width="36" height="36" class="w-9 h-9 rounded-full border-2 border-slate-900 bg-white object-cover shrink-0 ${i ? '-ml-2' : ''}">` : '').join('');
   const names = list.map((p) => escHtml(p.name.split(/[,(]/)[0].trim())).join(', ');
+  const extra = Math.max(0, (Number(CONFIG.partnersTotal) || 0) - list.length);
   return `
           <div class="mt-8 inline-flex flex-col sm:flex-row items-center gap-3 bg-white/5 border border-white/15 rounded-2xl px-4 py-3 max-w-2xl">
             <span class="flex items-center">${faces}</span>
-            <span class="text-xs sm:text-sm text-slate-300 text-center sm:text-left">Já fazem parte: <strong class="text-white font-semibold">${names}</strong></span>
+            <span class="text-xs sm:text-sm text-slate-300 text-center sm:text-left">Já fazem parte: <strong class="text-white font-semibold">${names}</strong>${extra > 0 ? ` e mais ${extra} ${extra === 1 ? 'profissional' : 'profissionais'}` : ''}</span>
           </div>`;
 }
 

@@ -19,7 +19,8 @@ function renderPartnerProof() {
     const logo = safeLogo(p);
     return logo ? `<img src="${escHtml(logo)}" alt="" width="32" height="32" class="w-8 h-8 rounded-full border-2 border-white shadow-sm bg-white object-cover shrink-0 ${i ? '-ml-2' : ''}">` : '';
   }).join('');
-  const label = list.length === 1 ? `Técnico parceiro: ${list[0].name}` : `${list.length} técnicos e empresas parceiras em Ribeirão Preto`;
+  const total = Math.max(list.length, Number(CONFIG.partnersTotal) || 0);
+  const label = total === 1 ? `Técnico parceiro: ${list[0].name}` : `${total} técnicos e empresas parceiras em Ribeirão Preto`;
   return `
           <div class="mt-6 inline-flex items-center gap-3 bg-white/80 border border-slate-200 rounded-full pl-1.5 pr-4 py-1.5 shadow-sm">
             <span class="flex items-center">${faces}</span>

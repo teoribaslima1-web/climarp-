@@ -19,6 +19,9 @@ export const CONFIG = {
     whatsappDefaultMessage: 'Olá! Encontrei o Clima16 e gostaria de solicitar um orçamento para ar-condicionado.'
   },
 
+  // Total de parceiros aprovados no painel (inclui quem ainda não autorizou aparecer com nome). Atualizar à mão.
+  partnersTotal: 9,
+
   // Parceiros exibidos na página inicial (só com autorização de cada um). Vazio = seção escondida.
   // Exemplo: { name: 'Nome da Empresa', area: 'Zona Sul', services: 'Instalação e higienização', instagram: 'perfil', logo: '/assets/parceiros/arquivo.png' }
   // logo: só com o arquivo enviado pelo próprio parceiro e autorização dele. Sem logo, aparecem as iniciais.

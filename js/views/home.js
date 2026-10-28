@@ -68,7 +68,8 @@ function renderPartnerStrip() {
       ? `<img src="${escHtml(logo)}" alt="" width="32" height="32" class="${base} bg-white object-cover">`
       : `<span class="${base} gradient-brand text-white text-[11px] font-extrabold flex items-center justify-center" aria-hidden="true">${escHtml(partnerInitials(p.name))}</span>`;
   }).join('');
-  const label = list.length === 1 ? `Técnico parceiro: ${list[0].name}` : `${list.length} técnicos e empresas parceiras em Ribeirão Preto`;
+  const total = Math.max(list.length, Number(CONFIG.partnersTotal) || 0);
+  const label = total === 1 ? `Técnico parceiro: ${list[0].name}` : `${total} técnicos e empresas parceiras em Ribeirão Preto`;
   return `
             <button type="button" onclick="document.getElementById('parceiros-section')?.scrollIntoView({behavior:'smooth'});" class="inline-flex items-center gap-3 bg-white/80 hover:bg-white border border-slate-200 hover:border-brand-blue/40 rounded-full pl-1.5 pr-4 py-1.5 shadow-sm transition-colors text-left">
               <span class="flex items-center">${faces}</span>
@@ -103,6 +104,7 @@ function renderAboutBlock() {
 function renderFeaturedPartners() {
   const list = Array.isArray(CONFIG.featuredPartners) ? CONFIG.featuredPartners.filter((p) => p && p.name) : [];
   if (!list.length) return '';
+  const extra = Math.max(0, (Number(CONFIG.partnersTotal) || 0) - list.length);
   return `
     <section id="parceiros-section" class="py-16 sm:py-20 bg-white border-t border-slate-100">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -129,6 +131,7 @@ function renderFeaturedPartners() {
           </div>`;
           }).join('')}
         </div>
+        ${extra > 0 ? `<p class="text-center text-sm text-slate-500 mt-6">E mais ${extra} ${extra === 1 ? 'técnico cadastrado' : 'técnicos e empresas cadastrados'} na rede, que ainda não aparecem aqui com nome.</p>` : ''}
       </div>
     </section>`;
 }
