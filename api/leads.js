@@ -100,6 +100,10 @@ function safeLabel(value, max) {
   return String(value || '').replace(/[^\p{L}\p{N} '\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, max);
 }
 
+// "Como encontrou o Clima16?" (opcional). Lista fixa: nada de texto livre.
+const FOUND_VIA = ['google', 'google_ads', 'instagram', 'indicacao', 'whatsapp', 'outro'];
+const FOUND_VIA_LABEL = { google: 'Pesquisa no Google', google_ads: 'Anúncio no Google', instagram: 'Instagram', indicacao: 'Indicação', whatsapp: 'WhatsApp', outro: 'Outro' };
+
 const CUSTOMER_EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
 function validate(input) {
@@ -137,7 +141,8 @@ function validate(input) {
       fbclid: clean(input.fbclid, 300) || null,
       referrer: clean(input.referrer, 500) || null,
       landing_page: clean(input.landing_page, 500) || null,
-      device: clean(input.device, 20) || null
+      device: clean(input.device, 20) || null,
+      found_via: FOUND_VIA.includes(input.found_via) ? input.found_via : null
     }
   };
 }
@@ -178,6 +183,7 @@ function buildEmail(lead, createdAt, leadId) {
     ['Aparelho', [lead.has_equipment, lead.btu].filter(Boolean).join(' · ') || '—'],
     ['Descrição', lead.description || '—'],
     ['Origem', origem],
+    ['Como encontrou', FOUND_VIA_LABEL[lead.found_via] || '—'],
     ['Recebido em', when],
     ['Status', 'Novo']
   ];
@@ -397,18 +403,27 @@ module.exports = async function handler(req, res) {
 
   let saved;
   try {
-    const insert = await boundedFetch(`${baseUrl}/rest/v1/leads`, {
+    const row = {
+      ...lead,
+      ...(requestId ? { id: requestId } : {}),
+      status,
+      consent: true,
+      consent_at: new Date().toISOString(),
+      ip_hash: ipHash
+    };
+    if (!row.found_via) delete row.found_via;
+    const send = (body) => boundedFetch(`${baseUrl}/rest/v1/leads`, {
       method: 'POST',
       headers: supabaseHeaders(key, { Prefer: 'return=representation' }),
-      body: JSON.stringify({
-        ...lead,
-        ...(requestId ? { id: requestId } : {}),
-        status,
-        consent: true,
-        consent_at: new Date().toISOString(),
-        ip_hash: ipHash
-      })
+      body: JSON.stringify(body)
     });
+    let insert = await send(row);
+    // Banco ainda sem a coluna found_via (migração 20261029 não rodada): salva sem ela.
+    if (!insert.ok && insert.status === 400 && row.found_via) {
+      console.error('[leads] found_via_column_missing');
+      const { found_via: _omit, ...rest } = row;
+      insert = await send(rest);
+    }
     if (!insert.ok) {
       if (insert.status === 409 && requestId) {
         const existing = await findRecent(baseUrl, key, `id=eq.${requestId}&select=id,phone_digits,service_type,status`);
@@ -437,4 +452,4 @@ module.exports = async function handler(req, res) {
   return res.status(200).json({ ok: true, id: saved && saved.id, duplicate: status === 'duplicado' });
 };
 
-module.exports._internals = { normalizeService, safeLabel, customerEmailAllowed, validate, clean, escapeHtml, buildEmail, buildCustomerEmail, deliverNotifications };
+module.exports._internals = { FOUND_VIA, FOUND_VIA_LABEL, normalizeService, safeLabel, customerEmailAllowed, validate, clean, escapeHtml, buildEmail, buildCustomerEmail, deliverNotifications };

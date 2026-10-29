@@ -248,9 +248,11 @@ module.exports = async function handler(req, res) {
       const { validate } = require('./leads')._internals;
       const checked = validate({
         name: body.name, phone: body.phone, email: body.email, service_type: body.service_type,
-        neighborhood: body.neighborhood, property_type: body.property_type, description: body.description, consent: true
+        neighborhood: body.neighborhood, property_type: body.property_type, description: body.description, consent: true,
+        found_via: body.found_via
       });
       if (checked.error) return res.status(400).json({ ok: false, error: checked.error });
+      if (!checked.value.found_via) delete checked.value.found_via;
       const now = new Date().toISOString();
       const r = await fetch(`${baseUrl}/rest/v1/leads`, {
         method: 'POST',

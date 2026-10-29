@@ -251,6 +251,18 @@ export function renderQuoteForm(preselectedServiceId = null) {
             </div>
 
             <div>
+              <label for="lead-found-via" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Como encontrou o Clima16? <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
+              <select id="lead-found-via" class="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-brand-blue focus:ring-0 rounded-xl text-slate-800 font-medium text-sm bg-white transition-all">
+                <option value="">Selecione</option>
+                <option value="google">Pesquisa no Google</option>
+                <option value="google_ads">Anúncio no Google</option>
+                <option value="instagram">Instagram</option>
+                <option value="indicacao">Indicação de alguém</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+
+            <div>
               <label for="lead-desc" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Conte um pouco mais sobre o que precisa <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
               <textarea id="lead-desc" rows="2" placeholder="Ex: Preciso instalar split de 12.000 BTUs no 3º andar, condomínio com dreno pronto..." class="w-full px-4 py-2 border-2 border-slate-200 focus:border-brand-blue focus:ring-0 rounded-xl text-slate-800 text-sm transition-all"></textarea>
             </div>
@@ -645,6 +657,7 @@ export function initQuoteFormEvents(initialService = null) {
     formData.email = emailInput?.value.trim() || '';
     const userDesc = descInput?.value.trim() || '';
     formData.description = [prefillCalc, userDesc].filter(Boolean).join('\n');
+    formData.found_via = document.getElementById('lead-found-via')?.value || '';
 
     // Show loading state on button
     const originalBtnHtml = submitBtn.innerHTML;

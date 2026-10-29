@@ -188,10 +188,13 @@ function computeStats(leads) {
   const within = (l, ms) => now - new Date(l.created_at).getTime() <= ms;
   const byService = {};
   const bySource = {};
+  const byFound = {};
   real.forEach((l) => {
     byService[l.service_type || '—'] = (byService[l.service_type || '—'] || 0) + 1;
     const src = l.utm_source || 'direto';
     bySource[src] = (bySource[src] || 0) + 1;
+    const fv = FOUND_VIA_LABEL[l.found_via] || 'Não informado';
+    byFound[fv] = (byFound[fv] || 0) + 1;
   });
   return {
     total: real.length,
@@ -201,6 +204,7 @@ function computeStats(leads) {
     waiting: leads.filter((l) => l.status === 'novo').length,
     byService,
     bySource,
+    byFound,
     contacted: real.filter(l => l.first_contact_at).length,
     quoted: real.filter(l => l.quoted_at).length,
     closed: real.filter(l => l.closed_at || l.status === 'convertido' || l.partner_status === 'fechado').length,
@@ -321,6 +325,10 @@ function renderDashboard() {
           <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
             <h3 class="text-base font-bold text-navy mb-4">Leads por origem</h3>
             <div class="space-y-3">${bars(stats.bySource, stats.total, 'bg-cyan-500')}</div>
+          </div>
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+            <h3 class="text-base font-bold text-navy mb-4">Como o cliente encontrou o Clima16</h3>
+            <div class="space-y-3">${bars(stats.byFound, stats.total, 'bg-emerald-500')}</div>
           </div>
         </div>
 
@@ -477,6 +485,7 @@ function renderRows() {
           <div class="font-bold text-navy font-mono text-xs">${protocolFor(l.id)}</div>
           <div class="text-slate-400 text-xs">${when}</div>
           <div class="text-[11px] text-slate-400 font-mono">${escapeHtml(l.utm_source || 'direto')}</div>
+          ${l.found_via ? `<div class="text-[11px] text-emerald-700">Achou por: ${escapeHtml(FOUND_VIA_LABEL[l.found_via] || l.found_via)}</div>` : ''}
         </td>
         <td class="p-4">
           <div class="font-bold text-slate-800">${escapeHtml(l.name)}</div>
@@ -699,6 +708,8 @@ function showCommercialResult(lead) {
   modal.showModal();
 }
 
+const FOUND_VIA_LABEL = { google: 'Pesquisa no Google', google_ads: 'Anúncio no Google', instagram: 'Instagram', indicacao: 'Indicação', whatsapp: 'WhatsApp', outro: 'Outro' };
+
 const MANUAL_SERVICES = ['Instalação de ar-condicionado', 'Manutenção de ar-condicionado', 'Limpeza e higienização', 'Ar-condicionado não está gelando', 'Vazamento / gotejamento', 'Recarga / avaliação de gás', 'Outro serviço de ar-condicionado'];
 const MANUAL_ERRORS = { invalid_name: 'Confira o nome.', invalid_phone: 'Confira o telefone (com DDD).', invalid_email: 'Confira o e-mail.', consent_required: 'Marque a autorização do cliente.', invalid_origin: 'Escolha a origem.' };
 
@@ -709,6 +720,7 @@ function showManualLead() {
   modal.className = 'rounded-2xl p-6 max-w-md w-full shadow-xl';
   modal.innerHTML = `<form class="text-sm"><h2 class="text-lg font-bold mb-1">Novo pedido fora do site</h2><p class="text-xs text-slate-500 mb-4">Entra no painel como "Novo", sem enviar e-mails.</p>
     <label class="block mb-3">Origem<select name="origin" class="${field}"><option value="whatsapp">WhatsApp</option><option value="instagram">Instagram</option><option value="telefone">Telefone</option><option value="indicacao">Indicação</option></select></label>
+    <label class="block mb-3">Como encontrou o Clima16?<select name="found_via" class="${field}"><option value="">Não perguntado</option>${Object.entries(FOUND_VIA_LABEL).map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</select></label>
     <label class="block mb-3">Nome<input name="name" required maxlength="120" class="${field}"></label>
     <label class="block mb-3">WhatsApp / telefone<input name="phone" type="tel" required maxlength="20" placeholder="(16) 99999-9999" class="${field}"></label>
     <label class="block mb-3">Serviço<select name="service_type" class="${field}">${MANUAL_SERVICES.map((sv) => `<option>${escapeHtml(sv)}</option>`).join('')}</select></label>
@@ -730,7 +742,7 @@ function showManualLead() {
     btn.disabled = true;
     const out = await api({
       action: 'create_manual', origin: v.get('origin'), name: v.get('name'), phone: v.get('phone'), service_type: v.get('service_type'),
-      neighborhood: v.get('neighborhood'), property_type: v.get('property_type'), description: v.get('description'), consent: true
+      neighborhood: v.get('neighborhood'), property_type: v.get('property_type'), description: v.get('description'), found_via: v.get('found_via'), consent: true
     });
     btn.disabled = false;
     if (out.httpStatus === 401) { modal.close(); return logout('Sessão expirada. Entre novamente.'); }
@@ -744,7 +756,7 @@ function showManualLead() {
 }
 
 function exportCsv() {
-  const header = ['Protocolo', 'Data', 'Nome', 'Telefone', 'E-mail', 'Bairro', 'Serviço', 'Imóvel', 'BTU', 'Descrição', 'Status', 'Parceiro', 'Andamento do parceiro', 'Origem', 'Primeiro contato', 'Orçamento emitido', 'Fechamento', 'Valor do serviço', 'Aviso interno', 'Confirmação cliente'];
+  const header = ['Protocolo', 'Data', 'Nome', 'Telefone', 'E-mail', 'Bairro', 'Serviço', 'Imóvel', 'BTU', 'Descrição', 'Status', 'Parceiro', 'Andamento do parceiro', 'Origem', 'Como encontrou', 'Primeiro contato', 'Orçamento emitido', 'Fechamento', 'Valor do serviço', 'Aviso interno', 'Confirmação cliente'];
   // Evita injeção de fórmula ao abrir no Excel (=, +, -, @).
   const cell = (v) => {
     let s = String(v ?? '').replace(/\r?\n/g, ' ');
@@ -756,7 +768,7 @@ function exportCsv() {
     new Date(l.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
     l.name, l.phone, l.email, l.neighborhood, l.service_type, l.property_type, l.btu, l.description,
     (STATUS.find((s) => s.id === l.status) || {}).label || l.status,
-    l.assigned_partner, PROGRESS_LABEL[l.partner_status] || '', l.utm_source || 'direto',
+    l.assigned_partner, PROGRESS_LABEL[l.partner_status] || '', l.utm_source || 'direto', FOUND_VIA_LABEL[l.found_via] || '',
     l.first_contact_at, l.quoted_at, l.closed_at, l.service_value, l.notification_status, l.customer_notification_status
   ]);
   const csv = '﻿' + [header, ...rows].map((r) => r.map(cell).join(';')).join('\r\n');

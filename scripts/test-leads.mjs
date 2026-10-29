@@ -222,6 +222,31 @@ await test('mesmo telefone e serviço, mas outro bairro: é pedido novo', async 
   assert.notEqual(JSON.parse(insertCall(calls).init.body).status, 'duplicado');
 });
 
+await test('"como encontrou": grava valor da lista e descarta texto livre', async () => {
+  setEnv(); let calls = installFetch();
+  await handler(req({ ...validBody(), found_via: 'google_ads' }), mockRes());
+  assert.equal(JSON.parse(insertCall(calls).init.body).found_via, 'google_ads');
+  assert.ok(emailCall(calls).init.body.includes('Anúncio no Google'));
+  setEnv(); calls = installFetch();
+  await handler(req({ ...validBody(), found_via: '<b>spam</b>' }), mockRes());
+  assert.equal('found_via' in JSON.parse(insertCall(calls).init.body), false);
+});
+
+await test('"como encontrou": banco sem a coluna ainda -> salva sem ela', async () => {
+  setEnv(); const calls = installFetch();
+  const base = global.fetch; let n = 0;
+  global.fetch = async (url, init = {}) => {
+    if (String(url).endsWith('/rest/v1/leads') && init.method === 'POST' && n++ === 0) { calls.push({ url: String(url), init }); return { ok: false, status: 400, json: async () => ({ message: 'column found_via' }) }; }
+    return base(url, init);
+  };
+  const res = mockRes();
+  await handler(req({ ...validBody(), found_via: 'instagram' }), res);
+  assert.equal(res.statusCode, 200);
+  const posts = calls.filter((c) => c.url.endsWith('/rest/v1/leads') && c.init.method === 'POST');
+  assert.equal(posts.length, 2);
+  assert.equal('found_via' in JSON.parse(posts[1].init.body), false);
+});
+
 await test('muitos envios do mesmo IP -> 429 e nada é salvo', async () => {
   setEnv(); const calls = installFetch({ recent: new Array(10).fill({ id: 'x' }) });
   const res = mockRes();
